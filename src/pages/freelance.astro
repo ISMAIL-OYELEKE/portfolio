@@ -1,4 +1,5 @@
 ---
+import { isWide } from '../lib/grid';
 import Base from '../layouts/Base.astro';
 import PageHero from '../components/PageHero.astro';
 import ProjectCard from '../components/ProjectCard.astro';
@@ -34,7 +35,7 @@ const offer = [
   <section class="section">
     <div class="shell">
       <div class="grid grid--pair">
-        {freelanceProjects.map((p, i) => <ProjectCard project={p} wide={i === 0} />)}
+        {freelanceProjects.map((p, i, all) => <ProjectCard project={p} wide={isWide(i, all.length)} />)}
       </div>
     </div>
   </section>

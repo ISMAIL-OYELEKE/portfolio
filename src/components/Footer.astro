@@ -69,7 +69,7 @@ const year = new Date().getFullYear();
   .footer__grid {
     display: grid;
     gap: 2.5rem;
-    grid-template-columns: minmax(0, 1.4fr) repeat(auto-fit, minmax(10rem, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr));
     padding-bottom: 2.75rem;
   }
 
@@ -103,6 +103,7 @@ const year = new Date().getFullYear();
     gap: 0.6rem;
   }
   .footer__list a {
+    overflow-wrap: anywhere;
     color: #c6d6cc;
     font-size: 0.92rem;
     text-decoration: none;

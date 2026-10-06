@@ -115,7 +115,7 @@ export const projects: Project[] = [
       'Voice and web chat run as one queue with a single set of routing rules.',
       'Out-of-hours contacts get a correct answer instead of ringing out.',
     ],
-    note: 'Client work, so the configuration and recordings stay private. The architecture below is drawn from the delivered design.',
+    note: 'Client work, so the configuration and recordings stay private. This write-up describes the delivered design.',
   },
   {
     slug: 'serverless-ai-recruiter-assistant',

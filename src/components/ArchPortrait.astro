@@ -30,7 +30,9 @@ const { alt, width = 440, smallWidth = 240, priority = false } = Astro.props;
      page. The flat colour background of the portrait carries the brand green,
      so no gradient or glow is needed behind it. */
   .arch {
-    --arch-w: var(--w);
+    /* Never taller than about half the screen, so it cannot push the page
+       content below the fold on a short laptop display. */
+    --arch-w: min(var(--w), 48vh);
     position: relative;
     margin: 0;
     width: min(100%, var(--arch-w));

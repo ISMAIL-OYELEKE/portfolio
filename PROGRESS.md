@@ -137,6 +137,11 @@ The project instructions hold the full text. Every change must keep to them.
 - [x] Automatic preview on GitHub Pages (noindex) on every push, live since
       2026-10-06 (Pages source set to GitHub Actions)
 - [x] This progress file
+- [x] Visual QA pass on the live preview (2026-10-06): hero sized to fit
+      short laptop screens with both buttons above the fold, portrait capped
+      by screen height, compact cookie bar, no horizontal overflow at any
+      width (footer email, contact form), no orphan cards in grids, missing
+      spaces before inline links fixed
 
 ## In progress
 

@@ -83,7 +83,8 @@ const description = `All ${certCount} of Ismail Oyeleke's certifications and bad
     padding: 0;
     display: grid;
     gap: 1.25rem;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr));
+    /* Four across, two by two, or one column: never three and an orphan. */
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
   .headline__item {
     border: 1px solid var(--rule);
@@ -172,5 +173,15 @@ const description = `All ${certCount} of Ismail Oyeleke's certifications and bad
   .badges__icon {
     color: var(--accent);
     display: flex;
+  }
+  @media (min-width: 1100px) {
+    .headline {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+  @media (max-width: 600px) {
+    .headline {
+      grid-template-columns: minmax(0, 1fr);
+    }
   }
 </style>
