@@ -156,8 +156,10 @@ The project instructions hold the full text. Every change must keep to them.
       Social icons are the real logos (Simple Icons, LinkedIn inlined from
       its own brand assets) via `src/lib/brands.ts`, in brand colours.
 - [x] Mobile hero shows the portrait on the first screen (2026-10-06): on
-      phones a compact arch sits at the top beside the availability line,
-      with the headline and both buttons still above the fold from 360x740.
+      phones a centred circular portrait sits at the top (Ismail did not
+      like the arch shape on phones), the availability pill is centred under
+      it, and the headline and both buttons stay above the fold from 360x740.
+      Desktop keeps the arch.
 - [x] Social preview and favicon fix (2026-10-06): og:image now includes the
       base path (it pointed outside /portfolio on the preview, so WhatsApp got
       a 404) and is a 70KB JPG instead of a 323KB PNG. Canonical and og:url
@@ -169,6 +171,11 @@ The project instructions hold the full text. Every change must keep to them.
       (2026-10-06): headline, spacing and stats sized by screen height.
       Checked at 1920x1080, 1920x950, 1536x730, 1440x780, 1366x650,
       1280x765 (1920 screen at 150% scaling), 1280x640 and 1024x690.
+      On desktop the hero fills exactly one screen, so the ivory section
+      below never peeks in.
+- Headshot without the sash was tried and rolled back (2026-10-06): the
+  edited area looked rough, so Ismail chose the original photo with the
+  sash. Do not swap it again unless he sends a new photo.
 
 ## In progress
 
