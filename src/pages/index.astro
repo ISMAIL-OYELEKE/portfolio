@@ -1,5 +1,6 @@
 ---
 import { isWide } from '../lib/grid';
+import { Image } from 'astro:assets';
 import Base from '../layouts/Base.astro';
 import ArchPortrait from '../components/ArchPortrait.astro';
 import ProjectCard from '../components/ProjectCard.astro';
@@ -146,6 +147,18 @@ const description =
         {
           headlineCerts.map((c) => (
             <li class="certs__item reveal">
+              {c.image && (
+                <Image
+                  class="certs__badge"
+                  src={c.image}
+                  alt={`${c.name} badge`}
+                  width={80}
+                  height={80}
+                  densities={[1, 2]}
+                  format="webp"
+                  loading="lazy"
+                />
+              )}
               <p class="certs__issuer">{c.issuer}</p>
               <h3 class="certs__name">{c.name}</h3>
               <p class="certs__dates">
@@ -413,6 +426,12 @@ const description =
     padding: 1.6rem 1.4rem;
     display: flex;
     flex-direction: column;
+  }
+  .certs__badge {
+    width: 80px;
+    height: 80px;
+    object-fit: contain;
+    margin-bottom: 0.9rem;
   }
   .certs__issuer {
     font-family: var(--font-mono);
