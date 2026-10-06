@@ -1,0 +1,96 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHero from '../components/PageHero.astro';
+import ProjectCard from '../components/ProjectCard.astro';
+import SocialIcon from '../components/SocialIcon.astro';
+import { freelanceProjects } from '../data/projects';
+
+const description =
+  'Freelance software engineering: a production point of sale system for a Lagos gadget retailer, and a thirteen-page marketing site for an AWS consultancy.';
+
+const offer = [
+  {
+    title: 'Business systems',
+    body: 'Inventory, point of sale, invoicing and staff accounts, built on Postgres with the money paths wrapped in transactions and an audit trail.',
+  },
+  {
+    title: 'Marketing sites that pass review',
+    body: 'Static builds with a real Content Security Policy, consent-gated analytics, a validated contact form and accessibility checked rather than assumed.',
+  },
+  {
+    title: 'Cloud hosting and deployment',
+    body: 'The infrastructure under it: S3 and CloudFront or Vercel, DNS and certificates, and a pipeline that deploys from a merge instead of a drag and drop.',
+  },
+];
+---
+
+<Base title="Freelance work" description={description}>
+  <PageHero
+    eyebrow="Freelance"
+    title="Software that businesses actually run on"
+    lede="Alongside cloud engineering, I build and maintain production systems for clients in Lagos. Both of the projects below are live, and both clients agreed to be named."
+  />
+
+  <section class="section">
+    <div class="shell">
+      <div class="grid grid--pair">
+        {freelanceProjects.map((p, i) => <ProjectCard project={p} wide={i === 0} />)}
+      </div>
+    </div>
+  </section>
+
+  <section class="on-dark section">
+    <div class="shell">
+      <div class="section-head">
+        <span class="eyebrow">What I take on</span>
+        <h2>Work I am available for</h2>
+        <span class="rule-gold"></span>
+      </div>
+
+      <dl class="offer">
+        {
+          offer.map((o) => (
+            <div class="offer__item reveal">
+              <dt>{o.title}</dt>
+              <dd>{o.body}</dd>
+            </div>
+          ))
+        }
+      </dl>
+
+      <div class="btn-row">
+        <a class="btn btn--primary" href="/contact">
+          Discuss a project
+          <SocialIcon name="arrow" size={15} />
+        </a>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .offer {
+    display: grid;
+    gap: 1px;
+    margin: 0;
+    background: var(--rule);
+    border: 1px solid var(--rule);
+    /* Two then one, rather than a row of three. */
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 21rem), 1fr));
+  }
+  .offer__item {
+    background: var(--bg);
+    padding: 1.6rem 1.5rem;
+  }
+  .offer dt {
+    font-family: var(--font-display);
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+  .offer dd {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 0.95rem;
+  }
+</style>

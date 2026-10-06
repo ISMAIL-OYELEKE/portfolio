@@ -1,0 +1,78 @@
+---
+import Base from '../layouts/Base.astro';
+import SocialIcon from '../components/SocialIcon.astro';
+import { nav } from '../data/site';
+---
+
+<Base
+  title="Page not found"
+  description="That page does not exist on ismailoyeleke.com. Here are the projects, certifications and contact details you were probably looking for."
+  noindex
+  hideStickyCta
+>
+  <section class="on-dark lost">
+    <div class="shell lost__inner">
+      <p class="lost__code">404</p>
+      <h1>That route does not resolve</h1>
+      <p class="lede">
+        The page you asked for is not here. It may have moved, or the link may have a typo in it.
+        Everything on the site is one click away below.
+      </p>
+
+      <ul class="lost__links">
+        <li><a href="/">Home</a></li>
+        {nav.map((item) => <li><a href={item.href}>{item.label}</a></li>)}
+      </ul>
+
+      <div class="btn-row">
+        <a class="btn btn--primary" href="/projects">
+          See the projects
+          <SocialIcon name="arrow" size={15} />
+        </a>
+        <a class="btn btn--ghost" href="/contact">Report a broken link</a>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .lost {
+    padding-block: clamp(3.5rem, 10vw, 7rem);
+    min-height: 60vh;
+    display: flex;
+    align-items: center;
+  }
+  .lost__inner {
+    max-width: 44rem;
+  }
+  .lost__code {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    letter-spacing: 0.3em;
+    color: var(--gold);
+    margin-bottom: 1rem;
+  }
+  .lost__links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    list-style: none;
+    margin: 2rem 0 0;
+    padding: 0;
+  }
+  .lost__links a {
+    display: inline-block;
+    padding: 0.45rem 0.85rem;
+    border: 1px solid var(--rule);
+    border-radius: var(--r-sharp);
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    text-decoration: none;
+  }
+  .lost__links a:hover {
+    border-color: var(--gold);
+    color: var(--gold);
+  }
+</style>

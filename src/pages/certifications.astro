@@ -1,0 +1,176 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHero from '../components/PageHero.astro';
+import SocialIcon from '../components/SocialIcon.astro';
+import { headlineCerts, badgeGroups, certCount } from '../data/certifications';
+
+const description = `All ${certCount} of Ismail Oyeleke's certifications and badges, including AWS Certified Solutions Architect Associate and KCNA, each linking to the issuer for verification.`;
+---
+
+<Base title="Certifications" description={description}>
+  <PageHero
+    eyebrow="Certifications"
+    title={`${certCount} certifications and badges, all verifiable`}
+    lede="Every entry links to the issuer rather than an image on this site, so you can check any of them in one click."
+  />
+
+  <section class="section">
+    <div class="shell">
+      <div class="section-head">
+        <span class="eyebrow">Professional certifications</span>
+        <h2>The four that count</h2>
+        <span class="rule-gold"></span>
+      </div>
+
+      <ul class="headline">
+        {
+          headlineCerts.map((c) => (
+            <li class="headline__item reveal">
+              <p class="headline__issuer">{c.issuer}</p>
+              <h3 class="headline__name">{c.name}</h3>
+              <p class="headline__dates">
+                {c.issued && <span>Issued {c.issued}</span>}
+                {c.expires && <span>Valid to {c.expires}</span>}
+              </p>
+              <a class="text-link" href={c.verify} target="_blank" rel="noopener">
+                Verify with issuer
+                <SocialIcon name="external" size={13} />
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  <section class="on-dark section">
+    <div class="shell">
+      <div class="section-head">
+        <span class="eyebrow">Training</span>
+        <h2>Course and training badges</h2>
+        <p class="lede">Grouped by issuer. Each badge links to its own verification page.</p>
+        <span class="rule-gold"></span>
+      </div>
+
+      {
+        badgeGroups.map((group) => (
+          <section class="group">
+            <h3 class="group__title">{group.issuer}</h3>
+            <ul class="badges">
+              {group.badges.map((b) => (
+                <li class="badges__item">
+                  <a href={b.verify} target="_blank" rel="noopener">
+                    <span class="badges__name">{b.name}</span>
+                    {b.issued && <span class="badges__date">{b.issued}</span>}
+                    <span class="badges__icon">
+                      <SocialIcon name="external" size={13} />
+                    </span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ))
+      }
+    </div>
+  </section>
+</Base>
+
+<style>
+  .headline {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 1.25rem;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr));
+  }
+  .headline__item {
+    border: 1px solid var(--rule);
+    border-top: 2px solid var(--gold);
+    border-radius: var(--r-card);
+    padding: 1.6rem 1.4rem;
+    background: var(--surface);
+    display: flex;
+    flex-direction: column;
+  }
+  .headline__issuer {
+    font-family: var(--font-mono);
+    font-size: 0.66rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 0.8rem;
+  }
+  .headline__name {
+    font-size: 1.1rem;
+    margin-bottom: 0.6rem;
+  }
+  .headline__dates {
+    display: flex;
+    flex-direction: column;
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    margin-bottom: 1.2rem;
+  }
+  .headline__item .text-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-top: auto;
+    align-self: flex-start;
+  }
+
+  .group + .group {
+    margin-top: 2.75rem;
+  }
+  .group__title {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 1rem;
+  }
+
+  .badges {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 1px;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 19rem), 1fr));
+    background: var(--rule);
+    border: 1px solid var(--rule);
+  }
+  .badges__item {
+    background: var(--bg);
+  }
+  .badges__item a {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    padding: 1rem 1.1rem;
+    text-decoration: none;
+    height: 100%;
+  }
+  .badges__item a:hover {
+    background: var(--surface);
+  }
+  .badges__name {
+    font-size: 0.92rem;
+    flex: 1 1 auto;
+  }
+  .badges__date {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+  .badges__icon {
+    color: var(--accent);
+    display: flex;
+  }
+</style>

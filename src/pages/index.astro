@@ -1,0 +1,487 @@
+---
+import Base from '../layouts/Base.astro';
+import ArchPortrait from '../components/ArchPortrait.astro';
+import ProjectCard from '../components/ProjectCard.astro';
+import SocialIcon from '../components/SocialIcon.astro';
+import { site, stats } from '../data/site';
+import { featuredProjects, freelanceProjects } from '../data/projects';
+import { roles } from '../data/experience';
+import { headlineCerts, certCount } from '../data/certifications';
+import { references, referencesNote } from '../data/testimonials';
+
+const description =
+  'Ismail Oyeleke is an AWS Certified Solutions Architect and Cloud/DevOps Engineer in Lagos, Nigeria, building secure, automated AWS infrastructure and production software.';
+---
+
+<Base title={`${site.name}, Cloud and DevOps Engineer in Lagos`} description={description}>
+  <!-- Hero -->
+  <section class="on-dark hero">
+    <div class="shell hero__grid">
+      <div class="hero__copy">
+        {
+          site.availableForWork && (
+            <p class="availability">
+              <span class="availability__dot" aria-hidden="true"></span>
+              Available for cloud and DevOps roles
+            </p>
+          )
+        }
+        <h1>{site.headline}</h1>
+        <p class="lede">{site.subheadline}</p>
+        <div class="btn-row">
+          <a class="btn btn--primary" href="/contact">
+            Hire me
+            <SocialIcon name="arrow" size={15} />
+          </a>
+          <a class="btn btn--ghost" href={site.cv} download>
+            <SocialIcon name="download" size={15} />
+            Download CV
+          </a>
+        </div>
+      </div>
+
+      <div class="hero__portrait">
+        <ArchPortrait alt={`${site.name}, ${site.role}`} width={400} smallWidth={250} priority />
+      </div>
+    </div>
+
+    <div class="shell">
+      <dl class="stats">
+        {
+          stats.map((s) => (
+            <div class="stats__item">
+              <dt>{s.label}</dt>
+              <dd>{s.value}</dd>
+            </div>
+          ))
+        }
+      </dl>
+    </div>
+  </section>
+
+  <!-- Featured cloud work -->
+  <section class="section">
+    <div class="shell">
+      <div class="section-head">
+        <span class="eyebrow">Cloud engineering</span>
+        <h2>Infrastructure I have designed and shipped</h2>
+        <p class="lede">
+          Serverless applications, a contact centre for a microfinance bank, and a multi-AZ
+          architecture rebuilt from a single server. Each one has a case study with the decisions
+          behind it.
+        </p>
+        <span class="rule-gold"></span>
+      </div>
+
+      <div class="grid grid--pair">
+        {featuredProjects.map((p, i) => <ProjectCard project={p} wide={i === 0} />)}
+      </div>
+
+      <div class="btn-row">
+        <a class="btn btn--ghost" href="/projects">
+          All projects
+          <SocialIcon name="arrow" size={15} />
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Experience snapshot -->
+  <section class="on-dark section">
+    <div class="shell">
+      <div class="section-head">
+        <span class="eyebrow">Experience</span>
+        <h2>Where I have worked</h2>
+        <span class="rule-gold"></span>
+      </div>
+
+      <ol class="roles">
+        {
+          roles.map((role) => (
+            <li class="roles__item reveal">
+              <p class="roles__period">{role.period}</p>
+              <div>
+                <h3 class="roles__title">{role.title}</h3>
+                <p class="roles__company">
+                  {role.companyUrl ? (
+                    <a href={role.companyUrl} target="_blank" rel="noopener">
+                      {role.company}
+                    </a>
+                  ) : (
+                    role.company
+                  )}
+                  <span class="roles__mode">{role.mode}</span>
+                </p>
+                <p class="roles__line">{role.did[0]}</p>
+              </div>
+            </li>
+          ))
+        }
+      </ol>
+
+      <div class="btn-row">
+        <a class="btn btn--ghost" href="/experience">
+          Full experience
+          <SocialIcon name="arrow" size={15} />
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Certifications -->
+  <section class="section section--sunken">
+    <div class="shell">
+      <div class="section-head">
+        <span class="eyebrow">Verified</span>
+        <h2>Certifications</h2>
+        <p class="lede">
+          {certCount} certifications and badges in total, each one linking to its issuer for
+          verification. These four lead.
+        </p>
+        <span class="rule-gold"></span>
+      </div>
+
+      <ul class="certs">
+        {
+          headlineCerts.map((c) => (
+            <li class="certs__item reveal">
+              <p class="certs__issuer">{c.issuer}</p>
+              <h3 class="certs__name">{c.name}</h3>
+              <p class="certs__dates">
+                {c.issued && <span>Issued {c.issued}</span>}
+                {c.expires && <span>Valid to {c.expires}</span>}
+              </p>
+              <a class="text-link" href={c.verify} target="_blank" rel="noopener">
+                Verify
+                <SocialIcon name="external" size={13} />
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+
+      <div class="btn-row">
+        <a class="btn btn--ghost" href="/certifications">
+          All {certCount} certifications
+          <SocialIcon name="arrow" size={15} />
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Freelance teaser -->
+  <section class="section">
+    <div class="shell">
+      <div class="section-head">
+        <span class="eyebrow">Freelance software</span>
+        <h2>Systems businesses run on</h2>
+        <p class="lede">
+          Beyond infrastructure, I build and maintain production software for clients in Lagos.
+        </p>
+        <span class="rule-gold"></span>
+      </div>
+
+      <div class="grid grid--pair">
+        {freelanceProjects.map((p) => <ProjectCard project={p} />)}
+      </div>
+
+      <div class="btn-row">
+        <a class="btn btn--ghost" href="/freelance">
+          Freelance work
+          <SocialIcon name="arrow" size={15} />
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- References -->
+  <section class="on-dark section">
+    <div class="shell">
+      <div class="section-head">
+        <span class="eyebrow">References</span>
+        <h2>What colleagues say</h2>
+        <p class="lede">{referencesNote}</p>
+        <span class="rule-gold"></span>
+      </div>
+
+      <ul class="quotes">
+        {
+          references.map((r) => (
+            <li class="quotes__item">
+              <p class="quotes__slot">{r.slot}</p>
+              {r.pending ? (
+                <p class="quotes__pending">Awaiting a written reference.</p>
+              ) : (
+                <blockquote class="quotes__text">
+                  <p>{r.quote}</p>
+                  <footer>
+                    {r.name}, {r.role}, {r.company}
+                  </footer>
+                </blockquote>
+              )}
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  <!-- Closing CTA -->
+  <section class="section section--sunken closing">
+    <div class="shell closing__inner">
+      <div>
+        <span class="eyebrow">Next step</span>
+        <h2>Hiring for cloud, DevOps or AWS architecture?</h2>
+        <p class="lede">
+          Tell me about the role or the system you need built. I reply to every message, and I am
+          open to {site.openTo}.
+        </p>
+      </div>
+      <div class="btn-row closing__actions">
+        <a class="btn btn--primary" href="/contact">
+          Start a conversation
+          <SocialIcon name="arrow" size={15} />
+        </a>
+        <a class="btn btn--ghost" href={`mailto:${site.email}`}>
+          <SocialIcon name="mail" size={15} />
+          Email directly
+        </a>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .hero {
+    padding-block: clamp(2.75rem, 7vw, 5.5rem) 0;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero__grid {
+    display: grid;
+    gap: clamp(2rem, 5vw, 4rem);
+    grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.75fr);
+    align-items: center;
+  }
+
+  .hero h1 {
+    font-size: clamp(1.8rem, 5.2vw, 3.6rem);
+    margin-bottom: 0.45em;
+  }
+
+  .hero .lede {
+    max-width: 46ch;
+  }
+
+  @media (max-width: 560px) {
+    .hero .lede {
+      font-size: 0.97rem;
+    }
+    .availability {
+      font-size: 0.64rem;
+      margin-bottom: 1.1rem;
+    }
+  }
+
+  .hero__portrait {
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .availability {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--gold);
+    border: 1px solid var(--green-line);
+    border-radius: var(--r-pill);
+    padding: 0.4rem 0.9rem;
+    margin: 0 0 1.5rem;
+  }
+  .availability__dot {
+    width: 7px;
+    height: 7px;
+    background: var(--gold);
+    border-radius: 50%;
+  }
+
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+    gap: 1px;
+    margin: clamp(2.5rem, 6vw, 4rem) 0 0;
+    background: var(--green-line);
+    border-top: 1px solid var(--green-line);
+    border-bottom: 1px solid var(--green-line);
+  }
+  .stats__item {
+    background: var(--green-deep);
+    padding: 1.4rem 1.2rem;
+  }
+  .stats dt {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #a8bdb1;
+    order: 2;
+  }
+  .stats dd {
+    font-family: var(--font-display);
+    font-size: clamp(1.5rem, 3vw, 2.1rem);
+    color: var(--gold);
+    margin: 0 0 0.25rem;
+    line-height: 1.1;
+  }
+
+  /* Experience list: a period column against the detail, not a card grid. */
+  .roles {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border-top: 1px solid var(--rule);
+  }
+  .roles__item {
+    display: grid;
+    grid-template-columns: 13rem minmax(0, 1fr);
+    gap: 1rem 2rem;
+    padding-block: 1.9rem;
+    border-bottom: 1px solid var(--rule);
+  }
+  .roles__period {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0.3rem 0 0;
+  }
+  .roles__title {
+    margin-bottom: 0.3rem;
+  }
+  .roles__company {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 0.9rem;
+    font-size: 0.92rem;
+    margin-bottom: 0.7rem;
+  }
+  .roles__mode {
+    color: var(--text-muted);
+  }
+  .roles__line {
+    color: var(--text-muted);
+    margin: 0;
+  }
+
+  .certs {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 1px;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
+    background: var(--rule);
+    border: 1px solid var(--rule);
+  }
+  .certs__item {
+    background: var(--surface);
+    padding: 1.6rem 1.4rem;
+    display: flex;
+    flex-direction: column;
+  }
+  .certs__issuer {
+    font-family: var(--font-mono);
+    font-size: 0.66rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 0.7rem;
+  }
+  .certs__name {
+    font-size: 1.1rem;
+    margin-bottom: 0.6rem;
+  }
+  .certs__dates {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    margin-bottom: 1.1rem;
+  }
+  .certs__item .text-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-top: auto;
+    align-self: flex-start;
+  }
+
+  .quotes {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 1.25rem;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr));
+  }
+  .quotes__item {
+    border: 1px solid var(--gold);
+    border-radius: var(--r-card);
+    padding: 1.6rem;
+    min-height: 9rem;
+  }
+  .quotes__slot {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 0.8rem;
+  }
+  .quotes__pending {
+    color: var(--text-muted);
+    margin: 0;
+  }
+  .quotes__text {
+    margin: 0;
+  }
+  .quotes__text footer {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+  }
+
+  .closing__inner {
+    display: grid;
+    gap: 1.5rem 3rem;
+    grid-template-columns: minmax(0, 1.3fr) minmax(0, auto);
+    align-items: center;
+  }
+  .closing__actions {
+    margin-top: 0;
+  }
+
+  @media (max-width: 900px) {
+    .hero__grid {
+      grid-template-columns: 1fr;
+    }
+    /* Copy and the call to action stay above the fold on a phone; the
+       portrait follows, at a size that does not take a whole screen. */
+    .hero__portrait {
+      justify-content: flex-start;
+    }
+    .roles__item {
+      grid-template-columns: 1fr;
+      gap: 0.5rem;
+    }
+    .closing__inner {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
