@@ -134,28 +134,25 @@ The project instructions hold the full text. Every change must keep to them.
 - [x] QA script and CI workflow, production deploy workflow (S3 + CloudFront)
 - [x] AWS setup guide in `docs/deployment.md`
 - [x] Pull request #1 open from `claude/portfolio-rebuild` into `main`
-- [x] Automatic preview on GitHub Pages (noindex) on every push
+- [x] Automatic preview on GitHub Pages (noindex) on every push, live since
+      2026-10-06 (Pages source set to GitHub Actions)
 - [x] This progress file
 
 ## In progress
 
-- Preview deploy goes live once GitHub Pages is switched on (see below).
 - Pull request #1 waiting on Ismail's review and merge.
 
 ## Waiting on Ismail
 
-1. Turn on GitHub Pages once: repo Settings > Pages > Build and deployment >
-   Source: **GitHub Actions**. Then re-run the "Preview" workflow from the
-   Actions tab (or push anything).
-2. Review the preview and merge pull request #1. After merging, set the
+1. Review the preview and merge pull request #1. After merging, set the
    repository default branch to `main` (Settings > General > Default branch).
-3. Web3Forms access key (free at web3forms.com, sent to his email). Save as
+2. Web3Forms access key (free at web3forms.com, sent to his email). Save as
    repo secret `PUBLIC_WEB3FORMS_KEY` in the `production` environment.
-4. GA4 Measurement ID (`G-XXXXXXX`). Save as variable `PUBLIC_GA_ID`.
-5. AWS setup per `docs/deployment.md`, then the secrets
+3. GA4 Measurement ID (`G-XXXXXXX`). Save as variable `PUBLIC_GA_ID`.
+4. AWS setup per `docs/deployment.md`, then the secrets
    `AWS_DEPLOY_ROLE_ARN`, `AWS_S3_BUCKET`, `AWS_CLOUDFRONT_DISTRIBUTION_ID`.
-6. Real reference quotes (mentor, former manager) with names and permission.
-7. Optionally a headshot that is not from convocation.
+5. Real reference quotes (mentor, former manager) with names and permission.
+6. Optionally a headshot that is not from convocation.
 
 ## Next steps, in order
 
