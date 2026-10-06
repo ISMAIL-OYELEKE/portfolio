@@ -44,17 +44,6 @@ const description =
 
       <div class="hero__portrait">
         <ArchPortrait alt={`${site.name}, ${site.role}`} width={400} smallWidth={150} priority />
-        {
-          /* Phones only: the availability line sits beside the portrait, so
-             the photo, headline and buttons all fit on the first screen. The
-             copy's own line is hidden at that size, so it is never read twice. */
-          site.availableForWork && (
-            <p class="availability availability--beside">
-              <span class="availability__dot" aria-hidden="true"></span>
-              Available for cloud and DevOps roles
-            </p>
-          )
-        }
       </div>
     </div>
 
@@ -318,6 +307,17 @@ const description =
     overflow: hidden;
   }
 
+  /* Desktop: the hero fills the first screen exactly, so the next section
+     never peeks in below the stats row. The masthead is about 73px tall. */
+  @media (min-width: 901px) {
+    .hero {
+      min-height: calc(100svh - 73px);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+  }
+
   .hero__grid {
     display: grid;
     gap: clamp(2rem, 5vw, 4rem);
@@ -571,39 +571,38 @@ const description =
       grid-template-columns: 1fr;
     }
   }
-  .availability--beside {
-    display: none;
-  }
   @media (max-width: 560px) {
+    /* Phones: a centred circular portrait above the copy, with the
+       availability line back in its usual place above the headline. */
     .hero__portrait {
-      align-items: center;
+      justify-content: center;
+    }
+    .hero__grid {
       gap: 1rem;
     }
+    .availability {
+      display: flex;
+      width: fit-content;
+      margin: 0 auto 1.1rem;
+      letter-spacing: 0.1em;
+      white-space: nowrap;
+    }
     .hero__portrait :global(.arch) {
-      --arch-w: 112px;
-      flex: 0 0 auto;
-      padding: 6px;
+      --arch-w: 116px;
+      aspect-ratio: 1;
+      border-radius: 50%;
+      padding: 5px;
     }
     .hero__portrait :global(.arch::after) {
-      inset: 6px;
+      inset: 5px;
+      border-radius: 50%;
     }
-    .availability--top {
-      display: none;
-    }
-    .availability--beside {
-      display: inline-flex;
-      align-items: flex-start;
-      border: 0;
-      padding: 0;
-      margin: 0;
-      line-height: 1.7;
-    }
-    .availability--beside .availability__dot {
-      margin-top: 0.55em;
-      flex: 0 0 auto;
+    .hero__portrait :global(.arch img) {
+      border-radius: 50%;
+      object-position: 50% 18%;
     }
     .hero h1 {
-      font-size: clamp(1.6rem, 7.4vw, 1.9rem);
+      font-size: clamp(1.55rem, 7.1vw, 1.85rem);
     }
   }
 </style>
