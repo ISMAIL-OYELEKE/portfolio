@@ -31,6 +31,7 @@
   "private": true,
   "type": "module",
   "devDependencies": {
+    "aws-icons": "^3.3.0",
     "simple-icons": "^16.34.0"
   }
 }

@@ -8,6 +8,7 @@ export default defineConfig({
   base: process.env.BASE_PATH ?? '/',
   trailingSlash: 'never',
   build: { format: 'file', inlineStylesheets: 'auto' },
-  integrations: [sitemap()],
+  // The thank-you page is noindex, so it stays out of the sitemap too.
+  integrations: [sitemap({ filter: (page) => !page.includes('/thank-you') })],
   image: { responsiveStyles: true },
 });

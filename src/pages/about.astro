@@ -6,6 +6,7 @@ import SocialIcon from '../components/SocialIcon.astro';
 import { site } from '../data/site';
 import { story, values, remember, education, community } from '../data/experience';
 import { skillGroups } from '../data/skills';
+import { skillIcon } from '../lib/skillIcons';
 
 const description =
   'Ismail Oyeleke: how an IT support role at Nigeria’s airports led to AWS architecture, what he values in a build, and the community he founded in Lagos.';
@@ -119,9 +120,20 @@ const description =
             <section class="skills__group reveal">
               <h3 class="skills__title">{g.title}</h3>
               <ul class="tag-row">
-                {g.items.map((item) => (
-                  <li class="tag">{item}</li>
-                ))}
+                {g.items.map((item) => {
+                  const icon = skillIcon(item);
+                  return (
+                    <li class:list={['tag', icon && 'skill']}>
+                      {icon?.kind === 'aws' && <span class="skill__tile" aria-hidden="true" set:html={icon.svg} />}
+                      {icon?.kind === 'mark' && (
+                        <svg class="skill__mark" viewBox="0 0 24 24" aria-hidden="true" style={`color:${icon.color}`}>
+                          <path fill="currentColor" d={icon.path} />
+                        </svg>
+                      )}
+                      {item}
+                    </li>
+                  );
+                })}
               </ul>
             </section>
           ))
@@ -251,6 +263,36 @@ const description =
     text-transform: uppercase;
     color: var(--accent);
     margin-bottom: 0.85rem;
+  }
+
+  /* A skill with a real logo: the mark sits before the name. */
+  .skill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding-left: 0.4rem;
+    color: var(--text);
+    transition: border-color 0.2s ease, translate 0.2s var(--ease-out);
+  }
+  .skill:hover {
+    border-color: var(--accent);
+    translate: 0 -1px;
+  }
+  .skill__mark,
+  .skill__tile,
+  .skill__tile :global(svg) {
+    width: 18px;
+    height: 18px;
+    flex: 0 0 auto;
+    display: block;
+  }
+  .skill__tile :global(svg) {
+    border-radius: 3px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .skill:hover {
+      translate: none;
+    }
   }
 
   .note {

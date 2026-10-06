@@ -17,6 +17,9 @@ import { site } from '../data/site';
 import SocialIcon from './SocialIcon.astro';
 
 const accessKey = import.meta.env.PUBLIC_WEB3FORMS_KEY ?? '';
+// Absolute and base-aware, so the preview under /portfolio lands on its own
+// thank-you page rather than the live domain's.
+const thankYou = new URL(`${import.meta.env.BASE_URL.replace(/\/$/, '')}/thank-you`, Astro.site).href;
 ---
 
 {
@@ -25,7 +28,7 @@ const accessKey = import.meta.env.PUBLIC_WEB3FORMS_KEY ?? '';
       <input type="hidden" name="access_key" value={accessKey} />
       <input type="hidden" name="subject" value="New message from ismailoyeleke.com" />
       <input type="hidden" name="from_name" value="ismailoyeleke.com" />
-      <input type="hidden" name="redirect" value={`${site.url}/thank-you`} />
+      <input type="hidden" name="redirect" value={thankYou} />
       {/* Honeypot: hidden from people, tempting to bots. */}
       <input type="checkbox" name="botcheck" class="form__honeypot" tabindex="-1" autocomplete="off" />
 
@@ -338,7 +341,7 @@ const accessKey = import.meta.env.PUBLIC_WEB3FORMS_KEY ?? '';
         const result = await response.json();
 
         if (response.ok && result.success) {
-          window.location.href = '/thank-you';
+          window.location.href = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/thank-you`;
           return;
         }
         throw new Error(result.message ?? 'The message could not be sent.');

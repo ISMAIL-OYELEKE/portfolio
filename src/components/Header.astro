@@ -170,28 +170,70 @@ const isCurrent = (href: string) => path === href || (href !== '/' && path.start
     transform: translateY(-6px) rotate(-45deg);
   }
 
+  /* The open menu is an ivory sheet over the page, with the page behind it
+     dimmed, so it reads as open on the green sections as well as the light
+     ones. */
   .masthead__panel {
-    border-top: 1px solid var(--green-line);
-    background: var(--green-deep);
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    max-height: calc(100svh - 100%);
+    overflow-y: auto;
+    z-index: 1;
+    background: var(--ivory);
+    border-top: 3px solid var(--gold);
+    box-shadow: 0 18px 40px rgba(7, 32, 24, 0.35);
+    animation: menu-in 0.22s var(--ease-out);
+  }
+  /* Dims the page while the menu is open, never the header above it. */
+  .masthead:has(.masthead__panel:not([hidden]))::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    height: 100vh;
+    background: rgba(7, 32, 24, 0.6);
+    pointer-events: none;
+  }
+  @keyframes menu-in {
+    from {
+      opacity: 0;
+      transform: translateY(-6px);
+    }
   }
   .masthead__panel ul {
     list-style: none;
     margin: 0;
-    padding: 0.5rem var(--gutter) 1.25rem;
+    padding: 0.35rem var(--gutter) 1rem;
   }
   .masthead__panel a {
     display: block;
-    padding: 0.85rem 0;
+    padding: 0.9rem 0 0.9rem 0.85rem;
     font-family: var(--font-mono);
     font-size: 0.8rem;
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: var(--ivory);
+    color: var(--green-deep);
     text-decoration: none;
-    border-bottom: 1px solid var(--green-line);
+    border-bottom: 1px solid var(--ivory-dim);
+    border-left: 3px solid transparent;
+    transition: border-color 0.2s ease, background-color 0.2s ease;
+  }
+  .masthead__panel a:hover {
+    border-left-color: var(--gold);
+    background: var(--ivory-dim);
   }
   .masthead__panel a[aria-current='page'] {
-    color: var(--gold);
+    color: var(--gold-text);
+    border-left-color: var(--gold);
+    font-weight: 600;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .masthead__panel {
+      animation: none;
+    }
   }
 
   @media (max-width: 1040px) {
@@ -215,10 +257,23 @@ const isCurrent = (href: string) => path === href || (href !== '/' && path.start
     if (panel) panel.hidden = open;
   });
 
-  panel?.querySelectorAll('a').forEach((link) =>
-    link.addEventListener('click', () => {
-      toggle?.setAttribute('aria-expanded', 'false');
-      if (panel) panel.hidden = true;
-    })
-  );
+  const close = () => {
+    toggle?.setAttribute('aria-expanded', 'false');
+    if (panel) panel.hidden = true;
+  };
+
+  panel?.querySelectorAll('a').forEach((link) => link.addEventListener('click', close));
+
+  // Tapping the dimmed page or pressing Escape closes the menu too.
+  document.addEventListener('click', (e) => {
+    if (panel?.hidden) return;
+    const target = e.target as Node;
+    if (!panel?.contains(target) && !toggle?.contains(target)) close();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && panel && !panel.hidden) {
+      close();
+      toggle?.focus();
+    }
+  });
 </script>
