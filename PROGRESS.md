@@ -169,9 +169,6 @@ The project instructions hold the full text. Every change must keep to them.
       (2026-10-06): headline, spacing and stats sized by screen height.
       Checked at 1920x1080, 1920x950, 1536x730, 1440x780, 1366x650,
       1280x765 (1920 screen at 150% scaling), 1280x640 and 1024x690.
-- [x] Headshots without the graduation sash (2026-10-06) on Home, About and
-      the share card (`public/og-image.jpg`, 84KB). Source files live in
-      `brand/headshot/` and `brand/logo/web/` in the project folder.
 
 ## In progress
 
@@ -187,7 +184,13 @@ The project instructions hold the full text. Every change must keep to them.
 4. AWS setup per `docs/deployment.md`, then the secrets
    `AWS_DEPLOY_ROLE_ARN`, `AWS_S3_BUCKET`, `AWS_CLOUDFRONT_DISTRIBUTION_ID`.
 5. Real reference quotes (mentor, former manager) with names and permission.
-6. The two ALX certificates as images (screenshot or PDF). ALX blocks
+6. Headshot without the graduation sash: being made in the brand thread.
+   When it lands in `brand/headshot/`, copy it over
+   `src/assets/headshot/headshot-portrait-green.jpg` (the one file
+   `ArchPortrait.astro` imports, used on Home and About), rebuild
+   `public/og-image.jpg` (the share card, 1200x630, under 300KB) from it,
+   and rebuild.
+7. The two ALX certificates as images (screenshot or PDF). ALX blocks
    automated access, so those two tiles show an "ALX" placeholder for now.
 
 ## Next steps, in order
