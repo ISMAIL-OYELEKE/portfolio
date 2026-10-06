@@ -22,7 +22,7 @@ const description =
       <div class="hero__copy" data-enter>
         {
           site.availableForWork && (
-            <p class="availability">
+            <p class="availability availability--top">
               <span class="availability__dot" aria-hidden="true"></span>
               Available for cloud and DevOps roles
             </p>
@@ -43,7 +43,18 @@ const description =
       </div>
 
       <div class="hero__portrait">
-        <ArchPortrait alt={`${site.name}, ${site.role}`} width={400} smallWidth={250} priority />
+        <ArchPortrait alt={`${site.name}, ${site.role}`} width={400} smallWidth={150} priority />
+        {
+          /* Phones only: the availability line sits beside the portrait, so
+             the photo, headline and buttons all fit on the first screen. The
+             copy's own line is hidden at that size, so it is never read twice. */
+          site.availableForWork && (
+            <p class="availability availability--beside">
+              <span class="availability__dot" aria-hidden="true"></span>
+              Available for cloud and DevOps roles
+            </p>
+          )
+        }
       </div>
     </div>
 
@@ -543,10 +554,14 @@ const description =
     .hero__grid {
       grid-template-columns: 1fr;
     }
-    /* Copy and the call to action stay above the fold on a phone; the
-       portrait follows, at a size that does not take a whole screen. */
+    /* On a phone and tablet the portrait comes first, small enough that
+       the headline and both buttons still fit on the first screen. */
     .hero__portrait {
-      justify-content: center;
+      order: -1;
+      justify-content: flex-start;
+    }
+    .hero__grid {
+      gap: 1.4rem;
     }
     .roles__item {
       grid-template-columns: 1fr;
@@ -554,6 +569,41 @@ const description =
     }
     .closing__inner {
       grid-template-columns: 1fr;
+    }
+  }
+  .availability--beside {
+    display: none;
+  }
+  @media (max-width: 560px) {
+    .hero__portrait {
+      align-items: center;
+      gap: 1rem;
+    }
+    .hero__portrait :global(.arch) {
+      --arch-w: 112px;
+      flex: 0 0 auto;
+      padding: 6px;
+    }
+    .hero__portrait :global(.arch::after) {
+      inset: 6px;
+    }
+    .availability--top {
+      display: none;
+    }
+    .availability--beside {
+      display: inline-flex;
+      align-items: flex-start;
+      border: 0;
+      padding: 0;
+      margin: 0;
+      line-height: 1.7;
+    }
+    .availability--beside .availability__dot {
+      margin-top: 0.55em;
+      flex: 0 0 auto;
+    }
+    .hero h1 {
+      font-size: clamp(1.6rem, 7.4vw, 1.9rem);
     }
   }
 </style>
