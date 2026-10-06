@@ -311,6 +311,62 @@ export const projects: Project[] = [
 
   /* ---------------- freelance software engineering ---------------- */
   {
+    slug: 'cloud-dimex-website',
+    title: 'Cloud Dimex marketing site',
+    kind: 'freelance',
+    date: 'October 2026',
+    dateISO: '2026-10-05',
+    context: 'Cloud Dimex LTD, an AWS consulting company in Lagos',
+    summary:
+      'A thirteen-page marketing site shipped with a build-time Content Security Policy, consent-gated analytics and automated QA, scoring 100 for accessibility, best practices and SEO.',
+    metaDescription:
+      'A thirteen-page marketing site for an AWS consultancy, with a build-time Content Security Policy, consent-gated analytics and automated QA.',
+    problem:
+      'A cloud consultancy is judged on its own site. It had to load fast, pass a security review, and collect enquiries without leaking anything.',
+    stack: ['Next.js', 'React', 'Tailwind CSS', 'Three.js', 'Vercel', 'Web3Forms', 'hCaptcha', 'GA4'],
+    featured: true,
+    live: 'https://clouddimex.com',
+    build: [
+      {
+        heading: 'Security',
+        points: [
+          'A Content Security Policy generated at build time with SHA-256 hashes for inline scripts and no unsafe-inline, plus a per-build nonce so the live-chat widget runs under the policy rather than around it.',
+          'HSTS preload and a full set of security response headers.',
+          'The contact form combines hCaptcha, a honeypot field and validation on both the client and the server.',
+        ],
+      },
+      {
+        heading: 'Privacy and compliance',
+        points: [
+          'Google Analytics only loads after the visitor accepts cookies.',
+          'A privacy policy written against the Nigeria Data Protection Act 2023.',
+        ],
+      },
+      {
+        heading: 'Quality',
+        points: [
+          'Lighthouse mobile: 100 for accessibility, best practices and SEO on every page tested.',
+          'WCAG AA contrast verified across all twenty colour pairs, and no horizontal overflow from 360px to 1440px.',
+          'Playwright scripts check links, the CSP, the form, overflow and page metadata on every run.',
+          'Search Console and Bing Webmaster Tools set up and the sitemap submitted.',
+        ],
+      },
+    ],
+    result: [
+      'Thirteen indexable pages live on a static export, indexed and monitored.',
+      'Enquiries arrive through a form that is validated, rate-limited by captcha and free of unsafe-inline script.',
+    ],
+    media: [
+      {
+        type: 'video',
+        src: '/media/cloud-dimex-demo.mp4',
+        poster: '/media/cloud-dimex-poster.jpg',
+        alt: 'A short walkthrough of the Cloud Dimex site',
+        caption: 'A short walkthrough: the hero, the services menu, the migration flow and the thank-you page.',
+      },
+    ],
+  },
+  {
     slug: 'cerbiol-gadgets-pos',
     title: 'Cerbiol Gadgets point of sale',
     kind: 'freelance',
@@ -375,62 +431,6 @@ export const projects: Project[] = [
       { type: 'image', src: 'pos-login.png', alt: 'The point of sale sign-in screen' },
     ],
     note: 'Private client repository. The screenshots are redacted.',
-  },
-  {
-    slug: 'cloud-dimex-website',
-    title: 'Cloud Dimex marketing site',
-    kind: 'freelance',
-    date: 'October 2026',
-    dateISO: '2026-10-05',
-    context: 'Cloud Dimex LTD, an AWS consulting company in Lagos',
-    summary:
-      'A thirteen-page marketing site shipped with a build-time Content Security Policy, consent-gated analytics and automated QA, scoring 100 for accessibility, best practices and SEO.',
-    metaDescription:
-      'A thirteen-page marketing site for an AWS consultancy, with a build-time Content Security Policy, consent-gated analytics and automated QA.',
-    problem:
-      'A cloud consultancy is judged on its own site. It had to load fast, pass a security review, and collect enquiries without leaking anything.',
-    stack: ['Next.js', 'React', 'Tailwind CSS', 'Three.js', 'Vercel', 'Web3Forms', 'hCaptcha', 'GA4'],
-    featured: true,
-    live: 'https://clouddimex.com',
-    build: [
-      {
-        heading: 'Security',
-        points: [
-          'A Content Security Policy generated at build time with SHA-256 hashes for inline scripts and no unsafe-inline, plus a per-build nonce so the live-chat widget runs under the policy rather than around it.',
-          'HSTS preload and a full set of security response headers.',
-          'The contact form combines hCaptcha, a honeypot field and validation on both the client and the server.',
-        ],
-      },
-      {
-        heading: 'Privacy and compliance',
-        points: [
-          'Google Analytics only loads after the visitor accepts cookies.',
-          'A privacy policy written against the Nigeria Data Protection Act 2023.',
-        ],
-      },
-      {
-        heading: 'Quality',
-        points: [
-          'Lighthouse mobile: 100 for accessibility, best practices and SEO on every page tested.',
-          'WCAG AA contrast verified across all twenty colour pairs, and no horizontal overflow from 360px to 1440px.',
-          'Playwright scripts check links, the CSP, the form, overflow and page metadata on every run.',
-          'Search Console and Bing Webmaster Tools set up and the sitemap submitted.',
-        ],
-      },
-    ],
-    result: [
-      'Thirteen indexable pages live on a static export, indexed and monitored.',
-      'Enquiries arrive through a form that is validated, rate-limited by captcha and free of unsafe-inline script.',
-    ],
-    media: [
-      {
-        type: 'video',
-        src: '/media/cloud-dimex-demo.mp4',
-        poster: '/media/cloud-dimex-poster.jpg',
-        alt: 'A short walkthrough of the Cloud Dimex site',
-        caption: 'A short walkthrough: the hero, the services menu, the migration flow and the thank-you page.',
-      },
-    ],
   },
 ];
 
