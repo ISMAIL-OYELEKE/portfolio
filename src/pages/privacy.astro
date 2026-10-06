@@ -1,0 +1,114 @@
+---
+import Legal from '../layouts/Legal.astro';
+import { site } from '../data/site';
+---
+
+<Legal
+  title="Privacy policy"
+  description="What ismailoyeleke.com collects, why, how long it is kept, and the rights you have under the Nigeria Data Protection Act 2023 and the GDPR."
+  updated="6 October 2026"
+>
+  <p>
+    This site is a personal portfolio run by {site.name} from {site.locality}, {site.country}. This
+    policy explains what it collects, why, and what you can ask me to do about it. It is written
+    against the Nigeria Data Protection Act 2023, and I apply the same standard to visitors in the
+    United Kingdom and the European Union under the UK GDPR and the GDPR.
+  </p>
+
+  <h2>Who is responsible</h2>
+  <p>
+    I am the data controller for this site. You can reach me at{' '}
+    <a href={`mailto:${site.email}`}>{site.email}</a> or on {site.phoneDisplay}. My postal location
+    is {site.locality}, {site.region}, {site.country}; a full address is available on request for
+    any formal data request.
+  </p>
+
+  <h2>What the site collects</h2>
+  <ul>
+    <li>
+      <strong>Nothing by default.</strong> Visiting a page sets no cookie and stores nothing about
+      you until you choose otherwise.
+    </li>
+    <li>
+      <strong>Contact form.</strong> If you send a message, I receive the name, email address,
+      organisation and message you typed, plus the topic you selected. This is delivered to my
+      email inbox through Web3Forms, which processes it on my behalf and does not use it for its own
+      purposes. The lawful basis is your consent, given by sending the message, and my legitimate
+      interest in replying to enquiries.
+    </li>
+    <li>
+      <strong>Analytics, only if you accept.</strong> If you press Accept on the cookie banner, the
+      site loads Google Analytics, which sets cookies to count visits and tell me which pages are
+      read. IP addresses are anonymised. The lawful basis is your consent, and you can withdraw it
+      at any time using the cookie settings link in the footer.
+    </li>
+    <li>
+      <strong>Hosting logs.</strong> The site is served from Amazon Web Services. Standard access
+      logs, including IP address and user agent, may be recorded for security and reliability. The
+      lawful basis is my legitimate interest in keeping the site running and secure.
+    </li>
+  </ul>
+
+  <h2>Cookies and local storage</h2>
+  <ul>
+    <li>
+      One entry in your browser's local storage records whether you accepted or declined analytics,
+      so you are not asked on every page. It contains no personal data.
+    </li>
+    <li>
+      If you accept, Google Analytics sets its own cookies. Declining sets none, and the analytics
+      script is never loaded.
+    </li>
+    <li>
+      Pressing play on an embedded video loads it from youtube-nocookie.com, at which point YouTube
+      may set cookies. Nothing is requested from YouTube until you press play.
+    </li>
+  </ul>
+
+  <h2>Who else processes your data</h2>
+  <ul>
+    <li>Amazon Web Services, for hosting and content delivery.</li>
+    <li>Web3Forms, for delivering contact form messages to my inbox.</li>
+    <li>Google, for analytics, only after you accept.</li>
+    <li>Google, for Gmail, which holds the email I receive from you.</li>
+  </ul>
+  <p>
+    Some of these providers are outside Nigeria, so your data may be transferred internationally.
+    They operate under standard contractual clauses and their own published safeguards.
+  </p>
+
+  <h2>How long anything is kept</h2>
+  <ul>
+    <li>Contact messages stay in my email for as long as the conversation is relevant, and no longer than three years.</li>
+    <li>Analytics data is retained for 14 months and then deleted automatically.</li>
+    <li>Your cookie choice stays in your browser until you clear it or change it.</li>
+  </ul>
+
+  <h2>Your rights</h2>
+  <p>
+    You can ask me to show you what I hold about you, correct it, delete it, restrict what I do with
+    it, or send you a copy. You can object to processing based on legitimate interest, and withdraw
+    consent for analytics whenever you like. Email{' '}
+    <a href={`mailto:${site.email}`}>{site.email}</a> and I will respond within 30 days. If you are
+    not satisfied, you can complain to the Nigeria Data Protection Commission, or to your own data
+    protection authority if you are in the UK or the EU.
+  </p>
+
+  <h2>Children</h2>
+  <p>
+    This site is aimed at recruiters, employers and clients. It is not intended for children, and I
+    do not knowingly collect data from anyone under 18.
+  </p>
+
+  <h2>Security</h2>
+  <p>
+    The site is served over HTTPS only. It is a static site, so there is no database and no account
+    to compromise. Messages reach me through an encrypted connection.
+  </p>
+
+  <h2>Changes</h2>
+  <p>
+    If this policy changes, the date at the top changes with it. Material changes will be noted on
+    this page.
+  </p>
+</Legal>

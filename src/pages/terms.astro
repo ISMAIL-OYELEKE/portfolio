@@ -1,0 +1,99 @@
+---
+import Legal from '../layouts/Legal.astro';
+import { site } from '../data/site';
+---
+
+<Legal
+  title="Terms and conditions"
+  description="The terms that apply to using ismailoyeleke.com, including ownership of the content, links to other sites, and the limits of what the site promises."
+  updated="6 October 2026"
+>
+  <p>
+    These terms apply to ismailoyeleke.com, a personal portfolio run by {site.name} from{' '}
+    {site.locality}, {site.country}. Using the site means you accept them. If you do not, please do
+    not use the site.
+  </p>
+
+  <h2>What this site is</h2>
+  <p>
+    It is a portfolio: a record of professional work, certifications and writing, and a way to get
+    in touch. It is not a product, it sells nothing, and it takes no payment.
+  </p>
+
+  <h2>Content and ownership</h2>
+  <ul>
+    <li>
+      The text, design, photography and code of this site belong to me, except where something is
+      credited to someone else.
+    </li>
+    <li>
+      You are welcome to quote or link to it with attribution. Republishing it wholesale, or
+      presenting it as your own work, is not permitted.
+    </li>
+    <li>
+      Client projects are described with the clients' agreement. Screenshots are redacted where they
+      show customer data, and client configuration and code remain the clients' property.
+    </li>
+    <li>
+      Certification names, badges and logos belong to the bodies that issue them. Every claim here
+      links to the issuer so it can be checked independently.
+    </li>
+    <li>
+      Source code published on my GitHub is covered by whatever licence that repository states, not
+      by these terms.
+    </li>
+  </ul>
+
+  <h2>Accuracy</h2>
+  <p>
+    I keep this site current and accurate to the best of my knowledge, but I give no warranty that
+    everything is complete or up to date at the moment you read it. Anything you rely on for a
+    hiring or contracting decision is worth confirming with me directly.
+  </p>
+
+  <h2>Links to other sites</h2>
+  <p>
+    This site links to GitHub, YouTube, Medium, Credly, LinkedIn, client sites and certification
+    issuers. I do not control those sites and I am not responsible for their content, their terms or
+    their privacy practices.
+  </p>
+
+  <h2>Contacting me</h2>
+  <p>
+    Messages sent through the contact form are read by me. Please do not send confidential
+    information, credentials or personal data about other people through it. Sending a message does
+    not create a contract or a professional engagement; any work is agreed separately in writing.
+  </p>
+
+  <h2>Acceptable use</h2>
+  <ul>
+    <li>Do not attempt to break, probe or disrupt the site or its hosting.</li>
+    <li>Do not use the contact form for unsolicited marketing or automated submissions.</li>
+    <li>Do not scrape the site to build a competing listing or a dataset.</li>
+  </ul>
+
+  <h2>Liability</h2>
+  <p>
+    The site is provided as it is. To the extent the law allows, I am not liable for any loss
+    arising from using it, or from being unable to use it. Nothing here limits liability for fraud
+    or for anything that cannot lawfully be limited.
+  </p>
+
+  <h2>Governing law</h2>
+  <p>
+    These terms are governed by the laws of the Federal Republic of Nigeria, and the courts of
+    Nigeria have jurisdiction over any dispute.
+  </p>
+
+  <h2>Changes</h2>
+  <p>
+    I may update these terms. The date at the top shows when they last changed. Continuing to use
+    the site after a change means you accept the updated terms.
+  </p>
+
+  <h2>Contact</h2>
+  <p>
+    Questions about these terms: <a href={`mailto:${site.email}`}>{site.email}</a>, or{' '}
+    {site.phoneDisplay}.
+  </p>
+</Legal>

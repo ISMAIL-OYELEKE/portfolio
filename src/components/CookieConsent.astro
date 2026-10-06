@@ -1,0 +1,159 @@
+---
+/**
+ * Consent banner. Analytics only loads after an explicit accept, and the
+ * choice can be changed again from the footer. Nothing is set before a
+ * decision, so declining leaves the site with no analytics cookies at all.
+ *
+ * Set PUBLIC_GA_ID at build time to switch measurement on. Without it the
+ * banner still records the choice and loads nothing.
+ */
+const gaId = import.meta.env.PUBLIC_GA_ID ?? '';
+---
+
+<div class="consent" data-consent hidden role="dialog" aria-modal="false" aria-labelledby="consent-title">
+  <div class="consent__inner">
+    <div>
+      <h2 class="consent__title" id="consent-title">Cookies</h2>
+      <p class="consent__text">
+        This site uses no cookies until you choose. Accepting turns on Google Analytics, which
+        tells me which pages are read. Declining keeps the site working with nothing stored.
+        <a href="/privacy">Read the privacy policy</a>.
+      </p>
+    </div>
+    <div class="consent__actions">
+      <button type="button" class="btn btn--ghost" data-consent-decline>Decline</button>
+      <button type="button" class="btn btn--primary" data-consent-accept>Accept analytics</button>
+    </div>
+  </div>
+</div>
+
+<style>
+  .consent {
+    position: fixed;
+    inset-inline: 0;
+    bottom: 0;
+    z-index: 60;
+    background: var(--green-ink);
+    border-top: 1px solid var(--gold);
+    color: var(--ivory);
+    padding: 1.1rem var(--gutter) calc(1.1rem + env(safe-area-inset-bottom));
+  }
+
+  .consent__inner {
+    max-width: var(--shell);
+    margin-inline: auto;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1rem 2rem;
+    justify-content: space-between;
+  }
+
+  .consent__title {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin: 0 0 0.4rem;
+  }
+
+  .consent__text {
+    margin: 0;
+    font-size: 0.88rem;
+    color: #c6d6cc;
+    max-width: 52ch;
+  }
+  .consent__text a {
+    color: var(--gold);
+  }
+
+  .consent__actions {
+    display: flex;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+  }
+  .consent__actions .btn--ghost {
+    color: var(--ivory);
+    border-color: var(--gold);
+  }
+
+  @media (max-width: 640px) {
+    .consent__actions {
+      width: 100%;
+    }
+    .consent__actions .btn {
+      flex: 1 1 auto;
+      justify-content: center;
+    }
+  }
+</style>
+
+<script is:inline define:vars={{ gaId }}>
+  (function () {
+    var KEY = 'io-consent-v1';
+    var banner = document.querySelector('[data-consent]');
+    if (!banner) return;
+
+    function readChoice() {
+      try {
+        return localStorage.getItem(KEY);
+      } catch (e) {
+        return null;
+      }
+    }
+
+    function writeChoice(value) {
+      try {
+        localStorage.setItem(KEY, value);
+      } catch (e) {
+        /* storage blocked: the choice applies to this page view only */
+      }
+    }
+
+    function loadAnalytics() {
+      if (!gaId || window.__analyticsLoaded) return;
+      window.__analyticsLoaded = true;
+      var s = document.createElement('script');
+      s.async = true;
+      s.src = 'https://www.googletagmanager.com/gtag/js?id=' + gaId;
+      document.head.appendChild(s);
+      window.dataLayer = window.dataLayer || [];
+      window.gtag = function () {
+        window.dataLayer.push(arguments);
+      };
+      window.gtag('js', new Date());
+      window.gtag('config', gaId, { anonymize_ip: true });
+    }
+
+    function show() {
+      banner.hidden = false;
+    }
+    function hide() {
+      banner.hidden = true;
+    }
+
+    var choice = readChoice();
+    if (choice === 'accepted') loadAnalytics();
+    else if (choice !== 'declined') show();
+
+    banner.querySelector('[data-consent-accept]').addEventListener('click', function () {
+      writeChoice('accepted');
+      loadAnalytics();
+      hide();
+    });
+
+    banner.querySelector('[data-consent-decline]').addEventListener('click', function () {
+      writeChoice('declined');
+      hide();
+    });
+
+    document.querySelectorAll('[data-cookie-reopen]').forEach(function (el) {
+      el.addEventListener('click', function () {
+        show();
+        banner.querySelector('[data-consent-accept]').focus();
+      });
+    });
+  })();
+</script>

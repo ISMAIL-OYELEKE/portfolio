@@ -1,0 +1,203 @@
+---
+import { nav, site } from '../data/site';
+import logo from '../assets/logo/lockup-horizontal-reversed.svg';
+
+const path = Astro.url.pathname.replace(/\/$/, '') || '/';
+const isCurrent = (href: string) => path === href || (href !== '/' && path.startsWith(href + '/'));
+---
+
+<header class="masthead" data-masthead>
+  <div class="shell masthead__inner">
+    <a href="/" class="masthead__brand" aria-label={`${site.name}, home`}>
+      <img src={logo.src} alt="" width="190" height="48" />
+    </a>
+
+    <nav class="masthead__nav" aria-label="Main">
+      <ul>
+        {
+          nav.map((item) => (
+            <li>
+              <a href={item.href} aria-current={isCurrent(item.href) ? 'page' : undefined}>
+                {item.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+
+    <a class="btn btn--primary masthead__cta" href={site.cv} download>Download CV</a>
+
+    <button
+      type="button"
+      class="masthead__toggle"
+      data-menu-toggle
+      aria-expanded="false"
+      aria-controls="site-menu"
+    >
+      <span class="visually-hidden">Menu</span>
+      <span class="masthead__bars" aria-hidden="true"></span>
+    </button>
+  </div>
+
+  <div class="masthead__panel" id="site-menu" data-menu-panel hidden>
+    <ul>
+      {
+        nav.map((item) => (
+          <li>
+            <a href={item.href} aria-current={isCurrent(item.href) ? 'page' : undefined}>
+              {item.label}
+            </a>
+          </li>
+        ))
+      }
+      <li><a href={site.cv} download>Download CV</a></li>
+    </ul>
+  </div>
+</header>
+
+<style>
+  .masthead {
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    background: var(--green-ink);
+    border-bottom: 1px solid var(--green-line);
+  }
+
+  .masthead__inner {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    min-height: 72px;
+  }
+
+  .masthead__brand {
+    display: flex;
+    flex: 0 0 auto;
+    margin-right: auto;
+  }
+  .masthead__brand img {
+    height: 34px;
+    width: auto;
+  }
+
+  .masthead__nav ul {
+    display: flex;
+    gap: 1.4rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .masthead__nav a {
+    font-family: var(--font-mono);
+    font-size: 0.73rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #c6d6cc;
+    text-decoration: none;
+    padding-block: 0.4rem;
+    border-bottom: 1px solid transparent;
+  }
+  .masthead__nav a:hover {
+    color: var(--ivory);
+  }
+  .masthead__nav a[aria-current='page'] {
+    color: var(--gold);
+    border-bottom-color: var(--gold);
+  }
+
+  .masthead__toggle {
+    display: none;
+    width: 44px;
+    height: 44px;
+    background: transparent;
+    border: 1px solid var(--green-line);
+    border-radius: var(--r-sharp);
+    cursor: pointer;
+    position: relative;
+  }
+  .masthead__bars,
+  .masthead__bars::before,
+  .masthead__bars::after {
+    position: absolute;
+    left: 12px;
+    width: 18px;
+    height: 1.5px;
+    background: var(--gold);
+    content: '';
+  }
+  .masthead__bars {
+    top: 21px;
+  }
+  .masthead__bars::before {
+    top: -6px;
+    left: 0;
+  }
+  .masthead__bars::after {
+    top: 6px;
+    left: 0;
+  }
+  [aria-expanded='true'] .masthead__bars {
+    background: transparent;
+  }
+  [aria-expanded='true'] .masthead__bars::before {
+    transform: translateY(6px) rotate(45deg);
+  }
+  [aria-expanded='true'] .masthead__bars::after {
+    transform: translateY(-6px) rotate(-45deg);
+  }
+
+  .masthead__panel {
+    border-top: 1px solid var(--green-line);
+    background: var(--green-deep);
+  }
+  .masthead__panel ul {
+    list-style: none;
+    margin: 0;
+    padding: 0.5rem var(--gutter) 1.25rem;
+  }
+  .masthead__panel a {
+    display: block;
+    padding: 0.85rem 0;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ivory);
+    text-decoration: none;
+    border-bottom: 1px solid var(--green-line);
+  }
+  .masthead__panel a[aria-current='page'] {
+    color: var(--gold);
+  }
+
+  @media (max-width: 1040px) {
+    .masthead__nav,
+    .masthead__cta {
+      display: none;
+    }
+    .masthead__toggle {
+      display: block;
+    }
+  }
+</style>
+
+<script>
+  const toggle = document.querySelector<HTMLButtonElement>('[data-menu-toggle]');
+  const panel = document.querySelector<HTMLElement>('[data-menu-panel]');
+
+  toggle?.addEventListener('click', () => {
+    const open = toggle.getAttribute('aria-expanded') === 'true';
+    toggle.setAttribute('aria-expanded', String(!open));
+    if (panel) panel.hidden = open;
+  });
+
+  panel?.querySelectorAll('a').forEach((link) =>
+    link.addEventListener('click', () => {
+      toggle?.setAttribute('aria-expanded', 'false');
+      if (panel) panel.hidden = true;
+    })
+  );
+</script>

@@ -1,0 +1,57 @@
+---
+import Base from '../../layouts/Base.astro';
+import PageHero from '../../components/PageHero.astro';
+import ProjectCard from '../../components/ProjectCard.astro';
+import SocialIcon from '../../components/SocialIcon.astro';
+import { cloudProjects, freelanceProjects } from '../../data/projects';
+
+const description =
+  'AWS projects with the decisions behind them: a serverless staff portal, an Amazon Connect contact centre, a multi-AZ web architecture and a Lex chatbot.';
+---
+
+<Base title="Projects" description={description}>
+  <PageHero
+    eyebrow="Projects"
+    title="What I built, and why it was built that way"
+    lede="Each case study covers the problem, the architecture, the decisions I would defend in a review, and what the result actually is."
+  />
+
+  <section class="section">
+    <div class="shell">
+      <div class="section-head">
+        <span class="eyebrow">Cloud and DevOps</span>
+        <h2>AWS projects</h2>
+        <span class="rule-gold"></span>
+      </div>
+
+      <div class="grid grid--pair">
+        {cloudProjects.map((p, i) => <ProjectCard project={p} wide={i === 0} />)}
+      </div>
+    </div>
+  </section>
+
+  <section class="on-dark section">
+    <div class="shell">
+      <div class="section-head">
+        <span class="eyebrow">Freelance software</span>
+        <h2>Client systems</h2>
+        <p class="lede">
+          Production software built for businesses in Lagos. Both are live, and both are named with
+          the client's agreement.
+        </p>
+        <span class="rule-gold"></span>
+      </div>
+
+      <div class="grid grid--pair">
+        {freelanceProjects.map((p) => <ProjectCard project={p} />)}
+      </div>
+
+      <div class="btn-row">
+        <a class="btn btn--ghost" href="/freelance">
+          More on freelance work
+          <SocialIcon name="arrow" size={15} />
+        </a>
+      </div>
+    </div>
+  </section>
+</Base>

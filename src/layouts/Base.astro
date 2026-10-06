@@ -1,0 +1,114 @@
+---
+import '../styles/global.css';
+import Seo from '../components/Seo.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import CookieConsent from '../components/CookieConsent.astro';
+import StickyCta from '../components/StickyCta.astro';
+import { site, socials } from '../data/site';
+
+interface Props {
+  title: string;
+  description: string;
+  image?: string;
+  noindex?: boolean;
+  type?: 'website' | 'article' | 'profile';
+  /** Hide the mobile sticky call to action, e.g. on the contact page itself. */
+  hideStickyCta?: boolean;
+  schema?: Record<string, unknown> | Record<string, unknown>[];
+}
+
+const { title, description, image, noindex, type, hideStickyCta = false, schema } = Astro.props;
+
+const personSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: site.name,
+  jobTitle: site.role,
+  url: site.url,
+  image: new URL('/og-image.png', Astro.site).href,
+  email: `mailto:${site.email}`,
+  telephone: site.phone,
+  address: {
+    '@type': 'PostalAddress',
+    addressLocality: site.locality,
+    addressRegion: site.region,
+    addressCountry: site.countryCode,
+  },
+  sameAs: socials.map((s) => s.href),
+  knowsAbout: [
+    'Amazon Web Services',
+    'Cloud architecture',
+    'DevOps',
+    'Terraform',
+    'Kubernetes',
+    'CI/CD',
+    'Serverless',
+  ],
+  alumniOf: {
+    '@type': 'CollegeOrUniversity',
+    name: 'Kwara State University',
+  },
+};
+
+const schemas = [personSchema, ...(schema ? (Array.isArray(schema) ? schema : [schema]) : [])];
+---
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+    <meta name="author" content={site.name} />
+    <meta name="theme-color" content="#0B2A1F" />
+
+    <link rel="icon" href="/favicon.ico" sizes="48x48" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+
+    <Seo title={title} description={description} image={image} noindex={noindex} type={type} />
+
+    <script is:inline>
+      document.documentElement.classList.remove('no-js');
+    </script>
+
+    {schemas.map((s) => <script type="application/ld+json" set:html={JSON.stringify(s)} />)}
+  </head>
+
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <Header />
+    <main id="main">
+      <slot />
+    </main>
+    <Footer />
+    {!hideStickyCta && <StickyCta />}
+    <CookieConsent />
+
+    <script>
+      // Reveal on scroll, one observer for the page.
+      const items = document.querySelectorAll('.reveal');
+      const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (items.length && !reduced && 'IntersectionObserver' in window) {
+        const io = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              if (entry.isIntersecting) {
+                entry.target.classList.add('is-in');
+                io.unobserve(entry.target);
+              }
+            });
+          },
+          { rootMargin: '0px 0px -8% 0px', threshold: 0.08 }
+        );
+        items.forEach((el) => {
+          el.classList.add('is-armed');
+          io.observe(el);
+        });
+      }
+    </script>
+  </body>
+</html>
