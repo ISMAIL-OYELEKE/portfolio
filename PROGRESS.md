@@ -164,6 +164,7 @@ The project instructions hold the full text. Every change must keep to them.
       drop the .html suffix. New favicon is a solid green rounded tile with
       the ivory and gold mark, readable on light and dark browser tabs, with
       matching ico, PNG, apple touch and manifest icons.
+- [x] About page portrait centred under the buttons on phones and tablets.
 
 ## In progress
 
@@ -179,7 +180,10 @@ The project instructions hold the full text. Every change must keep to them.
 4. AWS setup per `docs/deployment.md`, then the secrets
    `AWS_DEPLOY_ROLE_ARN`, `AWS_S3_BUCKET`, `AWS_CLOUDFRONT_DISTRIBUTION_ID`.
 5. Real reference quotes (mentor, former manager) with names and permission.
-6. Optionally a headshot that is not from convocation.
+6. Headshot without the graduation sash: being made in the brand thread.
+   When it lands in `brand/headshot/`, copy it over
+   `src/assets/headshot/headshot-portrait-green.jpg` (the one file
+   `ArchPortrait.astro` imports, used on Home and About) and rebuild.
 7. The two ALX certificates as images (screenshot or PDF). ALX blocks
    automated access, so those two tiles show an "ALX" placeholder for now.
 
