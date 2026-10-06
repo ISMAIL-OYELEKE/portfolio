@@ -313,7 +313,7 @@ const description =
   .hero {
     /* Height-aware so the headline and both buttons fit on a short laptop
        screen, not only on a tall monitor. */
-    padding-block: clamp(2rem, min(7vw, 8vh), 5.5rem) clamp(1.5rem, 4vh, 3rem);
+    padding-block: clamp(1.5rem, min(6vw, 6vh), 4.5rem) clamp(1.25rem, 3vh, 2.5rem);
     position: relative;
     overflow: hidden;
   }
@@ -326,7 +326,7 @@ const description =
   }
 
   .hero h1 {
-    font-size: clamp(1.8rem, min(4.1vw, 6.6vh), 3.3rem);
+    font-size: clamp(1.8rem, min(4.1vw, 5.6vh), 3.3rem);
     line-height: 1.08;
     margin-bottom: 0.45em;
   }
@@ -391,14 +391,14 @@ const description =
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
     gap: 1px;
-    margin: clamp(2.5rem, 6vw, 4rem) 0 0;
+    margin: clamp(1.5rem, min(6vw, 4vh), 3.5rem) 0 0;
     background: var(--green-line);
     border-top: 1px solid var(--green-line);
     border-bottom: 1px solid var(--green-line);
   }
   .stats__item {
     background: var(--green-deep);
-    padding: 1.4rem 1.2rem;
+    padding: clamp(0.8rem, 2vh, 1.4rem) 1.2rem;
   }
   .stats dt {
     font-family: var(--font-mono);
@@ -410,7 +410,7 @@ const description =
   }
   .stats dd {
     font-family: var(--font-display);
-    font-size: clamp(1.5rem, 3vw, 2.1rem);
+    font-size: clamp(1.4rem, min(3vw, 4vh), 2.1rem);
     color: var(--gold);
     margin: 0 0 0.25rem;
     line-height: 1.1;
