@@ -11,6 +11,7 @@
    (2.2:1), where #8A6A16 is used instead (4.6:1).
    --------------------------------------------------------------- */
 :root {
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
   --green-deep: #0b2a1f;
   --green-forest: #0f4d36;
   --green-ink: #072018;
@@ -249,7 +250,35 @@ hr {
   border: 1px solid transparent;
   text-decoration: none;
   cursor: pointer;
-  transition: background-color 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s var(--ease-out),
+    box-shadow 0.2s ease;
+}
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 22px -14px rgb(4 20 14 / 0.55);
+}
+.btn:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
+/* The arrow steps forward on hover; it moves once, it never loops. */
+.btn .icon--arrow,
+.text-link .icon--arrow {
+  transition: transform 0.2s var(--ease-out);
+}
+.btn:hover .icon--arrow,
+.text-link:hover .icon--arrow {
+  transform: translateX(3px);
+}
+.btn .icon--download {
+  transition: transform 0.2s var(--ease-out);
+}
+.btn:hover .icon--download {
+  transform: translateY(2px);
 }
 
 .btn--primary {
@@ -288,8 +317,62 @@ hr {
   border-bottom: 1px solid color-mix(in srgb, currentColor 45%, transparent);
   padding-bottom: 2px;
 }
-.text-link:hover {
-  border-bottom-color: currentColor;
+.text-link {
+  position: relative;
+}
+/* A solid underline draws across from the left on hover, over the faint
+   resting rule. */
+.text-link::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.25s var(--ease-out);
+}
+.text-link:hover::after,
+.text-link:focus-visible::after {
+  transform: scaleX(1);
+}
+
+/* ---------- hover lift ----------
+   Cards rise a few pixels and pick up a gold edge. Movement is small and
+   eased, with no glow and no scaling of text. */
+.lift {
+  transition:
+    translate 0.25s var(--ease-out),
+    border-color 0.25s ease,
+    box-shadow 0.25s ease;
+}
+.lift:hover,
+.lift:focus-within {
+  translate: 0 -4px;
+  border-color: var(--accent-line);
+  box-shadow: 0 18px 34px -24px rgb(4 20 14 / 0.45);
+}
+
+/* List rows: a gold bar slides in on the left edge. */
+.row-hover {
+  position: relative;
+}
+.row-hover::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--gold);
+  transform: scaleY(0);
+  transform-origin: top;
+  transition: transform 0.3s var(--ease-out);
+}
+.row-hover:hover::before {
+  transform: scaleY(1);
 }
 
 /* ---------- cards and tags ---------- */
@@ -350,8 +433,11 @@ hr {
    actually watching it, so a script failure can never leave a blank page. */
 .reveal.is-armed {
   opacity: 0;
-  transform: translateY(10px);
-  transition: opacity 0.5s ease, transform 0.5s ease;
+  transform: translateY(18px);
+  transition:
+    opacity 0.6s ease,
+    transform 0.6s var(--ease-out);
+  transition-delay: var(--reveal-delay, 0ms);
 }
 .reveal.is-armed.is-in {
   opacity: 1;
@@ -363,4 +449,34 @@ hr {
     transform: none;
     transition: none;
   }
+}
+
+/* ---------- page entrance ----------
+   The first screen settles in once on load: each [data-enter] child rises
+   into place in order. CSS only, so it runs even if scripts fail, and the
+   reduced-motion rule at the top of this file cancels it. */
+@keyframes enter-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+[data-enter] > * {
+  animation: enter-up 0.7s var(--ease-out) both;
+}
+[data-enter] > :nth-child(2) {
+  animation-delay: 0.08s;
+}
+[data-enter] > :nth-child(3) {
+  animation-delay: 0.16s;
+}
+[data-enter] > :nth-child(4) {
+  animation-delay: 0.24s;
+}
+[data-enter] > :nth-child(n + 5) {
+  animation-delay: 0.32s;
 }

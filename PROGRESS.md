@@ -149,6 +149,12 @@ The project instructions hold the full text. Every change must keep to them.
 - [x] Project 1 (this portfolio, v1 on S3, CloudFront and Route 53) given a
       full case study at /projects/portfolio-on-s3-cloudfront-route-53,
       featured on the home page and second in the project list
+- [x] Motion and real brand icons (2026-10-06): hover lift on cards, button
+      rise with arrow step, underline draw on links and nav, gold bar on list
+      rows, header shadow on scroll, staggered scroll reveals, a one-time
+      entrance on page heroes, count-up stats. All off under reduced motion.
+      Social icons are the real logos (Simple Icons, LinkedIn inlined from
+      its own brand assets) via `src/lib/brands.ts`, in brand colours.
 
 ## In progress
 

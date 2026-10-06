@@ -3,6 +3,7 @@ import Base from '../layouts/Base.astro';
 import ContactForm from '../components/ContactForm.astro';
 import SocialIcon from '../components/SocialIcon.astro';
 import { site, socials } from '../data/site';
+import { brandStyle } from '../lib/brands';
 
 const description =
   'Get in touch with Ismail Oyeleke, Cloud and DevOps Engineer in Lagos, Nigeria, about a role, a freelance project or an architecture review.';
@@ -55,7 +56,7 @@ const schema = {
           {
             socials.map((s) => (
               <li>
-                <a href={s.href} target="_blank" rel="me noopener">
+                <a href={s.href} target="_blank" rel="me noopener" style={brandStyle(s.icon)}>
                   <SocialIcon name={s.icon} size={16} />
                   {s.label}
                 </a>
@@ -136,10 +137,26 @@ const schema = {
     border-radius: var(--r-sharp);
     font-size: 0.85rem;
     text-decoration: none;
+    transition:
+      background-color 0.2s ease,
+      border-color 0.2s ease,
+      color 0.2s ease,
+      transform 0.2s ease;
   }
-  .contact__socials a:hover {
-    border-color: var(--gold);
-    color: var(--gold);
+  .contact__socials a :global(.brand-icon) {
+    color: var(--brand-on-dark);
+    transition: color 0.2s ease;
+  }
+  .contact__socials a:hover,
+  .contact__socials a:focus-visible {
+    background: var(--brand);
+    border-color: var(--brand);
+    color: #fff;
+    transform: translateY(-2px);
+  }
+  .contact__socials a:hover :global(.brand-icon),
+  .contact__socials a:focus-visible :global(.brand-icon) {
+    color: #fff;
   }
 
   .contact__form {

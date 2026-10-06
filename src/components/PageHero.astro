@@ -8,7 +8,7 @@ const { eyebrow, title, lede } = Astro.props;
 ---
 
 <section class="on-dark page-hero">
-  <div class="shell">
+  <div class="shell" data-enter>
     <span class="eyebrow">{eyebrow}</span>
     <h1>{title}</h1>
     {lede && <p class="lede page-hero__lede">{lede}</p>}

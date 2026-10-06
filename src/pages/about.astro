@@ -74,7 +74,7 @@ const description =
       <ol class="numbered">
         {
           remember.map((item, i) => (
-            <li class="numbered__item reveal">
+            <li class="numbered__item row-hover reveal">
               <span class="numbered__n">{String(i + 1).padStart(2, '0')}</span>
               <p>{item}</p>
             </li>
@@ -95,7 +95,7 @@ const description =
       <dl class="values">
         {
           values.map((v) => (
-            <div class="values__item reveal">
+            <div class="values__item lift reveal">
               <dt>{v.title}</dt>
               <dd>{v.body}</dd>
             </div>

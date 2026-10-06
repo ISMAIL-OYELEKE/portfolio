@@ -1,6 +1,7 @@
 ---
 import { nav, site, socials } from '../data/site';
 import SocialIcon from './SocialIcon.astro';
+import { brandStyle } from '../lib/brands';
 import logo from '../assets/logo/lockup-stacked-reversed.svg';
 
 const year = new Date().getFullYear();
@@ -17,7 +18,7 @@ const year = new Date().getFullYear();
         {
           socials.map((s) => (
             <li>
-              <a href={s.href} rel="me noopener" target="_blank" aria-label={s.label}>
+              <a href={s.href} rel="me noopener" target="_blank" aria-label={s.label} style={brandStyle(s.icon)}>
                 <SocialIcon name={s.icon} />
               </a>
             </li>
@@ -134,11 +135,19 @@ const year = new Date().getFullYear();
     height: 40px;
     border: 1px solid var(--green-line);
     border-radius: var(--r-sharp);
-    color: #c6d6cc;
+    color: var(--brand-on-dark, #c6d6cc);
+    transition:
+      background-color 0.2s ease,
+      border-color 0.2s ease,
+      color 0.2s ease,
+      transform 0.2s ease;
   }
-  .footer__socials a:hover {
-    border-color: var(--gold);
-    color: var(--gold);
+  .footer__socials a:hover,
+  .footer__socials a:focus-visible {
+    background: var(--brand, var(--gold));
+    border-color: var(--brand, var(--gold));
+    color: #fff;
+    transform: translateY(-2px);
   }
 
   .footer__base {
