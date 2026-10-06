@@ -176,7 +176,9 @@ The project instructions hold the full text. Every change must keep to them.
 - [x] Real logos on the Skills list (2026-10-06): AWS services use the
       official AWS Architecture Icons (`aws-icons` package), other tools use
       Simple Icons marks in brand colour, via `src/lib/skillIcons.ts`.
-      Skills with no logo (SQL, Boto3, REST APIs) stay as text.
+      Skills with no logo (SQL, Boto3, REST APIs) stay as text. On desktop
+      each group sits in its own bordered panel (AWS full width on top, the
+      rest two to a row with matching heights); phones keep the plain list.
 - [x] Mobile menu opens as an ivory sheet with a gold top edge over a
       dimmed page, closes on outside tap or Escape.
 - [x] Contact form redirect is base aware, so a preview submission lands on

@@ -118,7 +118,10 @@ const description =
         {
           skillGroups.map((g) => (
             <section class="skills__group reveal">
-              <h3 class="skills__title">{g.title}</h3>
+              <h3 class="skills__title">
+                {g.title}
+                <span class="skills__count">{g.items.length}</span>
+              </h3>
               <ul class="tag-row">
                 {g.items.map((item) => {
                   const icon = skillIcon(item);
@@ -263,6 +266,48 @@ const description =
     text-transform: uppercase;
     color: var(--accent);
     margin-bottom: 0.85rem;
+  }
+  .skills__count {
+    display: none;
+  }
+
+  /* Desktop: each group sits in its own bordered panel. AWS, the largest,
+     runs full width on top; the rest pair up two to a row with matching
+     heights, and an odd one out at the end takes the full row. */
+  @media (min-width: 901px) {
+    .skills {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1.25rem;
+    }
+    .skills__group {
+      background: var(--surface);
+      border: 1px solid var(--rule);
+      border-top: 3px solid var(--gold);
+      border-radius: var(--r-card);
+      padding: 1.4rem 1.5rem 1.6rem;
+      transition: border-color 0.25s ease, box-shadow 0.25s ease;
+    }
+    .skills__group:hover {
+      border-color: var(--gold);
+      box-shadow: 0 10px 24px rgba(11, 42, 31, 0.08);
+    }
+    .skills__group:first-child,
+    .skills__group:last-child:nth-child(even) {
+      grid-column: 1 / -1;
+    }
+    .skills__title {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      padding-bottom: 0.8rem;
+      margin-bottom: 1rem;
+      border-bottom: 1px solid var(--rule);
+    }
+    .skills__count {
+      display: inline;
+      color: var(--text-muted);
+      letter-spacing: 0.08em;
+    }
   }
 
   /* A skill with a real logo: the mark sits before the name. */
