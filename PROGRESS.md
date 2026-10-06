@@ -193,6 +193,9 @@ The project instructions hold the full text. Every change must keep to them.
       `environment:production` subject the deploy job actually presents.
 - [x] Step-by-step go-live guide for Ismail: `go-live-guide.md` in the
       project folder.
+- [x] Share card (`public/og-image.jpg`, 27KB) redesigned around the logo,
+      centred, because WhatsApp crops link previews to a centre square.
+      Name and role sit under the mark; no photo.
 - [x] Plain-language finish list for Ismail in the project folder:
       `finish-checklist.md`.
 - Headshot without the sash was tried and rolled back (2026-10-06): the
