@@ -74,7 +74,7 @@ const aws: Record<string, string> = {
 
 /**
  * Simple Icons marks. The colour is the brand's own, except where that
- * colour is too pale to read on the ivory page, where the brand's darker
+ * colour is too pale to read on the paper page, where the brand's darker
  * variant (or near black) is used instead.
  */
 const marks: Record<string, { icon: { path: string; hex: string }; color?: string }> = {

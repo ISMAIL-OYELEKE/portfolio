@@ -69,7 +69,7 @@ const description =
       <div class="section-head">
         <span class="eyebrow">In short</span>
         <h2>Five things worth knowing</h2>
-        <span class="rule-gold"></span>
+        <span class="rule-tick"></span>
       </div>
 
       <ol class="numbered">
@@ -90,7 +90,7 @@ const description =
       <div class="section-head">
         <span class="eyebrow">How I work</span>
         <h2>What I hold to on every build</h2>
-        <span class="rule-gold"></span>
+        <span class="rule-tick"></span>
       </div>
 
       <dl class="values">
@@ -111,7 +111,7 @@ const description =
       <div class="section-head">
         <span class="eyebrow">Toolkit</span>
         <h2>Skills</h2>
-        <span class="rule-gold"></span>
+        <span class="rule-tick"></span>
       </div>
 
       <div class="skills">
@@ -170,7 +170,7 @@ const description =
 
   .panel {
     border: 1px solid var(--rule);
-    border-left: 2px solid var(--gold);
+    border-left: 2px solid var(--highlight);
     border-radius: var(--r-card);
     padding: 1.3rem 1.4rem;
     background: var(--surface);
@@ -218,7 +218,7 @@ const description =
     font-family: var(--font-mono);
     font-size: 0.8rem;
     letter-spacing: 0.1em;
-    color: var(--gold);
+    color: var(--highlight);
   }
   .numbered__item p {
     margin: 0;
@@ -282,14 +282,14 @@ const description =
     .skills__group {
       background: var(--surface);
       border: 1px solid var(--rule);
-      border-top: 3px solid var(--gold);
+      border-top: 3px solid var(--highlight);
       border-radius: var(--r-card);
       padding: 1.4rem 1.5rem 1.6rem;
       transition: border-color 0.25s ease, box-shadow 0.25s ease;
     }
     .skills__group:hover {
-      border-color: var(--gold);
-      box-shadow: 0 10px 24px rgba(11, 42, 31, 0.08);
+      border-color: var(--highlight);
+      box-shadow: 0 10px 24px rgba(15, 30, 51, 0.08);
     }
     .skills__group:first-child,
     .skills__group:last-child:nth-child(even) {

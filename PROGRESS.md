@@ -63,10 +63,10 @@ fast, accessible, indexed by Google, and deployed automatically from GitHub.
 | Framework | Astro, multi page |
 | Deploy | GitHub Actions + AWS OIDC role, S3 + CloudFront |
 | Preview | GitHub Pages at https://ismail-oyeleke.github.io/portfolio/ (noindex) |
-| Brand | Deep green and gold on warm ivory. Logo kit is final. |
+| Brand | Harbour navy `#0F1E33`, blue `#1D5BA6` and amber `#E0A33A` on paper `#F4F5F2` (chosen 2026-10-06 after his mentor asked for a reason beyond favourite colour). Blue is accent text on light; amber only on navy or as the button fill, never text on paper. Tokens in `src/styles/global.css`. Logo shapes are final. |
 | Positioning | Cloud / DevOps first, freelance second |
 | Content excluded | No .NET projects |
-| Headshot | `headshot-portrait-green.jpg` in the arched portrait |
+| Headshot | `headshot-portrait-stone.jpg` (grey backdrop, with sash) in the arched portrait |
 | References | None on the site (mentor's advice, 2026-10-06). Available on request only. |
 | Pages | Home, About, Experience, Projects (+ 8 case studies), Certifications, Freelance, Writing, Contact, Thank you, 404, Privacy, Terms |
 
@@ -203,6 +203,12 @@ The project instructions hold the full text. Every change must keep to them.
 - Headshot without the sash was tried and rolled back (2026-10-06): the
   edited area looked rough, so Ismail chose the original photo with the
   sash. Do not swap it again unless he sends a new photo.
+- [x] Recoloured to harbour navy, blue and amber (2026-10-06). Three
+      options were compared with WCAG contrast scores and Ismail picked
+      navy. Tokens renamed to neutral names (`--brand-*`, `--highlight`,
+      `--accent-text`, `--paper`). Logo SVGs, favicon set, app icons, manifest,
+      theme colour and share card all regenerated. Headshot switched to the
+      grey-backdrop version so the green photo background does not clash.
 
 ## In progress
 

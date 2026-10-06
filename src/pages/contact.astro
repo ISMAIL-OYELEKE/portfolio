@@ -26,7 +26,7 @@ const schema = {
           I read every message and reply, usually within a day. If it is about a role, say which one
           and I will send whatever else you need.
         </p>
-        <span class="rule-gold"></span>
+        <span class="rule-tick"></span>
 
         <dl class="details">
           <div>
@@ -108,12 +108,12 @@ const schema = {
     max-width: 34ch;
   }
   .details a {
-    color: var(--gold);
+    color: var(--highlight);
     text-decoration: none;
-    border-bottom: 1px solid color-mix(in srgb, var(--gold) 45%, transparent);
+    border-bottom: 1px solid color-mix(in srgb, var(--highlight) 45%, transparent);
   }
   .details a:hover {
-    border-bottom-color: var(--gold);
+    border-bottom-color: var(--highlight);
   }
   .details__note {
     color: var(--text-muted);
@@ -162,10 +162,10 @@ const schema = {
   .contact__form {
     min-width: 0;
     overflow-wrap: anywhere;
-    border: 1px solid var(--gold);
+    border: 1px solid var(--highlight);
     border-radius: var(--r-card);
     padding: clamp(1.5rem, 3vw, 2.25rem);
-    background: color-mix(in srgb, var(--green-ink) 55%, transparent);
+    background: color-mix(in srgb, var(--brand-ink) 55%, transparent);
   }
   .contact__form-title {
     font-size: 1.4rem;

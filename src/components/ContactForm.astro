@@ -169,7 +169,7 @@ const thankYou = new URL(`${import.meta.env.BASE_URL.replace(/\/$/, '')}/thank-y
   .field input:focus,
   .field select:focus,
   .field textarea:focus {
-    border-color: var(--gold);
+    border-color: var(--highlight);
   }
   .field [aria-invalid='true'] {
     border-color: #e9a7a7;
@@ -227,7 +227,7 @@ const thankYou = new URL(`${import.meta.env.BASE_URL.replace(/\/$/, '')}/thank-y
     color: #f0b4b4;
   }
   .form__status[data-state='success'] {
-    color: var(--gold);
+    color: var(--highlight);
   }
 
   .spinner {

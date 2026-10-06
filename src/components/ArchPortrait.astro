@@ -1,6 +1,6 @@
 ---
 import { Image } from 'astro:assets';
-import portrait from '../assets/headshot/headshot-portrait-green.jpg';
+import portrait from '../assets/headshot/headshot-portrait-stone.jpg';
 
 interface Props {
   alt: string;
@@ -26,8 +26,8 @@ const { alt, width = 440, smallWidth = 240, priority = false } = Astro.props;
 </figure>
 
 <style>
-  /* Arched frame with a thin gold outline, the one ornamental shape on the
-     page. The flat colour background of the portrait carries the brand green,
+  /* Arched frame with a thin amber outline, the one ornamental shape on the
+     page. The flat colour background of the portrait is a neutral grey,
      so no gradient or glow is needed behind it. */
   .arch {
     /* Never taller than about half the screen, so it cannot push the page
@@ -37,7 +37,7 @@ const { alt, width = 440, smallWidth = 240, priority = false } = Astro.props;
     margin: 0;
     width: min(100%, var(--arch-w));
     aspect-ratio: 4 / 5;
-    border: 1px solid var(--gold);
+    border: 1px solid var(--highlight);
     border-radius: calc(var(--arch-w) / 2) calc(var(--arch-w) / 2) var(--r-card) var(--r-card);
     padding: 10px;
   }
@@ -45,7 +45,7 @@ const { alt, width = 440, smallWidth = 240, priority = false } = Astro.props;
     content: '';
     position: absolute;
     inset: 10px;
-    border: 1px solid color-mix(in srgb, var(--gold) 45%, transparent);
+    border: 1px solid color-mix(in srgb, var(--highlight) 45%, transparent);
     border-radius: calc(var(--arch-w) / 2) calc(var(--arch-w) / 2) 1px 1px;
     pointer-events: none;
   }

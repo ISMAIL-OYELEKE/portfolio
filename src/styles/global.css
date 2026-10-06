@@ -5,33 +5,34 @@
 @import '@fontsource/jetbrains-mono/500.css';
 
 /* ---------------------------------------------------------------
-   Brand tokens. Palette from the logo guidelines (brand/logo).
-   Dark emerald is the hero look; ivory is the light surface.
-   Gold is an accent only: it is never used for body text on ivory
-   (2.2:1), where #8A6A16 is used instead (4.6:1).
+   Brand tokens: harbour navy, a working blue and amber.
+   Navy is the dark surface and paper the light one. Amber is the
+   highlight on navy (7.5:1) and fills the primary button. It is never
+   used for text on paper (2.0:1); blue is the accent text there
+   (6.2:1). Every pairing below clears WCAG AA, most clear AAA.
    --------------------------------------------------------------- */
 :root {
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
-  --green-deep: #0b2a1f;
-  --green-forest: #0f4d36;
-  --green-ink: #072018;
-  --green-line: #1d5a42;
-  --gold: #c9a13b;
-  --gold-text: #7d6013; /* darkened from the guide's #8A6A16 so gold text also clears 4.5:1 on the sunken ivory */
-  --gold-soft: #e0c070;
-  --ivory: #f7f5ee;
-  --ivory-dim: #ebe7da;
-  --sand: #ded9c8;
+  --brand-deep: #0f1e33;
+  --brand-mid: #1d5ba6;
+  --brand-ink: #0a1526;
+  --brand-line: #25375a;
+  --highlight: #e0a33a;
+  --accent-text: #1d5ba6;
+  --highlight-soft: #ecbd66;
+  --paper: #f4f5f2;
+  --paper-dim: #e7e9e6;
+  --stone: #d5d9de;
 
   /* semantic, light sections */
-  --bg: var(--ivory);
-  --bg-sunken: var(--ivory-dim);
-  --surface: #fffdf7;
-  --text: #16241e;
-  --text-muted: #4a5a52;
-  --rule: #d6d0bd;
-  --accent: var(--gold-text);
-  --accent-line: var(--gold);
+  --bg: var(--paper);
+  --bg-sunken: var(--paper-dim);
+  --surface: #fafbf9;
+  --text: #152132;
+  --text-muted: #4b5868;
+  --rule: #d5d9de;
+  --accent: var(--accent-text);
+  --accent-line: var(--highlight);
 
   --font-display: 'Fraunces Variable', 'Iowan Old Style', Georgia, 'Times New Roman', serif;
   --font-body: 'Sora', 'Segoe UI', system-ui, sans-serif;
@@ -48,17 +49,17 @@
   --r-pill: 999px;
 }
 
-/* Dark emerald surface, applied per-section rather than globally,
+/* Dark navy surface, applied per-section rather than globally,
    so the page alternates the way the reference does. */
 .on-dark {
-  --bg: var(--green-deep);
-  --bg-sunken: var(--green-ink);
-  --surface: #0e3426;
-  --text: var(--ivory);
-  --text-muted: #a8bdb1;
-  --rule: var(--green-line);
-  --accent: var(--gold);
-  --accent-line: var(--gold);
+  --bg: var(--brand-deep);
+  --bg-sunken: var(--brand-ink);
+  --surface: #13253f;
+  --text: var(--paper);
+  --text-muted: #a9b6c8;
+  --rule: var(--brand-line);
+  --accent: var(--highlight);
+  --accent-line: var(--highlight);
   color: var(--text);
   background-color: var(--bg);
 }
@@ -89,7 +90,7 @@ html {
 
 body {
   margin: 0;
-  background-color: var(--ivory);
+  background-color: var(--paper);
   color: var(--text);
   font-family: var(--font-body);
   font-size: 1rem;
@@ -138,7 +139,7 @@ input:focus-visible,
 textarea:focus-visible,
 summary:focus-visible,
 [tabindex]:focus-visible {
-  outline: 2px solid var(--gold);
+  outline: 2px solid var(--highlight);
   outline-offset: 3px;
 }
 
@@ -187,8 +188,8 @@ hr {
   left: -9999px;
   top: 0;
   z-index: 100;
-  background: var(--green-deep);
-  color: var(--ivory);
+  background: var(--brand-deep);
+  color: var(--paper);
   padding: 0.75rem 1.25rem;
 }
 .skip-link:focus {
@@ -217,22 +218,22 @@ hr {
   margin-bottom: clamp(2rem, 4vw, 3rem);
 }
 
-/* A single hairline rule with a gold tick: the one recurring flourish. */
-.rule-gold {
+/* A single hairline rule with a amber tick: the one recurring flourish. */
+.rule-tick {
   display: block;
   height: 1px;
   background: var(--rule);
   position: relative;
   margin: 1.4rem 0 0;
 }
-.rule-gold::before {
+.rule-tick::before {
   content: '';
   position: absolute;
   left: 0;
   top: -1px;
   width: 3.5rem;
   height: 3px;
-  background: var(--gold);
+  background: var(--highlight);
 }
 
 /* ---------- buttons ---------- */
@@ -282,13 +283,13 @@ hr {
 }
 
 .btn--primary {
-  background: var(--gold);
-  color: #241a05;
-  border-color: var(--gold);
+  background: var(--highlight);
+  color: var(--brand-deep);
+  border-color: var(--highlight);
 }
 .btn--primary:hover {
-  background: var(--gold-soft);
-  border-color: var(--gold-soft);
+  background: var(--highlight-soft);
+  border-color: var(--highlight-soft);
 }
 
 .btn--ghost {
@@ -297,7 +298,7 @@ hr {
   border-color: var(--accent-line);
 }
 .btn--ghost:hover {
-  background: color-mix(in srgb, var(--gold) 14%, transparent);
+  background: color-mix(in srgb, var(--highlight) 14%, transparent);
 }
 
 .btn-row {
@@ -340,7 +341,7 @@ hr {
 }
 
 /* ---------- hover lift ----------
-   Cards rise a few pixels and pick up a gold edge. Movement is small and
+   Cards rise a few pixels and pick up an amber edge. Movement is small and
    eased, with no glow and no scaling of text. */
 .lift {
   transition:
@@ -355,7 +356,7 @@ hr {
   box-shadow: 0 18px 34px -24px rgb(4 20 14 / 0.45);
 }
 
-/* List rows: a gold bar slides in on the left edge. */
+/* List rows: an amber bar slides in on the left edge. */
 .row-hover {
   position: relative;
 }
@@ -366,7 +367,7 @@ hr {
   top: 0;
   bottom: 0;
   width: 2px;
-  background: var(--gold);
+  background: var(--highlight);
   transform: scaleY(0);
   transform-origin: top;
   transition: transform 0.3s var(--ease-out);
