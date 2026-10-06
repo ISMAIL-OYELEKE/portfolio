@@ -82,7 +82,7 @@ In the repo:
   - `skills.ts`, `testimonials.ts`
 - `src/components/`, `src/layouts/`, `src/pages/` layout and routes
 - `src/assets/` logo SVGs, headshots, project screenshots (optimised at build)
-- `public/` favicons, manifest, `og-image.png`, the CV PDF, the demo video
+- `public/` favicons, manifest, `og-image.jpg` (1200x630, under 300KB for WhatsApp), the CV PDF, the demo video
 - `scripts/qa.mjs` build time quality checks (titles, descriptions,
   canonicals, alt text, single h1, broken internal links, no dashes)
 - `scripts/apply-base.mjs` preview only link prefixing for GitHub Pages
@@ -158,6 +158,12 @@ The project instructions hold the full text. Every change must keep to them.
 - [x] Mobile hero shows the portrait on the first screen (2026-10-06): on
       phones a compact arch sits at the top beside the availability line,
       with the headline and both buttons still above the fold from 360x740.
+- [x] Social preview and favicon fix (2026-10-06): og:image now includes the
+      base path (it pointed outside /portfolio on the preview, so WhatsApp got
+      a 404) and is a 70KB JPG instead of a 323KB PNG. Canonical and og:url
+      drop the .html suffix. New favicon is a solid green rounded tile with
+      the ivory and gold mark, readable on light and dark browser tabs, with
+      matching ico, PNG, apple touch and manifest icons.
 
 ## In progress
 
