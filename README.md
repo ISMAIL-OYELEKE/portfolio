@@ -31,7 +31,6 @@ src/
     experience.ts   Roles, education, values, the About story
     certifications.ts  All 23 certifications and badges, with verify links
     skills.ts       Skill groups
-    testimonials.ts References, with empty slots until real quotes arrive
   components/     Header, footer, cards, the contact form, consent banner
   layouts/        Base (head, schema, consent), Legal (privacy and terms)
   pages/          One file per route; projects/[slug] builds a case study each

@@ -9,7 +9,6 @@ import { site, stats } from '../data/site';
 import { featuredProjects, freelanceProjects } from '../data/projects';
 import { roles } from '../data/experience';
 import { headlineCerts, certCount } from '../data/certifications';
-import { references, referencesNote } from '../data/testimonials';
 
 const description =
   'Ismail Oyeleke is an AWS Certified Solutions Architect and Cloud/DevOps Engineer in Lagos, Nigeria, building secure, automated AWS infrastructure and production software.';
@@ -205,38 +204,6 @@ const description =
           <SocialIcon name="arrow" size={15} />
         </a>
       </div>
-    </div>
-  </section>
-
-  <!-- References -->
-  <section class="on-dark section">
-    <div class="shell">
-      <div class="section-head">
-        <span class="eyebrow">References</span>
-        <h2>What colleagues say</h2>
-        <p class="lede">{referencesNote}</p>
-        <span class="rule-gold"></span>
-      </div>
-
-      <ul class="quotes">
-        {
-          references.map((r) => (
-            <li class="quotes__item">
-              <p class="quotes__slot">{r.slot}</p>
-              {r.pending ? (
-                <p class="quotes__pending">Awaiting a written reference.</p>
-              ) : (
-                <blockquote class="quotes__text">
-                  <p>{r.quote}</p>
-                  <footer>
-                    {r.name}, {r.role}, {r.company}
-                  </footer>
-                </blockquote>
-              )}
-            </li>
-          ))
-        }
-      </ul>
     </div>
   </section>
 
@@ -504,40 +471,6 @@ const description =
     gap: 0.4rem;
     margin-top: auto;
     align-self: flex-start;
-  }
-
-  .quotes {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: grid;
-    gap: 1.25rem;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr));
-  }
-  .quotes__item {
-    border: 1px solid var(--gold);
-    border-radius: var(--r-card);
-    padding: 1.6rem;
-    min-height: 9rem;
-  }
-  .quotes__slot {
-    font-family: var(--font-mono);
-    font-size: 0.68rem;
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
-    color: var(--gold);
-    margin-bottom: 0.8rem;
-  }
-  .quotes__pending {
-    color: var(--text-muted);
-    margin: 0;
-  }
-  .quotes__text {
-    margin: 0;
-  }
-  .quotes__text footer {
-    font-size: 0.85rem;
-    color: var(--text-muted);
   }
 
   .closing__inner {

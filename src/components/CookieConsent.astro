@@ -10,7 +10,7 @@
 const gaId = import.meta.env.PUBLIC_GA_ID ?? '';
 ---
 
-<div class="consent" data-consent hidden role="dialog" aria-modal="false" aria-labelledby="consent-title">
+<div class="consent" data-consent data-ga-id={gaId} hidden role="dialog" aria-modal="false" aria-labelledby="consent-title">
   <div class="consent__inner">
     <div>
       <h2 class="consent__title" id="consent-title">Cookies</h2>
@@ -92,13 +92,16 @@ const gaId = import.meta.env.PUBLIC_GA_ID ?? '';
   }
 </style>
 
-<script is:inline define:vars={{ gaId }}>
+<script>
+  // Bundled to an external file, so the site's Content-Security-Policy needs
+  // no inline-script allowance for it.
   (function () {
     var KEY = 'io-consent-v1';
-    var banner = document.querySelector('[data-consent]');
+    var banner = document.querySelector<HTMLElement>('[data-consent]');
     if (!banner) return;
+    var gaId = banner.dataset.gaId || '';
 
-    function readChoice() {
+    function readChoice(): string | null {
       try {
         return localStorage.getItem(KEY);
       } catch (e) {
@@ -106,7 +109,7 @@ const gaId = import.meta.env.PUBLIC_GA_ID ?? '';
       }
     }
 
-    function writeChoice(value) {
+    function writeChoice(value: string) {
       try {
         localStorage.setItem(KEY, value);
       } catch (e) {
@@ -115,38 +118,39 @@ const gaId = import.meta.env.PUBLIC_GA_ID ?? '';
     }
 
     function loadAnalytics() {
-      if (!gaId || window.__analyticsLoaded) return;
-      window.__analyticsLoaded = true;
+      var w = window as any;
+      if (!gaId || w.__analyticsLoaded) return;
+      w.__analyticsLoaded = true;
       var s = document.createElement('script');
       s.async = true;
       s.src = 'https://www.googletagmanager.com/gtag/js?id=' + gaId;
       document.head.appendChild(s);
-      window.dataLayer = window.dataLayer || [];
-      window.gtag = function () {
-        window.dataLayer.push(arguments);
+      w.dataLayer = w.dataLayer || [];
+      w.gtag = function () {
+        w.dataLayer.push(arguments);
       };
-      window.gtag('js', new Date());
-      window.gtag('config', gaId, { anonymize_ip: true });
+      w.gtag('js', new Date());
+      w.gtag('config', gaId, { anonymize_ip: true });
     }
 
     function show() {
-      banner.hidden = false;
+      banner!.hidden = false;
     }
     function hide() {
-      banner.hidden = true;
+      banner!.hidden = true;
     }
 
     var choice = readChoice();
     if (choice === 'accepted') loadAnalytics();
     else if (choice !== 'declined') show();
 
-    banner.querySelector('[data-consent-accept]').addEventListener('click', function () {
+    banner.querySelector('[data-consent-accept]')?.addEventListener('click', function () {
       writeChoice('accepted');
       loadAnalytics();
       hide();
     });
 
-    banner.querySelector('[data-consent-decline]').addEventListener('click', function () {
+    banner.querySelector('[data-consent-decline]')?.addEventListener('click', function () {
       writeChoice('declined');
       hide();
     });
@@ -154,7 +158,7 @@ const gaId = import.meta.env.PUBLIC_GA_ID ?? '';
     document.querySelectorAll('[data-cookie-reopen]').forEach(function (el) {
       el.addEventListener('click', function () {
         show();
-        banner.querySelector('[data-consent-accept]').focus();
+        banner!.querySelector<HTMLElement>('[data-consent-accept]')?.focus();
       });
     });
   })();

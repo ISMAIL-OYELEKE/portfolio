@@ -23,8 +23,8 @@ The repository is ISMAIL-OYELEKE/portfolio. Before doing anything:
 Rules that are never negotiable:
 - Follow the "Rules" section of PROGRESS.md (production standards, anti
   vibecoding design rules, SEO launch checklist). Do not relax them.
-- Never invent testimonials or quotes. Reference slots stay "awaiting" until
-  I send the real words.
+- Never invent testimonials or quotes. The site has no references section,
+  on Ismail's mentor's advice; do not add one back.
 - Do not show any .NET projects. Lead with cloud and DevOps.
 - Never commit secrets. Keys go in GitHub secrets or variables only.
 - Do not touch my old portfolio repository.
@@ -67,7 +67,7 @@ fast, accessible, indexed by Google, and deployed automatically from GitHub.
 | Positioning | Cloud / DevOps first, freelance second |
 | Content excluded | No .NET projects |
 | Headshot | `headshot-portrait-green.jpg` in the arched portrait |
-| Testimonials | Visible section with honest "awaiting" slots, never invented |
+| References | None on the site (mentor's advice, 2026-10-06). Available on request only. |
 | Pages | Home, About, Experience, Projects (+ 8 case studies), Certifications, Freelance, Writing, Contact, Thank you, 404, Privacy, Terms |
 
 ## Where things live
@@ -79,7 +79,7 @@ In the repo:
   - `projects.ts` all 8 projects and their case studies
   - `experience.ts` roles, education, community, values, About story
   - `certifications.ts` 23 certifications and badge groups
-  - `skills.ts`, `testimonials.ts`
+  - `skills.ts`
 - `src/components/`, `src/layouts/`, `src/pages/` layout and routes
 - `src/assets/` logo SVGs, headshots, project screenshots (optimised at build)
 - `public/` favicons, manifest, `og-image.jpg` (1200x630, under 300KB for WhatsApp), the CV PDF, the demo video
@@ -186,6 +186,13 @@ The project instructions hold the full text. Every change must keep to them.
 - [x] ALX certificates (Cloud Practitioner, August 2025; Professional
       Foundations, June 2025) shown as images with Verify links. Every
       certification tile now has real artwork.
+- [x] References section removed from Home (2026-10-06), with its data file.
+- [x] Strict CSP ready: every script ships as a file (no inline scripts except
+      the hashed no-js line), and `scripts/qa.mjs` fails on any new inline
+      script. OIDC trust policy in `docs/deployment.md` corrected to the
+      `environment:production` subject the deploy job actually presents.
+- [x] Step-by-step go-live guide for Ismail: `go-live-guide.md` in the
+      project folder.
 - [x] Plain-language finish list for Ismail in the project folder:
       `finish-checklist.md`.
 - Headshot without the sash was tried and rolled back (2026-10-06): the
@@ -204,15 +211,10 @@ The project instructions hold the full text. Every change must keep to them.
    a repository secret `PUBLIC_WEB3FORMS_KEY` (read by both the preview and
    the production build).
 3. GA4 Measurement ID (`G-XXXXXXX`). Save as repository variable `PUBLIC_GA_ID`.
-4. AWS setup per `docs/deployment.md`, then the secrets
+4. AWS setup, following `go-live-guide.md` in the project folder (the plain
+   version of `docs/deployment.md`), then the environment secrets
    `AWS_DEPLOY_ROLE_ARN`, `AWS_S3_BUCKET`, `AWS_CLOUDFRONT_DISTRIBUTION_ID`.
-5. Real reference quotes (mentor, former manager) with names and permission.
-6. Headshot without the graduation sash: being made in the brand thread.
-   When it lands in `brand/headshot/`, copy it over
-   `src/assets/headshot/headshot-portrait-green.jpg` (the one file
-   `ArchPortrait.astro` imports, used on Home and About), rebuild
-   `public/og-image.jpg` (the share card, 1200x630, under 300KB) from it,
-   and rebuild.
+5. Optionally the Project 1 architecture diagram as an image.
 
 ## Next steps, in order
 
@@ -227,8 +229,8 @@ The project instructions hold the full text. Every change must keep to them.
 7. Run PageSpeed Insights on mobile and desktop, fix anything under 90.
 8. Business email on the domain (for example hello@ismailoyeleke.com) with
    SPF, DKIM and DMARC, then update `site.ts` email.
-9. Drop real reference quotes into `src/data/testimonials.ts`.
-10. Retire the old site once the new one is live.
+9. Retire the old site once the new one is live (ask Ismail before deleting
+   anything).
 
 ## Open questions
 
