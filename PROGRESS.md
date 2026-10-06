@@ -142,6 +142,10 @@ The project instructions hold the full text. Every change must keep to them.
       by screen height, compact cookie bar, no horizontal overflow at any
       width (footer email, contact form), no orphan cards in grids, missing
       spaces before inline links fixed
+- [x] Real badge images on every certification (2026-10-06): 19 Credly
+      badges and 2 Coursera certificates in `src/assets/badges/`, named by
+      Credly badge id or Coursera code. Shown on the certifications page and
+      the home page.
 
 ## In progress
 
@@ -158,6 +162,8 @@ The project instructions hold the full text. Every change must keep to them.
    `AWS_DEPLOY_ROLE_ARN`, `AWS_S3_BUCKET`, `AWS_CLOUDFRONT_DISTRIBUTION_ID`.
 5. Real reference quotes (mentor, former manager) with names and permission.
 6. Optionally a headshot that is not from convocation.
+7. The two ALX certificates as images (screenshot or PDF). ALX blocks
+   automated access, so those two tiles show an "ALX" placeholder for now.
 
 ## Next steps, in order
 
