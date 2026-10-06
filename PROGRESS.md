@@ -146,6 +146,9 @@ The project instructions hold the full text. Every change must keep to them.
       badges and 2 Coursera certificates in `src/assets/badges/`, named by
       Credly badge id or Coursera code. Shown on the certifications page and
       the home page.
+- [x] Project 1 (this portfolio, v1 on S3, CloudFront and Route 53) given a
+      full case study at /projects/portfolio-on-s3-cloudfront-route-53,
+      featured on the home page and second in the project list
 
 ## In progress
 
