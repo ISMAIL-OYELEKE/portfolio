@@ -143,6 +143,8 @@ const schema = {
   }
 
   .contact__form {
+    min-width: 0;
+    overflow-wrap: anywhere;
     border: 1px solid var(--gold);
     border-radius: var(--r-card);
     padding: clamp(1.5rem, 3vw, 2.25rem);
@@ -155,7 +157,7 @@ const schema = {
 
   @media (max-width: 900px) {
     .contact__grid {
-      grid-template-columns: 1fr;
+      grid-template-columns: minmax(0, 1fr);
     }
   }
 </style>

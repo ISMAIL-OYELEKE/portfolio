@@ -15,9 +15,8 @@ const gaId = import.meta.env.PUBLIC_GA_ID ?? '';
     <div>
       <h2 class="consent__title" id="consent-title">Cookies</h2>
       <p class="consent__text">
-        This site uses no cookies until you choose. Accepting turns on Google Analytics, which
-        tells me which pages are read. Declining keeps the site working with nothing stored.
-        <a href="/privacy">Read the privacy policy</a>.
+        No cookies until you choose. Accepting turns on Google Analytics so I can see which pages
+        are read. Declining stores nothing.{' '}<a href="/privacy">Privacy policy</a>.
       </p>
     </div>
     <div class="consent__actions">
@@ -36,7 +35,7 @@ const gaId = import.meta.env.PUBLIC_GA_ID ?? '';
     background: var(--green-ink);
     border-top: 1px solid var(--gold);
     color: var(--ivory);
-    padding: 1.1rem var(--gutter) calc(1.1rem + env(safe-area-inset-bottom));
+    padding: 0.8rem var(--gutter) calc(0.8rem + env(safe-area-inset-bottom));
   }
 
   .consent__inner {
@@ -56,14 +55,15 @@ const gaId = import.meta.env.PUBLIC_GA_ID ?? '';
     letter-spacing: 0.2em;
     text-transform: uppercase;
     color: var(--gold);
-    margin: 0 0 0.4rem;
+    margin: 0 0 0.25rem;
   }
 
   .consent__text {
     margin: 0;
-    font-size: 0.88rem;
+    font-size: 0.85rem;
+    line-height: 1.5;
     color: #c6d6cc;
-    max-width: 52ch;
+    max-width: 60ch;
   }
   .consent__text a {
     color: var(--gold);
@@ -86,6 +86,8 @@ const gaId = import.meta.env.PUBLIC_GA_ID ?? '';
     .consent__actions .btn {
       flex: 1 1 auto;
       justify-content: center;
+      padding-block: 0.7rem;
+      min-height: 44px;
     }
   }
 </style>
