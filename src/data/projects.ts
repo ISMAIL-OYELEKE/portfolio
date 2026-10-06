@@ -76,6 +76,74 @@ export const projects: Project[] = [
     ],
   },
   {
+    slug: 'portfolio-on-s3-cloudfront-route-53',
+    title: 'This Portfolio: Static Hosting on S3, CloudFront and Route 53',
+    kind: 'cloud',
+    date: 'December 2025',
+    dateISO: '2025-12',
+    context: 'Project 1, my first AWS build, still serving ismailoyeleke.com',
+    summary:
+      'The site you are reading started here: S3 for the files, CloudFront for HTTPS and edge caching, an ACM certificate, and a domain I registered and run in Route 53.',
+    problem:
+      'I needed a portfolio of my own that was fast anywhere, served over HTTPS on a real domain, and cost almost nothing to run. A portfolio does not need a server, so I built it without one.',
+    stack: ['Amazon S3', 'CloudFront', 'Route 53', 'AWS Certificate Manager'],
+    featured: true,
+    repo: 'https://github.com/ISMAIL-OYELEKE/Project-1-Static-Website-Hosting-Host-a-website-on-S3-with-Route-53-CloudFront',
+    live: 'https://ismailoyeleke.com',
+    video: 'https://www.youtube.com/watch?v=XOSVDGpVcy8',
+    metaTitle: 'This Portfolio on S3, CloudFront and Route 53',
+    metaDescription:
+      'Project 1: how Ismail Oyeleke hosts this portfolio on S3, CloudFront, ACM and Route 53, and how version two moved it to a private bucket with CI/CD.',
+    build: [
+      {
+        heading: 'Storage',
+        points: [
+          'An S3 bucket named after the domain, in us-east-1, with static website hosting switched on and index.html as the index document.',
+          'The HTML, CSS and JavaScript uploaded to the bucket, with a bucket policy allowing public read of the site files.',
+        ],
+      },
+      {
+        heading: 'Domain and DNS',
+        points: [
+          'ismailoyeleke.com registered through Route 53, with a public hosted zone to manage its records.',
+          'An A record set as an alias to the CloudFront distribution, so the apex domain resolves without a fixed IP address.',
+        ],
+      },
+      {
+        heading: 'Delivery and HTTPS',
+        points: [
+          'A CloudFront distribution in front of the bucket, with the domain as an alternate name and HTTP redirected to HTTPS.',
+          'A public certificate from AWS Certificate Manager, validated through DNS in Route 53 and attached to the distribution.',
+        ],
+      },
+    ],
+    decisions: [
+      {
+        title: 'No server at all',
+        body: 'S3 and CloudFront serve static files without an instance to patch, scale or pay for while idle. The monthly bill is cents plus the domain.',
+      },
+      {
+        title: 'CloudFront in front of S3, not the bucket alone',
+        body: 'An S3 website endpoint cannot serve HTTPS on a custom domain. CloudFront adds the certificate, enforces HTTPS and caches the site close to visitors outside the region.',
+      },
+      {
+        title: 'Keep the domain and DNS in AWS',
+        body: 'With the domain registered in Route 53, the certificate validates through a DNS record in the same account, and the alias record can point straight at CloudFront.',
+      },
+    ],
+    result: [
+      'ismailoyeleke.com served over HTTPS from CloudFront, with no server to run.',
+      'Every page cached at the edge, so the site loads quickly from Lagos and from abroad.',
+      'The setup is documented step by step in the repository and on YouTube.',
+    ],
+    lessons: [
+      'Edits to index.html did not appear until I invalidated the CloudFront cache, so an invalidation is part of every deploy, not an afterthought.',
+      'DNS changes take time to propagate. The fix was to check the records once and wait, not to keep changing them.',
+      'A custom domain on HTTPS needs a validated certificate first. DNS validation through Route 53 made that a single record.',
+    ],
+    note: 'This rebuild is version two of the same project. The bucket is now private behind Origin Access Control, security headers come from CloudFront, and every change deploys from GitHub Actions through an OIDC role instead of a manual upload.',
+  },
+  {
     slug: 'cloud-contact-center',
     title: 'Cloud Contact Centre for ThinkFinance MFB',
     kind: 'cloud',
@@ -209,36 +277,6 @@ export const projects: Project[] = [
       'Losing an instance, or an entire Availability Zone, no longer takes the application down.',
       'The database is unreachable from the internet, and no credential is stored on disk.',
     ],
-  },
-  {
-    slug: 'serverless-static-website',
-    title: 'Serverless Static Website on S3 and CloudFront',
-    kind: 'cloud',
-    date: 'December 2025',
-    dateISO: '2025-12',
-    context: 'Personal project, the first version of this site',
-    summary:
-      'Static hosting on S3 behind CloudFront, with an ACM certificate and Route 53 alias records on a custom domain.',
-    problem:
-      'A portfolio does not need a server, but it does need HTTPS, a custom domain and fast delivery outside the region it is stored in.',
-    stack: ['Amazon S3', 'CloudFront', 'Route 53', 'AWS Certificate Manager'],
-    repo: 'https://github.com/ISMAIL-OYELEKE/Project-1-Static-Website-Hosting-Host-a-website-on-S3-with-Route-53-CloudFront',
-    video: 'https://www.youtube.com/watch?v=XOSVDGpVcy8',
-    build: [
-      {
-        heading: 'Hosting and delivery',
-        points: [
-          'S3 holds the static files; CloudFront caches them at the edge and redirects HTTP to HTTPS.',
-          'An ACM certificate validated through DNS, attached to the distribution.',
-          'A Route 53 alias record points the apex domain at CloudFront.',
-        ],
-      },
-    ],
-    lessons: [
-      'Edits did not appear until the CloudFront cache was invalidated, which is a deploy step, not an afterthought.',
-      'DNS changes take their own time to propagate, so verification has to wait rather than be re-done.',
-    ],
-    note: 'The site you are reading is version two of this project: the bucket is private behind Origin Access Control, and every change deploys from GitHub Actions instead of a manual upload.',
   },
   {
     slug: 'wordpress-on-lightsail',
