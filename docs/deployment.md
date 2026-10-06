@@ -89,6 +89,13 @@ distribution to read, and nobody else:
 
 ## 3. DNS in Route 53
 
+The domain's hosted zone already exists from the first version of the site,
+whose apex record points at the old distribution. Pointing those records at the
+new distribution is the moment the new site goes live, and pointing them back
+is the rollback. If the old ACM certificate already covers both
+`ismailoyeleke.com` and `www.ismailoyeleke.com`, the new distribution can reuse
+it.
+
 In the hosted zone for `ismailoyeleke.com`:
 
 - An **A record** for the apex, as an **alias** to the CloudFront distribution.
@@ -110,9 +117,12 @@ aws iam create-open-id-connect-provider \
 
 Create a role named `github-actions-portfolio-deploy`.
 
-**Trust policy.** Replace `ACCOUNT_ID`. The `sub` condition is what limits this
-role to pushes on `main` in this repository, so a fork or another branch cannot
-assume it:
+**Trust policy.** Replace `ACCOUNT_ID`. The deploy job runs in the
+`production` GitHub environment, and when a job uses an environment GitHub puts
+the environment in the token's `sub` claim instead of the branch. So the `sub`
+condition names the environment. Only `main` can deploy to it once the
+environment's branch rule is set (section 7), so a fork or another branch cannot
+assume this role:
 
 ```json
 {
@@ -127,17 +137,13 @@ assume it:
       "Condition": {
         "StringEquals": {
           "token.actions.githubusercontent.com:aud": "sts.amazonaws.com",
-          "token.actions.githubusercontent.com:sub": "repo:ISMAIL-OYELEKE/portfolio:ref:refs/heads/main"
+          "token.actions.githubusercontent.com:sub": "repo:ISMAIL-OYELEKE/portfolio:environment:production"
         }
       }
     }
   ]
 }
 ```
-
-If you also want the `workflow_dispatch` button to work from the GitHub UI on a
-branch, add `"repo:ISMAIL-OYELEKE/portfolio:environment:production"` to the `sub`
-list instead of widening it to `repo:ISMAIL-OYELEKE/portfolio:*`.
 
 **Permissions policy.** Only what a deploy needs, on only this bucket and this
 distribution:
@@ -186,7 +192,7 @@ A policy that fits what the site actually loads:
 
 ```
 default-src 'self';
-script-src 'self' https://www.googletagmanager.com;
+script-src 'self' 'sha256-bRrXOZfzkSHqxbwz5Za8TNTsnrMa7Kvk+eW1MqoTxsQ=' https://www.googletagmanager.com;
 style-src 'self' 'unsafe-inline';
 img-src 'self' data: https://i.ytimg.com https://www.googletagmanager.com;
 font-src 'self';
@@ -198,29 +204,32 @@ object-src 'none';
 frame-ancestors 'none'
 ```
 
-The one inline script in the build is the `no-js` class removal in the page head.
-Either add its SHA-256 hash to `script-src`, or move it to an external file if you
-would rather keep the policy free of hashes.
+Every script ships as its own file except the one-line `no-js` snippet in the
+page head, which the hash in `script-src` allows. `node scripts/qa.mjs` fails
+the build if any other inline script appears, so the policy cannot silently
+break the site. If that snippet ever changes, the check prints the new hash to
+put here and in `scripts/qa.mjs`.
 
 ## 7. Repository settings on GitHub
 
-Under **Settings, Environments**, create an environment called `production`.
-Add these to it:
-
-**Secrets**
+Under **Settings, Environments**, create an environment called `production`
+(the first deploy creates it if you have not). Under **Deployment branches and
+tags**, choose *Selected branches and tags* and add `main`, so only `main` can
+deploy. Add these environment secrets:
 
 | Name | Value |
 | --- | --- |
 | `AWS_DEPLOY_ROLE_ARN` | `arn:aws:iam::ACCOUNT_ID:role/github-actions-portfolio-deploy` |
 | `AWS_S3_BUCKET` | the bucket name |
 | `AWS_CLOUDFRONT_DISTRIBUTION_ID` | the distribution id |
-| `PUBLIC_WEB3FORMS_KEY` | the access key from web3forms.com, for the contact form |
 
-**Variables**
+Under **Settings, Secrets and variables, Actions**, add these at repository
+level, so the preview build can use them too:
 
-| Name | Value |
-| --- | --- |
-| `PUBLIC_GA_ID` | the GA4 measurement id, `G-XXXXXXXXXX` |
+| Kind | Name | Value |
+| --- | --- | --- |
+| Secret | `PUBLIC_WEB3FORMS_KEY` | the access key from web3forms.com, for the contact form |
+| Variable | `PUBLIC_GA_ID` | the GA4 measurement id, `G-XXXXXXXXXX` |
 
 `PUBLIC_WEB3FORMS_KEY` and `PUBLIC_GA_ID` end up in the built JavaScript, which
 is how they are meant to work: both are public identifiers, not credentials.

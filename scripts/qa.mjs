@@ -12,6 +12,11 @@
  */
 import { readdir, readFile } from 'node:fs/promises';
 import { join, relative } from 'node:path';
+import { createHash } from 'node:crypto';
+
+// The only inline script the Content-Security-Policy allows, by hash. If the
+// no-js snippet in Base.astro changes, update this and docs/deployment.md.
+const ALLOWED_INLINE_SCRIPT = 'sha256-bRrXOZfzkSHqxbwz5Za8TNTsnrMa7Kvk+eW1MqoTxsQ=';
 
 const DIST = 'dist';
 const problems = [];
@@ -85,6 +90,14 @@ for (const file of files) {
   const h1s = html.match(/<h1[\s>]/g)?.length ?? 0;
   if (h1s === 0) problems.push(`${name}: no h1`);
   if (h1s > 1) problems.push(`${name}: ${h1s} h1 elements, expected one`);
+
+  for (const [, attrs, body] of html.matchAll(/<script([^>]*)>([\s\S]*?)<\/script>/g)) {
+    if (/\bsrc=|application\/ld\+json/.test(attrs)) continue;
+    const hash = 'sha256-' + createHash('sha256').update(body).digest('base64');
+    if (hash !== ALLOWED_INLINE_SCRIPT) {
+      problems.push(`${name}: inline script not allowed by the CSP (${hash})`);
+    }
+  }
 
   for (const tag of html.match(/<img\b[^>]*>/g) ?? []) {
     if (!/\balt=/.test(tag)) problems.push(`${name}: an img has no alt attribute`);
