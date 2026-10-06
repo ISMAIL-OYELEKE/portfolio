@@ -155,6 +155,9 @@ The project instructions hold the full text. Every change must keep to them.
       entrance on page heroes, count-up stats. All off under reduced motion.
       Social icons are the real logos (Simple Icons, LinkedIn inlined from
       its own brand assets) via `src/lib/brands.ts`, in brand colours.
+- [x] Mobile hero shows the portrait on the first screen (2026-10-06): on
+      phones a compact arch sits at the top beside the availability line,
+      with the headline and both buttons still above the fold from 360x740.
 
 ## In progress
 
