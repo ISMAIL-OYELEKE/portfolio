@@ -165,6 +165,10 @@ The project instructions hold the full text. Every change must keep to them.
       the ivory and gold mark, readable on light and dark browser tabs, with
       matching ico, PNG, apple touch and manifest icons.
 - [x] About page portrait centred under the buttons on phones and tablets.
+- [x] Whole home hero, stats row included, on the first screen on desktop
+      (2026-10-06): headline, spacing and stats sized by screen height.
+      Checked at 1920x1080, 1920x950, 1536x730, 1440x780, 1366x650,
+      1280x765 (1920 screen at 150% scaling), 1280x640 and 1024x690.
 
 ## In progress
 
