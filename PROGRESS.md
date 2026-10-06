@@ -183,7 +183,9 @@ The project instructions hold the full text. Every change must keep to them.
 6. Headshot without the graduation sash: being made in the brand thread.
    When it lands in `brand/headshot/`, copy it over
    `src/assets/headshot/headshot-portrait-green.jpg` (the one file
-   `ArchPortrait.astro` imports, used on Home and About) and rebuild.
+   `ArchPortrait.astro` imports, used on Home and About), rebuild
+   `public/og-image.jpg` (the share card, 1200x630, under 300KB) from it,
+   and rebuild.
 7. The two ALX certificates as images (screenshot or PDF). ALX blocks
    automated access, so those two tiles show an "ALX" placeholder for now.
 
