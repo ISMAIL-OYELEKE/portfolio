@@ -1,0 +1,62 @@
+name: Preview
+
+# Publishes a live preview to GitHub Pages on every push, so the site can be
+# checked on a phone or laptop while it is being built:
+#   https://ismail-oyeleke.github.io/portfolio/
+# The preview is marked noindex, so it never competes with the real domain.
+#
+# One-time setup: Settings > Pages > Build and deployment > Source: GitHub Actions.
+
+on:
+  push:
+    branches: [main, 'claude/**']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages-preview
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build the preview
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Build for the Pages subpath
+        run: npm run build
+        env:
+          SITE_URL: https://ismail-oyeleke.github.io
+          BASE_PATH: /portfolio
+          PUBLIC_NOINDEX: 'true'
+          PUBLIC_WEB3FORMS_KEY: ${{ secrets.PUBLIC_WEB3FORMS_KEY }}
+
+      - name: Prefix hand-written links with the subpath
+        run: node scripts/apply-base.mjs dist /portfolio
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    name: Publish to GitHub Pages
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

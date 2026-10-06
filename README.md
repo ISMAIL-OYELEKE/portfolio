@@ -1,5 +1,7 @@
 # ismailoyeleke.com
 
+> Picking this project up in a new chat? Start with [PROGRESS.md](PROGRESS.md).
+
 The personal site of Ismail Oyeleke, Cloud and DevOps Engineer in Lagos, Nigeria.
 
 Built with [Astro](https://astro.build), shipped as static files to Amazon S3 and
