@@ -10,7 +10,9 @@ interface Props {
   type?: 'website' | 'article' | 'profile';
 }
 
-const { title, description, image = '/og-image.png', noindex = false, type = 'website' } = Astro.props;
+const { title, description, image = '/og-image.png', type = 'website' } = Astro.props;
+// Preview builds are never indexed, so Google only ever sees the real domain.
+const noindex = Astro.props.noindex || import.meta.env.PUBLIC_NOINDEX === 'true';
 
 const canonical = new URL(Astro.url.pathname.replace(/\/$/, '') || '/', Astro.site).href;
 const ogImage = new URL(image, Astro.site).href;

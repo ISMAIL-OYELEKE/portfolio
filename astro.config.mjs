@@ -1,8 +1,11 @@
 import { defineConfig } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
 
+// SITE_URL and BASE_PATH are only set by the preview workflow, which serves the
+// site from a subpath on GitHub Pages. Production uses the defaults.
 export default defineConfig({
-  site: 'https://ismailoyeleke.com',
+  site: process.env.SITE_URL ?? 'https://ismailoyeleke.com',
+  base: process.env.BASE_PATH ?? '/',
   trailingSlash: 'never',
   build: { format: 'file', inlineStylesheets: 'auto' },
   integrations: [sitemap()],
