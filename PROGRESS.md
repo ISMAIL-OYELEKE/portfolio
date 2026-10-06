@@ -173,6 +173,16 @@ The project instructions hold the full text. Every change must keep to them.
       1280x765 (1920 screen at 150% scaling), 1280x640 and 1024x690.
       On desktop the hero fills exactly one screen, so the ivory section
       below never peeks in.
+- [x] Real logos on the Skills list (2026-10-06): AWS services use the
+      official AWS Architecture Icons (`aws-icons` package), other tools use
+      Simple Icons marks in brand colour, via `src/lib/skillIcons.ts`.
+      Skills with no logo (SQL, Boto3, REST APIs) stay as text.
+- [x] Mobile menu opens as an ivory sheet with a gold top edge over a
+      dimmed page, closes on outside tap or Escape.
+- [x] Contact form redirect is base aware, so a preview submission lands on
+      the preview thank-you page. Thank-you page left out of the sitemap.
+- [x] Plain-language finish list for Ismail in the project folder:
+      `finish-checklist.md`.
 - Headshot without the sash was tried and rolled back (2026-10-06): the
   edited area looked rough, so Ismail chose the original photo with the
   sash. Do not swap it again unless he sends a new photo.
@@ -186,8 +196,9 @@ The project instructions hold the full text. Every change must keep to them.
 1. Review the preview and merge pull request #1. After merging, set the
    repository default branch to `main` (Settings > General > Default branch).
 2. Web3Forms access key (free at web3forms.com, sent to his email). Save as
-   repo secret `PUBLIC_WEB3FORMS_KEY` in the `production` environment.
-3. GA4 Measurement ID (`G-XXXXXXX`). Save as variable `PUBLIC_GA_ID`.
+   a repository secret `PUBLIC_WEB3FORMS_KEY` (read by both the preview and
+   the production build).
+3. GA4 Measurement ID (`G-XXXXXXX`). Save as repository variable `PUBLIC_GA_ID`.
 4. AWS setup per `docs/deployment.md`, then the secrets
    `AWS_DEPLOY_ROLE_ARN`, `AWS_S3_BUCKET`, `AWS_CLOUDFRONT_DISTRIBUTION_ID`.
 5. Real reference quotes (mentor, former manager) with names and permission.
