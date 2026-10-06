@@ -61,8 +61,8 @@ const isCurrent = (href: string) => path === href || (href !== '/' && path.start
     position: sticky;
     top: 0;
     z-index: 40;
-    background: var(--green-ink);
-    border-bottom: 1px solid var(--green-line);
+    background: var(--brand-ink);
+    border-bottom: 1px solid var(--brand-line);
     transition: box-shadow 0.3s ease;
   }
   .masthead.is-scrolled {
@@ -99,13 +99,13 @@ const isCurrent = (href: string) => path === href || (href !== '/' && path.start
     font-size: 0.73rem;
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: #c6d6cc;
+    color: #c3cede;
     text-decoration: none;
     padding-block: 0.4rem;
     position: relative;
     transition: color 0.2s ease;
   }
-  /* Gold rule draws in under the link on hover and stays on the current page. */
+  /* Amber rule draws in under the link on hover and stays on the current page. */
   .masthead__nav a::after {
     content: '';
     position: absolute;
@@ -113,20 +113,20 @@ const isCurrent = (href: string) => path === href || (href !== '/' && path.start
     right: 0;
     bottom: 0;
     height: 1px;
-    background: var(--gold);
+    background: var(--highlight);
     transform: scaleX(0);
     transform-origin: left;
     transition: transform 0.25s var(--ease-out);
   }
   .masthead__nav a:hover {
-    color: var(--ivory);
+    color: var(--paper);
   }
   .masthead__nav a:hover::after,
   .masthead__nav a[aria-current='page']::after {
     transform: scaleX(1);
   }
   .masthead__nav a[aria-current='page'] {
-    color: var(--gold);
+    color: var(--highlight);
   }
 
   .masthead__toggle {
@@ -134,7 +134,7 @@ const isCurrent = (href: string) => path === href || (href !== '/' && path.start
     width: 44px;
     height: 44px;
     background: transparent;
-    border: 1px solid var(--green-line);
+    border: 1px solid var(--brand-line);
     border-radius: var(--r-sharp);
     cursor: pointer;
     position: relative;
@@ -146,7 +146,7 @@ const isCurrent = (href: string) => path === href || (href !== '/' && path.start
     left: 12px;
     width: 18px;
     height: 1.5px;
-    background: var(--gold);
+    background: var(--highlight);
     content: '';
   }
   .masthead__bars {
@@ -170,8 +170,8 @@ const isCurrent = (href: string) => path === href || (href !== '/' && path.start
     transform: translateY(-6px) rotate(-45deg);
   }
 
-  /* The open menu is an ivory sheet over the page, with the page behind it
-     dimmed, so it reads as open on the green sections as well as the light
+  /* The open menu is a paper sheet over the page, with the page behind it
+     dimmed, so it reads as open on the navy sections as well as the light
      ones. */
   .masthead__panel {
     position: absolute;
@@ -181,9 +181,9 @@ const isCurrent = (href: string) => path === href || (href !== '/' && path.start
     max-height: calc(100svh - 100%);
     overflow-y: auto;
     z-index: 1;
-    background: var(--ivory);
-    border-top: 3px solid var(--gold);
-    box-shadow: 0 18px 40px rgba(7, 32, 24, 0.35);
+    background: var(--paper);
+    border-top: 3px solid var(--highlight);
+    box-shadow: 0 18px 40px rgba(10, 21, 38, 0.35);
     animation: menu-in 0.22s var(--ease-out);
   }
   /* Dims the page while the menu is open, never the header above it. */
@@ -194,7 +194,7 @@ const isCurrent = (href: string) => path === href || (href !== '/' && path.start
     left: 0;
     right: 0;
     height: 100vh;
-    background: rgba(7, 32, 24, 0.6);
+    background: rgba(10, 21, 38, 0.6);
     pointer-events: none;
   }
   @keyframes menu-in {
@@ -215,19 +215,19 @@ const isCurrent = (href: string) => path === href || (href !== '/' && path.start
     font-size: 0.8rem;
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: var(--green-deep);
+    color: var(--brand-deep);
     text-decoration: none;
-    border-bottom: 1px solid var(--ivory-dim);
+    border-bottom: 1px solid var(--paper-dim);
     border-left: 3px solid transparent;
     transition: border-color 0.2s ease, background-color 0.2s ease;
   }
   .masthead__panel a:hover {
-    border-left-color: var(--gold);
-    background: var(--ivory-dim);
+    border-left-color: var(--highlight);
+    background: var(--paper-dim);
   }
   .masthead__panel a[aria-current='page'] {
-    color: var(--gold-text);
-    border-left-color: var(--gold);
+    color: var(--accent-text);
+    border-left-color: var(--highlight);
     font-weight: 600;
   }
   @media (prefers-reduced-motion: reduce) {

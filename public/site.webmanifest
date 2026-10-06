@@ -18,8 +18,8 @@
       "purpose": "maskable"
     }
   ],
-  "theme_color": "#0B2A1F",
-  "background_color": "#F7F5EE",
+  "theme_color": "#0F1E33",
+  "background_color": "#F4F5F2",
   "start_url": ".",
   "display": "standalone",
   "short_name": "Ismail O."
