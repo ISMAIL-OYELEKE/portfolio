@@ -196,6 +196,8 @@ The project instructions hold the full text. Every change must keep to them.
 - [x] Share card (`public/og-image.jpg`, 27KB) redesigned around the logo,
       centred, because WhatsApp crops link previews to a centre square.
       Name and role sit under the mark; no photo.
+- [x] Cloud Chariots role is a full position, not an internship (confirmed
+      by his manager, 2026-10-06). Title is "Cloud / DevOps Engineer".
 - [x] Plain-language finish list for Ismail in the project folder:
       `finish-checklist.md`.
 - Headshot without the sash was tried and rolled back (2026-10-06): the

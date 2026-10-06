@@ -14,7 +14,7 @@ export type Role = {
 
 export const roles: Role[] = [
   {
-    title: 'Cloud / DevOps Engineer (Internship)',
+    title: 'Cloud / DevOps Engineer',
     company: 'Cloud Chariots',
     companyUrl: 'https://cloudchariotsservices.com/',
     companyLine:
