@@ -89,17 +89,28 @@ const schemas = [personSchema, ...(schema ? (Array.isArray(schema) ? schema : [s
     <CookieConsent />
 
     <script>
-      // Reveal on scroll, one observer for the page.
-      const items = document.querySelectorAll('.reveal');
+      // Reveal on scroll, one observer for the page. Siblings that enter
+      // together are staggered slightly, and once an element has settled
+      // the reveal classes come off, so hover transitions work normally.
+      const items = document.querySelectorAll<HTMLElement>('.reveal');
       const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       if (items.length && !reduced && 'IntersectionObserver' in window) {
+        const settle = (el: HTMLElement, delay: number) =>
+          window.setTimeout(() => {
+            el.classList.remove('reveal', 'is-armed', 'is-in');
+            el.style.removeProperty('--reveal-delay');
+          }, 650 + delay);
+
         const io = new IntersectionObserver(
           (entries) => {
-            entries.forEach((entry) => {
-              if (entry.isIntersecting) {
-                entry.target.classList.add('is-in');
-                io.unobserve(entry.target);
-              }
+            const entering = entries.filter((e) => e.isIntersecting);
+            entering.forEach((entry, i) => {
+              const el = entry.target as HTMLElement;
+              const delay = Math.min(i, 4) * 80;
+              el.style.setProperty('--reveal-delay', `${delay}ms`);
+              el.classList.add('is-in');
+              io.unobserve(el);
+              settle(el, delay);
             });
           },
           { rootMargin: '0px 0px -8% 0px', threshold: 0.08 }
@@ -108,6 +119,14 @@ const schemas = [personSchema, ...(schema ? (Array.isArray(schema) ? schema : [s
           el.classList.add('is-armed');
           io.observe(el);
         });
+      }
+
+      // The header picks up a shadow once the page has scrolled.
+      const masthead = document.querySelector('.masthead');
+      if (masthead) {
+        const onScroll = () => masthead.classList.toggle('is-scrolled', window.scrollY > 8);
+        onScroll();
+        window.addEventListener('scroll', onScroll, { passive: true });
       }
     </script>
   </body>

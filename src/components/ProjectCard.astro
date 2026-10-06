@@ -10,7 +10,7 @@ interface Props {
 const { project, wide = false } = Astro.props;
 ---
 
-<article class:list={['pcard', wide && 'pcard--wide', 'reveal']}>
+<article class:list={['pcard', 'lift', wide && 'pcard--wide', 'reveal']}>
   <div class="pcard__meta">
     <span class="pcard__date">{project.date}</span>
     <span class="pcard__context">{project.context}</span>
@@ -52,10 +52,6 @@ const { project, wide = false } = Astro.props;
     border: 1px solid var(--rule);
     border-radius: var(--r-card);
     padding: clamp(1.4rem, 3vw, 2.1rem);
-    transition: border-color 0.2s ease;
-  }
-  .pcard:hover {
-    border-color: var(--accent-line);
   }
 
   .pcard--wide {
@@ -96,8 +92,21 @@ const { project, wide = false } = Astro.props;
     position: absolute;
     inset: 0;
   }
-  .pcard__title a:hover {
+  .pcard__title a {
+    transition: color 0.2s ease;
+  }
+  .pcard:hover .pcard__title a {
     color: var(--accent);
+  }
+  .pcard:hover .pcard__foot .icon--arrow {
+    transform: translateX(3px);
+  }
+  .pcard .tag {
+    transition: border-color 0.25s ease, color 0.25s ease;
+  }
+  .pcard:hover .tag {
+    border-color: var(--accent-line);
+    color: var(--text);
   }
 
   .pcard__summary {

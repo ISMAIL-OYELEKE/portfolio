@@ -63,6 +63,10 @@ const isCurrent = (href: string) => path === href || (href !== '/' && path.start
     z-index: 40;
     background: var(--green-ink);
     border-bottom: 1px solid var(--green-line);
+    transition: box-shadow 0.3s ease;
+  }
+  .masthead.is-scrolled {
+    box-shadow: 0 12px 28px -20px rgb(0 0 0 / 0.7);
   }
 
   .masthead__inner {
@@ -98,14 +102,31 @@ const isCurrent = (href: string) => path === href || (href !== '/' && path.start
     color: #c6d6cc;
     text-decoration: none;
     padding-block: 0.4rem;
-    border-bottom: 1px solid transparent;
+    position: relative;
+    transition: color 0.2s ease;
+  }
+  /* Gold rule draws in under the link on hover and stays on the current page. */
+  .masthead__nav a::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 1px;
+    background: var(--gold);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.25s var(--ease-out);
   }
   .masthead__nav a:hover {
     color: var(--ivory);
   }
+  .masthead__nav a:hover::after,
+  .masthead__nav a[aria-current='page']::after {
+    transform: scaleX(1);
+  }
   .masthead__nav a[aria-current='page'] {
     color: var(--gold);
-    border-bottom-color: var(--gold);
   }
 
   .masthead__toggle {

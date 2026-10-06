@@ -29,5 +29,8 @@
     "typescript": "^6.0.3"
   },
   "private": true,
-  "type": "module"
+  "type": "module",
+  "devDependencies": {
+    "simple-icons": "^16.34.0"
+  }
 }

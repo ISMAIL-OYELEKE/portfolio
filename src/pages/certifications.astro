@@ -26,7 +26,7 @@ const description = `All ${certCount} of Ismail Oyeleke's certifications and bad
       <ul class="headline">
         {
           headlineCerts.map((c) => (
-            <li class="headline__item reveal">
+            <li class="headline__item lift reveal">
               {c.image && (
                 <Image
                   class="headline__badge"
@@ -127,10 +127,14 @@ const description = `All ${certCount} of Ismail Oyeleke's certifications and bad
     flex-direction: column;
   }
   .headline__badge {
+    transition: translate 0.3s var(--ease-out);
     width: 104px;
     height: 104px;
     object-fit: contain;
     margin-bottom: 1.1rem;
+  }
+  .headline__item:hover .headline__badge {
+    translate: 0 -3px;
   }
   .headline__issuer {
     font-family: var(--font-mono);
@@ -195,8 +199,17 @@ const description = `All ${certCount} of Ismail Oyeleke's certifications and bad
     text-decoration: none;
     height: 100%;
   }
+  .badges__item a {
+    transition: background-color 0.25s ease;
+  }
   .badges__item a:hover {
     background: var(--surface);
+  }
+  .badges__art :global(img) {
+    transition: translate 0.3s var(--ease-out);
+  }
+  .badges__item a:hover .badges__art :global(img) {
+    translate: 0 -4px;
   }
   .badges__art {
     height: 112px;
