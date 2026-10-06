@@ -181,6 +181,9 @@ The project instructions hold the full text. Every change must keep to them.
       dimmed page, closes on outside tap or Escape.
 - [x] Contact form redirect is base aware, so a preview submission lands on
       the preview thank-you page. Thank-you page left out of the sitemap.
+- [x] ALX certificates (Cloud Practitioner, August 2025; Professional
+      Foundations, June 2025) shown as images with Verify links. Every
+      certification tile now has real artwork.
 - [x] Plain-language finish list for Ismail in the project folder:
       `finish-checklist.md`.
 - Headshot without the sash was tried and rolled back (2026-10-06): the
@@ -208,8 +211,6 @@ The project instructions hold the full text. Every change must keep to them.
    `ArchPortrait.astro` imports, used on Home and About), rebuild
    `public/og-image.jpg` (the share card, 1200x630, under 300KB) from it,
    and rebuild.
-7. The two ALX certificates as images (screenshot or PDF). ALX blocks
-   automated access, so those two tiles show an "ALX" placeholder for now.
 
 ## Next steps, in order
 
