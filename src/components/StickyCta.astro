@@ -1,0 +1,56 @@
+---
+/** One high-intent action, pinned on small screens where the header CTA is hidden. */
+---
+
+<div class="sticky-cta" data-sticky-cta>
+  <a class="btn btn--primary" href="/contact">Hire me</a>
+  <a class="btn btn--ghost" href="/Oyeleke-Ismail-Olanrewaju-CV.pdf" download>CV</a>
+</div>
+
+<style>
+  .sticky-cta {
+    display: none;
+  }
+
+  @media (max-width: 1040px) {
+    .sticky-cta {
+      position: fixed;
+      inset-inline: 0;
+      bottom: 0;
+      z-index: 50;
+      display: flex;
+      gap: 0.6rem;
+      padding: 0.7rem var(--gutter) calc(0.7rem + env(safe-area-inset-bottom));
+      background: color-mix(in srgb, #0a1526 94%, transparent);
+      border-top: 1px solid var(--brand-line);
+      transform: translateY(110%);
+      transition: transform 0.25s ease;
+    }
+    .sticky-cta.is-shown {
+      transform: none;
+    }
+    .sticky-cta .btn {
+      flex: 1 1 auto;
+      justify-content: center;
+      padding-block: 0.8rem;
+    }
+    .sticky-cta .btn--ghost {
+      flex: 0 0 auto;
+      color: var(--paper);
+      border-color: var(--highlight);
+    }
+    /* Keep the footer clear of the bar. */
+    :global(body) {
+      padding-bottom: 4.5rem;
+    }
+  }
+</style>
+
+<script>
+  const bar = document.querySelector<HTMLElement>('[data-sticky-cta]');
+  if (bar) {
+    const update = () => bar.classList.toggle('is-shown', window.scrollY > 420);
+    update();
+    window.addEventListener('scroll', update, { passive: true });
+  }
+</script>

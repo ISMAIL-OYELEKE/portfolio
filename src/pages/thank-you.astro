@@ -1,0 +1,144 @@
+---
+import Base from '../layouts/Base.astro';
+import SocialIcon from '../components/SocialIcon.astro';
+import { site } from '../data/site';
+import { featuredProjects } from '../data/projects';
+
+const next = featuredProjects.slice(0, 2);
+---
+
+<Base
+  title="Message sent"
+  description="Your message reached Ismail Oyeleke. He reads every enquiry himself and replies, usually within a day."
+  noindex
+  hideStickyCta
+>
+  <section class="on-dark done">
+    <div class="shell done__inner">
+      <span class="done__mark" aria-hidden="true">
+        <svg viewBox="0 0 48 48" width="44" height="44" fill="none" stroke="currentColor" stroke-width="1.6">
+          <rect x="4" y="4" width="40" height="40" />
+          <path d="M14 24.5l7 7 14-15" stroke-linecap="square" />
+        </svg>
+      </span>
+
+      <span class="eyebrow">Sent</span>
+      <h1>Thank you. Your message is with me.</h1>
+      <p class="lede">
+        I read every message myself and reply from {site.email}, usually within a day. If it is
+        urgent, WhatsApp is faster.
+      </p>
+
+      <div class="btn-row">
+        <a class="btn btn--ghost" href={site.whatsapp} target="_blank" rel="noopener">
+          <SocialIcon name="whatsapp" size={15} />
+          Message on WhatsApp
+        </a>
+        <a class="btn btn--ghost" href={site.cv} download>
+          <SocialIcon name="download" size={15} />
+          Download my CV
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="shell">
+      <div class="section-head">
+        <span class="eyebrow">While you are here</span>
+        <h2>Two builds worth a look</h2>
+        <span class="rule-tick"></span>
+      </div>
+
+      <ul class="next">
+        {
+          next.map((p) => (
+            <li>
+              <a href={`/projects/${p.slug}`}>
+                <span class="next__kicker">{p.date}</span>
+                <span class="next__title">{p.title}</span>
+                <span class="next__summary">{p.summary}</span>
+                <span class="next__arrow">
+                  <SocialIcon name="arrow" size={16} />
+                </span>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+
+      <div class="btn-row">
+        <a class="btn btn--primary" href="/">Back to the home page</a>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .done {
+    padding-block: clamp(3.5rem, 9vw, 6.5rem);
+  }
+  .done__inner {
+    max-width: 44rem;
+  }
+  .done__mark {
+    display: inline-flex;
+    color: var(--highlight);
+    margin-bottom: 1.75rem;
+  }
+  .done h1 {
+    font-size: clamp(2rem, 4.8vw, 3.1rem);
+  }
+
+  .next {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border-top: 1px solid var(--rule);
+  }
+  .next a {
+    display: grid;
+    grid-template-columns: 9rem minmax(0, 1fr) auto;
+    gap: 0.4rem 1.5rem;
+    align-items: baseline;
+    padding: 1.5rem 0;
+    border-bottom: 1px solid var(--rule);
+    text-decoration: none;
+  }
+  .next a:hover .next__title {
+    color: var(--accent);
+  }
+  .next__kicker {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+  .next__title {
+    font-family: var(--font-display);
+    font-size: 1.25rem;
+    font-weight: 600;
+  }
+  .next__summary {
+    grid-column: 2 / 3;
+    color: var(--text-muted);
+    font-size: 0.92rem;
+  }
+  .next__arrow {
+    color: var(--accent);
+    display: flex;
+    grid-row: 1 / 3;
+    grid-column: 3;
+    align-self: center;
+  }
+
+  @media (max-width: 720px) {
+    .next a {
+      grid-template-columns: 1fr auto;
+    }
+    .next__summary {
+      grid-column: 1 / 2;
+    }
+  }
+</style>

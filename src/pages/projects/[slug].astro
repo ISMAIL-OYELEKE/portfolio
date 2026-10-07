@@ -1,0 +1,390 @@
+---
+import { Image } from 'astro:assets';
+import Base from '../../layouts/Base.astro';
+import VideoEmbed from '../../components/VideoEmbed.astro';
+import SocialIcon from '../../components/SocialIcon.astro';
+import { projects } from '../../data/projects';
+import { site } from '../../data/site';
+
+export function getStaticPaths() {
+  return projects.map((project) => ({ params: { slug: project.slug }, props: { project } }));
+}
+
+const { project } = Astro.props;
+
+const shots = import.meta.glob<{ default: ImageMetadata }>('../../assets/proof/*.png', {
+  eager: true,
+});
+const shotFor = (src: string) => shots[`../../assets/proof/${src}`]?.default;
+
+const related = projects.filter((p) => p.slug !== project.slug && p.kind === project.kind).slice(0, 2);
+
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'CreativeWork',
+  name: project.title,
+  description: project.summary,
+  author: { '@type': 'Person', name: site.name, url: site.url },
+  dateCreated: project.dateISO,
+  keywords: project.stack.join(', '),
+  url: new URL(`/projects/${project.slug}`, Astro.site).href,
+};
+---
+
+<Base
+  title={project.metaTitle ?? project.title}
+  description={project.metaDescription ?? project.summary}
+  type="article"
+  schema={schema}
+>
+  <article>
+    <header class="on-dark case-hero">
+      <div class="shell">
+        <nav class="crumbs" aria-label="Breadcrumb">
+          <a href="/projects">Projects</a>
+          <span aria-hidden="true">/</span>
+          <span>{project.kind === 'cloud' ? 'AWS' : 'Freelance'}</span>
+        </nav>
+
+        <h1>{project.title}</h1>
+        <p class="lede case-hero__summary">{project.summary}</p>
+
+        <dl class="case-facts">
+          <div>
+            <dt>When</dt>
+            <dd>{project.date}</dd>
+          </div>
+          <div>
+            <dt>Context</dt>
+            <dd>{project.context}</dd>
+          </div>
+          <div>
+            <dt>Role</dt>
+            <dd>Solo build</dd>
+          </div>
+        </dl>
+
+        <ul class="tag-row case-hero__stack">
+          {project.stack.map((s) => <li class="tag">{s}</li>)}
+        </ul>
+
+        <div class="btn-row">
+          {
+            project.repo && (
+              <a class="btn btn--ghost" href={project.repo} target="_blank" rel="noopener">
+                <SocialIcon name="github" size={15} />
+                View the code
+              </a>
+            )
+          }
+          {
+            project.live && (
+              <a class="btn btn--ghost" href={project.live} target="_blank" rel="noopener">
+                <SocialIcon name="external" size={15} />
+                Visit the site
+              </a>
+            )
+          }
+        </div>
+      </div>
+    </header>
+
+    <div class="section">
+      <div class="shell case-body">
+        <section>
+          <h2>The problem</h2>
+          <p>{project.problem}</p>
+        </section>
+
+        {project.video && <VideoEmbed url={project.video} title={project.title} />}
+
+        {
+          project.media?.map((m) =>
+            m.type === 'video' ? (
+              <figure class="shot">
+                <video
+                  src={m.src}
+                  poster={m.poster}
+                  controls
+                  muted
+                  playsinline
+                  preload="none"
+                  width="1280"
+                  height="720"
+                  aria-label={m.alt}
+                ></video>
+                {m.caption && <figcaption>{m.caption}</figcaption>}
+              </figure>
+            ) : shotFor(m.src) ? (
+              <figure class="shot">
+                <Image src={shotFor(m.src)!} alt={m.alt} widths={[640, 960, 1280]} sizes="(max-width: 860px) 92vw, 760px" format="webp" quality={80} />
+                {m.caption && <figcaption>{m.caption}</figcaption>}
+              </figure>
+            ) : null
+          )
+        }
+
+        {
+          project.build.map((block) => (
+            <section>
+              <h2>{block.heading}</h2>
+              <ul class="bullets">
+                {block.points.map((p) => (
+                  <li>{p}</li>
+                ))}
+              </ul>
+            </section>
+          ))
+        }
+
+        {
+          project.decisions && (
+            <section>
+              <h2>Decisions</h2>
+              <dl class="decisions">
+                {project.decisions.map((d) => (
+                  <div class="decisions__item lift">
+                    <dt>{d.title}</dt>
+                    <dd>{d.body}</dd>
+                  </div>
+                ))}
+              </dl>
+            </section>
+          )
+        }
+
+        {
+          project.lessons && (
+            <section>
+              <h2>What went wrong, and what fixed it</h2>
+              <ul class="bullets">
+                {project.lessons.map((l) => (
+                  <li>{l}</li>
+                ))}
+              </ul>
+            </section>
+          )
+        }
+
+        {
+          project.result && (
+            <section>
+              <h2>The result</h2>
+              <ul class="bullets">
+                {project.result.map((r) => (
+                  <li>{r}</li>
+                ))}
+              </ul>
+            </section>
+          )
+        }
+
+        {project.note && <p class="case-note">{project.note}</p>}
+      </div>
+    </div>
+
+    <section class="section section--sunken">
+      <div class="shell">
+        <div class="section-head">
+          <span class="eyebrow">Keep reading</span>
+          <h2>Other work</h2>
+          <span class="rule-tick"></span>
+        </div>
+        <ul class="related">
+          {
+            related.map((r) => (
+              <li>
+                <a href={`/projects/${r.slug}`}>
+                  <span class="related__kicker">{r.date}</span>
+                  <span class="related__title">{r.title}</span>
+                  <span class="related__arrow">
+                    <SocialIcon name="arrow" size={16} />
+                  </span>
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+        <div class="btn-row">
+          <a class="btn btn--primary" href="/contact">
+            Talk about a project like this
+            <SocialIcon name="arrow" size={15} />
+          </a>
+        </div>
+      </div>
+    </section>
+  </article>
+</Base>
+
+<style>
+  .case-hero {
+    padding-block: clamp(2.5rem, 6vw, 4.5rem);
+  }
+
+  .crumbs {
+    display: flex;
+    gap: 0.5rem;
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 1.5rem;
+  }
+  .crumbs a {
+    color: var(--highlight);
+    text-decoration: none;
+  }
+
+  .case-hero h1 {
+    max-width: 20ch;
+  }
+  .case-hero__summary {
+    max-width: 58ch;
+  }
+
+  .case-facts {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(11rem, auto));
+    gap: 1.25rem 3rem;
+    margin: 2rem 0 1.5rem;
+    justify-content: start;
+  }
+  .case-facts dt {
+    font-family: var(--font-mono);
+    font-size: 0.66rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 0.3rem;
+  }
+  .case-facts dd {
+    margin: 0;
+    font-size: 0.95rem;
+    max-width: 24ch;
+  }
+
+  .case-hero__stack {
+    margin-bottom: 0.5rem;
+  }
+
+  .case-body {
+    max-width: 50rem;
+  }
+  .case-body > section + section,
+  .case-body > section + .shot {
+    margin-top: 2.75rem;
+  }
+  .case-body h2 {
+    font-size: clamp(1.4rem, 2.8vw, 1.9rem);
+    margin-bottom: 0.7rem;
+  }
+
+  .bullets {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 0.85rem;
+  }
+  .bullets li {
+    position: relative;
+    padding-left: 1.5rem;
+    max-width: 68ch;
+  }
+  .bullets li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.72em;
+    width: 0.85rem;
+    height: 1px;
+    background: var(--highlight);
+  }
+
+  .decisions {
+    display: grid;
+    gap: 1rem;
+    margin: 0;
+  }
+  .decisions__item {
+    border: 1px solid var(--rule);
+    border-top: 2px solid var(--highlight);
+    border-radius: var(--r-card);
+    padding: 1.3rem;
+    background: var(--surface);
+  }
+  .decisions dt {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 1.08rem;
+    margin-bottom: 0.4rem;
+  }
+  .decisions dd {
+    margin: 0;
+    color: var(--text-muted);
+  }
+
+  .shot {
+    margin: 2.25rem 0;
+  }
+  .shot :global(img),
+  .shot video {
+    width: 100%;
+    border: 1px solid var(--rule);
+    border-radius: var(--r-card);
+    display: block;
+  }
+  .shot figcaption {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    margin-top: 0.6rem;
+  }
+
+  .case-note {
+    margin-top: 2.5rem;
+    padding: 1rem 1.2rem;
+    border-left: 2px solid var(--highlight);
+    background: var(--bg-sunken);
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    max-width: none;
+  }
+
+  .related {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border-top: 1px solid var(--rule);
+  }
+  .related a {
+    display: flex;
+    align-items: center;
+    gap: 1rem 1.5rem;
+    flex-wrap: wrap;
+    padding: 1.3rem 0;
+    border-bottom: 1px solid var(--rule);
+    text-decoration: none;
+  }
+  .related a:hover .related__title {
+    color: var(--accent);
+  }
+  .related__kicker {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    flex: 0 0 9rem;
+  }
+  .related__title {
+    font-family: var(--font-display);
+    font-size: 1.25rem;
+    font-weight: 600;
+  }
+  .related__arrow {
+    margin-left: auto;
+    color: var(--accent);
+    display: flex;
+  }
+</style>

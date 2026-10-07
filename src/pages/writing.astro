@@ -1,0 +1,185 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHero from '../components/PageHero.astro';
+import SocialIcon from '../components/SocialIcon.astro';
+import { projects } from '../data/projects';
+
+const description =
+  'Write-ups and recorded walkthroughs of each AWS build, on Medium and YouTube, by Ismail Oyeleke.';
+
+type Post = { title: string; link: string; date?: string };
+
+/**
+ * Posts are pulled from the Medium feed at build time, so the page is still
+ * static. If the feed is unreachable during a build, the page falls back to
+ * the links below rather than failing the deploy.
+ */
+async function fetchPosts(): Promise<Post[]> {
+  try {
+    const res = await fetch('https://medium.com/feed/@ismailoyeleke2003', {
+      signal: AbortSignal.timeout(8000),
+    });
+    if (!res.ok) return [];
+    const xml = await res.text();
+    const items = xml.split('<item>').slice(1, 7);
+    return items
+      .map((item) => {
+        const title = item.match(/<title><!\[CDATA\[([\s\S]*?)\]\]><\/title>/)?.[1]?.trim();
+        const link = item.match(/<link>([\s\S]*?)<\/link>/)?.[1]?.trim();
+        const pub = item.match(/<pubDate>([\s\S]*?)<\/pubDate>/)?.[1]?.trim();
+        if (!title || !link) return null;
+        return {
+          title,
+          link,
+          date: pub
+            ? new Date(pub).toLocaleDateString('en-GB', {
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric',
+              })
+            : undefined,
+        };
+      })
+      .filter((p) => p !== null) as Post[];
+  } catch {
+    return [];
+  }
+}
+
+const posts = await fetchPosts();
+const demos = projects.filter((p) => p.video);
+---
+
+<Base title="Writing and talks" description={description}>
+  <PageHero
+    eyebrow="Writing"
+    title="Every build gets written down"
+    lede="I document what I build, both because it is how I learn it properly and because a recruiter should be able to see the reasoning, not just the result."
+  />
+
+  <section class="section">
+    <div class="shell">
+      <div class="section-head">
+        <span class="eyebrow">Medium</span>
+        <h2>Articles</h2>
+        <span class="rule-tick"></span>
+      </div>
+
+      {
+        posts.length > 0 ? (
+          <ul class="posts">
+            {posts.map((post) => (
+              <li>
+                <a href={post.link} target="_blank" rel="noopener">
+                  {post.date && <span class="posts__date">{post.date}</span>}
+                  <span class="posts__title">{post.title}</span>
+                  <span class="posts__icon">
+                    <SocialIcon name="external" size={15} />
+                  </span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p class="lede">
+            The latest articles live on Medium. The list here refreshes on each deploy.
+          </p>
+        )
+      }
+
+      <div class="btn-row">
+        <a
+          class="btn btn--ghost"
+          href="https://medium.com/@ismailoyeleke2003"
+          target="_blank"
+          rel="noopener"
+        >
+          <SocialIcon name="medium" size={15} />
+          Read on Medium
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="on-dark section">
+    <div class="shell">
+      <div class="section-head">
+        <span class="eyebrow">YouTube</span>
+        <h2>Recorded walkthroughs</h2>
+        <p class="lede">
+          Each cloud project has a recording of the build, from the console through to the working
+          system.
+        </p>
+        <span class="rule-tick"></span>
+      </div>
+
+      <ul class="posts">
+        {
+          demos.map((d) => (
+            <li>
+              <a href={d.video} target="_blank" rel="noopener">
+                <span class="posts__date">{d.date}</span>
+                <span class="posts__title">{d.title}</span>
+                <span class="posts__icon">
+                  <SocialIcon name="play" size={16} />
+                </span>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+
+      <div class="btn-row">
+        <a
+          class="btn btn--ghost"
+          href="https://youtube.com/@learn_with_ismail_oyeleke"
+          target="_blank"
+          rel="noopener"
+        >
+          <SocialIcon name="youtube" size={15} />
+          All videos
+        </a>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .posts {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border-top: 1px solid var(--rule);
+  }
+  .posts a {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 1.5rem;
+    padding: 1.25rem 0;
+    border-bottom: 1px solid var(--rule);
+    text-decoration: none;
+  }
+  .posts a:hover .posts__title {
+    color: var(--accent);
+  }
+  .posts__date {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    flex: 0 0 10rem;
+  }
+  .posts__title {
+    font-family: var(--font-display);
+    font-size: 1.15rem;
+    font-weight: 600;
+    flex: 1 1 16rem;
+  }
+  .posts__icon {
+    color: var(--accent);
+    display: flex;
+    margin-left: auto;
+  }
+</style>

@@ -1,0 +1,483 @@
+@import '@fontsource-variable/fraunces';
+@import '@fontsource/sora/400.css';
+@import '@fontsource/sora/500.css';
+@import '@fontsource/sora/600.css';
+@import '@fontsource/jetbrains-mono/500.css';
+
+/* ---------------------------------------------------------------
+   Brand tokens: harbour navy, a working blue and amber.
+   Navy is the dark surface and paper the light one. Amber is the
+   highlight on navy (7.5:1) and fills the primary button. It is never
+   used for text on paper (2.0:1); blue is the accent text there
+   (6.2:1). Every pairing below clears WCAG AA, most clear AAA.
+   --------------------------------------------------------------- */
+:root {
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --brand-deep: #0f1e33;
+  --brand-mid: #1d5ba6;
+  --brand-ink: #0a1526;
+  --brand-line: #25375a;
+  --highlight: #e0a33a;
+  --accent-text: #1d5ba6;
+  --highlight-soft: #ecbd66;
+  --paper: #f4f5f2;
+  --paper-dim: #e7e9e6;
+  --stone: #d5d9de;
+
+  /* semantic, light sections */
+  --bg: var(--paper);
+  --bg-sunken: var(--paper-dim);
+  --surface: #fafbf9;
+  --text: #152132;
+  --text-muted: #4b5868;
+  --rule: #d5d9de;
+  --accent: var(--accent-text);
+  --accent-line: var(--highlight);
+
+  --font-display: 'Fraunces Variable', 'Iowan Old Style', Georgia, 'Times New Roman', serif;
+  --font-body: 'Sora', 'Segoe UI', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+
+  --measure: 68ch;
+  --shell: 1180px;
+  --gutter: clamp(1rem, 4vw, 2.75rem);
+  --section-y: clamp(3.5rem, 8vw, 7rem);
+
+  /* deliberate, varied radii: sharp cards, cut corners, round only on pills */
+  --r-sharp: 2px;
+  --r-card: 3px;
+  --r-pill: 999px;
+}
+
+/* Dark navy surface, applied per-section rather than globally,
+   so the page alternates the way the reference does. */
+.on-dark {
+  --bg: var(--brand-deep);
+  --bg-sunken: var(--brand-ink);
+  --surface: #13253f;
+  --text: var(--paper);
+  --text-muted: #a9b6c8;
+  --rule: var(--brand-line);
+  --accent: var(--highlight);
+  --accent-line: var(--highlight);
+  color: var(--text);
+  background-color: var(--bg);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+body {
+  margin: 0;
+  background-color: var(--paper);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 1rem;
+  line-height: 1.65;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-variation-settings: 'SOFT' 0, 'WONK' 0, 'opsz' 40;
+  line-height: 1.12;
+  letter-spacing: -0.01em;
+  margin: 0 0 0.6em;
+  text-wrap: balance;
+}
+
+h1 {
+  font-size: clamp(2.25rem, 6vw, 3.9rem);
+}
+h2 {
+  font-size: clamp(1.75rem, 4vw, 2.7rem);
+}
+h3 {
+  font-size: clamp(1.2rem, 2.2vw, 1.5rem);
+}
+
+p {
+  margin: 0 0 1.1em;
+  max-width: var(--measure);
+}
+
+a {
+  color: inherit;
+  text-underline-offset: 0.22em;
+  text-decoration-thickness: 1px;
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+summary:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--highlight);
+  outline-offset: 3px;
+}
+
+img,
+video,
+svg {
+  max-width: 100%;
+  height: auto;
+}
+
+ul,
+ol {
+  padding-left: 1.1rem;
+}
+
+hr {
+  border: 0;
+  border-top: 1px solid var(--rule);
+  margin: 2rem 0;
+}
+
+/* ---------- layout helpers ---------- */
+.shell {
+  width: 100%;
+  max-width: var(--shell);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+.section {
+  padding-block: var(--section-y);
+  background-color: var(--bg);
+  color: var(--text);
+}
+
+.section--sunken {
+  background-color: var(--bg-sunken);
+}
+
+.stack > * + * {
+  margin-top: 1rem;
+}
+
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 100;
+  background: var(--brand-deep);
+  color: var(--paper);
+  padding: 0.75rem 1.25rem;
+}
+.skip-link:focus {
+  left: 0;
+}
+
+/* ---------- type utilities ---------- */
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin: 0 0 0.9rem;
+  display: block;
+}
+
+.lede {
+  font-size: clamp(1.03rem, 1.6vw, 1.18rem);
+  color: var(--text-muted);
+}
+
+.section-head {
+  max-width: 44rem;
+  margin-bottom: clamp(2rem, 4vw, 3rem);
+}
+
+/* A single hairline rule with a amber tick: the one recurring flourish. */
+.rule-tick {
+  display: block;
+  height: 1px;
+  background: var(--rule);
+  position: relative;
+  margin: 1.4rem 0 0;
+}
+.rule-tick::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: -1px;
+  width: 3.5rem;
+  height: 3px;
+  background: var(--highlight);
+}
+
+/* ---------- buttons ---------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 0.95rem 1.6rem;
+  border-radius: var(--r-sharp);
+  border: 1px solid transparent;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s var(--ease-out),
+    box-shadow 0.2s ease;
+}
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 22px -14px rgb(4 20 14 / 0.55);
+}
+.btn:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
+/* The arrow steps forward on hover; it moves once, it never loops. */
+.btn .icon--arrow,
+.text-link .icon--arrow {
+  transition: transform 0.2s var(--ease-out);
+}
+.btn:hover .icon--arrow,
+.text-link:hover .icon--arrow {
+  transform: translateX(3px);
+}
+.btn .icon--download {
+  transition: transform 0.2s var(--ease-out);
+}
+.btn:hover .icon--download {
+  transform: translateY(2px);
+}
+
+.btn--primary {
+  background: var(--highlight);
+  color: var(--brand-deep);
+  border-color: var(--highlight);
+}
+.btn--primary:hover {
+  background: var(--highlight-soft);
+  border-color: var(--highlight-soft);
+}
+
+.btn--ghost {
+  background: transparent;
+  color: var(--text);
+  border-color: var(--accent-line);
+}
+.btn--ghost:hover {
+  background: color-mix(in srgb, var(--highlight) 14%, transparent);
+}
+
+.btn-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.85rem;
+  margin-top: 1.9rem;
+}
+
+.text-link {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent);
+  text-decoration: none;
+  border-bottom: 1px solid color-mix(in srgb, currentColor 45%, transparent);
+  padding-bottom: 2px;
+}
+.text-link {
+  position: relative;
+}
+/* A solid underline draws across from the left on hover, over the faint
+   resting rule. */
+.text-link::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.25s var(--ease-out);
+}
+.text-link:hover::after,
+.text-link:focus-visible::after {
+  transform: scaleX(1);
+}
+
+/* ---------- hover lift ----------
+   Cards rise a few pixels and pick up an amber edge. Movement is small and
+   eased, with no glow and no scaling of text. */
+.lift {
+  transition:
+    translate 0.25s var(--ease-out),
+    border-color 0.25s ease,
+    box-shadow 0.25s ease;
+}
+.lift:hover,
+.lift:focus-within {
+  translate: 0 -4px;
+  border-color: var(--accent-line);
+  box-shadow: 0 18px 34px -24px rgb(4 20 14 / 0.45);
+}
+
+/* List rows: an amber bar slides in on the left edge. */
+.row-hover {
+  position: relative;
+}
+.row-hover::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--highlight);
+  transform: scaleY(0);
+  transform-origin: top;
+  transition: transform 0.3s var(--ease-out);
+}
+.row-hover:hover::before {
+  transform: scaleY(1);
+}
+
+/* ---------- cards and tags ---------- */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: var(--r-card);
+  padding: clamp(1.3rem, 2.5vw, 1.9rem);
+}
+
+.tag-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tag {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  padding: 0.28rem 0.6rem;
+  border: 1px solid var(--rule);
+  border-radius: var(--r-sharp);
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.grid {
+  display: grid;
+  gap: clamp(1rem, 2.5vw, 1.6rem);
+}
+
+/* Deliberately not three equal cards in a row. */
+.grid--pair {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
+}
+.grid--tight {
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 15rem), 1fr));
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Reveal on scroll, kept subtle: opacity and 10px, no bounce.
+   Content is visible by default and only hidden once the observer is
+   actually watching it, so a script failure can never leave a blank page. */
+.reveal.is-armed {
+  opacity: 0;
+  transform: translateY(18px);
+  transition:
+    opacity 0.6s ease,
+    transform 0.6s var(--ease-out);
+  transition-delay: var(--reveal-delay, 0ms);
+}
+.reveal.is-armed.is-in {
+  opacity: 1;
+  transform: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .reveal.is-armed {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
+/* ---------- page entrance ----------
+   The first screen settles in once on load: each [data-enter] child rises
+   into place in order. CSS only, so it runs even if scripts fail, and the
+   reduced-motion rule at the top of this file cancels it. */
+@keyframes enter-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+[data-enter] > * {
+  animation: enter-up 0.7s var(--ease-out) both;
+}
+[data-enter] > :nth-child(2) {
+  animation-delay: 0.08s;
+}
+[data-enter] > :nth-child(3) {
+  animation-delay: 0.16s;
+}
+[data-enter] > :nth-child(4) {
+  animation-delay: 0.24s;
+}
+[data-enter] > :nth-child(n + 5) {
+  animation-delay: 0.32s;
+}

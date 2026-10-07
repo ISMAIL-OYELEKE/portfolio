@@ -1,0 +1,180 @@
+---
+import Base from '../layouts/Base.astro';
+import ContactForm from '../components/ContactForm.astro';
+import SocialIcon from '../components/SocialIcon.astro';
+import { site, socials } from '../data/site';
+import { brandStyle } from '../lib/brands';
+
+const description =
+  'Get in touch with Ismail Oyeleke, Cloud and DevOps Engineer in Lagos, Nigeria, about a role, a freelance project or an architecture review.';
+
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'ContactPage',
+  name: 'Contact Ismail Oyeleke',
+  url: new URL('/contact', Astro.site).href,
+};
+---
+
+<Base title="Contact" description={description} hideStickyCta schema={schema}>
+  <section class="on-dark contact">
+    <div class="shell contact__grid">
+      <div>
+        <span class="eyebrow">Contact</span>
+        <h1>Tell me what you need built, or who you need hired</h1>
+        <p class="lede">
+          I read every message and reply, usually within a day. If it is about a role, say which one
+          and I will send whatever else you need.
+        </p>
+        <span class="rule-tick"></span>
+
+        <dl class="details">
+          <div>
+            <dt>Email</dt>
+            <dd><a href={`mailto:${site.email}`}>{site.email}</a></dd>
+          </div>
+          <div>
+            <dt>Phone and WhatsApp</dt>
+            <dd>
+              <a href={`tel:${site.phone}`}>{site.phoneDisplay}</a>
+            </dd>
+          </div>
+          <div>
+            <dt>Based in</dt>
+            <dd>
+              {site.locality}, {site.region}, {site.country}<br />
+              <span class="details__note">West Africa Time, UTC+1</span>
+            </dd>
+          </div>
+          <div>
+            <dt>Open to</dt>
+            <dd>{site.openTo}</dd>
+          </div>
+        </dl>
+
+        <ul class="contact__socials">
+          {
+            socials.map((s) => (
+              <li>
+                <a href={s.href} target="_blank" rel="me noopener" style={brandStyle(s.icon)}>
+                  <SocialIcon name={s.icon} size={16} />
+                  {s.label}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+
+      <div class="contact__form">
+        <h2 class="contact__form-title">Send a message</h2>
+        <ContactForm />
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .contact {
+    padding-block: clamp(2.75rem, 7vw, 5rem);
+  }
+
+  .contact__grid {
+    display: grid;
+    gap: clamp(2.25rem, 5vw, 4rem);
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    align-items: start;
+  }
+
+  .contact h1 {
+    font-size: clamp(1.9rem, 4.4vw, 3rem);
+  }
+
+  .details {
+    display: grid;
+    gap: 1.4rem;
+    margin: 2.25rem 0 0;
+  }
+  .details dt {
+    font-family: var(--font-mono);
+    font-size: 0.66rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 0.35rem;
+  }
+  .details dd {
+    margin: 0;
+    max-width: 34ch;
+  }
+  .details a {
+    color: var(--highlight);
+    text-decoration: none;
+    border-bottom: 1px solid color-mix(in srgb, var(--highlight) 45%, transparent);
+  }
+  .details a:hover {
+    border-bottom-color: var(--highlight);
+  }
+  .details__note {
+    color: var(--text-muted);
+    font-size: 0.86rem;
+  }
+
+  .contact__socials {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    list-style: none;
+    margin: 2.25rem 0 0;
+    padding: 0;
+  }
+  .contact__socials a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.85rem;
+    border: 1px solid var(--rule);
+    border-radius: var(--r-sharp);
+    font-size: 0.85rem;
+    text-decoration: none;
+    transition:
+      background-color 0.2s ease,
+      border-color 0.2s ease,
+      color 0.2s ease,
+      transform 0.2s ease;
+  }
+  .contact__socials a :global(.brand-icon) {
+    color: var(--brand-on-dark);
+    transition: color 0.2s ease;
+  }
+  .contact__socials a:hover,
+  .contact__socials a:focus-visible {
+    background: var(--brand);
+    border-color: var(--brand);
+    color: #fff;
+    transform: translateY(-2px);
+  }
+  .contact__socials a:hover :global(.brand-icon),
+  .contact__socials a:focus-visible :global(.brand-icon) {
+    color: #fff;
+  }
+
+  .contact__form {
+    min-width: 0;
+    overflow-wrap: anywhere;
+    border: 1px solid var(--highlight);
+    border-radius: var(--r-card);
+    padding: clamp(1.5rem, 3vw, 2.25rem);
+    background: color-mix(in srgb, var(--brand-ink) 55%, transparent);
+  }
+  .contact__form-title {
+    font-size: 1.4rem;
+    margin-bottom: 1.5rem;
+  }
+
+  @media (max-width: 900px) {
+    .contact__grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+</style>

@@ -1,0 +1,279 @@
+---
+import { nav, site } from '../data/site';
+import logo from '../assets/logo/lockup-horizontal-reversed.svg';
+
+const path = Astro.url.pathname.replace(/\/$/, '') || '/';
+const isCurrent = (href: string) => path === href || (href !== '/' && path.startsWith(href + '/'));
+---
+
+<header class="masthead" data-masthead>
+  <div class="shell masthead__inner">
+    <a href="/" class="masthead__brand" aria-label={`${site.name}, home`}>
+      <img src={logo.src} alt="" width="190" height="48" />
+    </a>
+
+    <nav class="masthead__nav" aria-label="Main">
+      <ul>
+        {
+          nav.map((item) => (
+            <li>
+              <a href={item.href} aria-current={isCurrent(item.href) ? 'page' : undefined}>
+                {item.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+
+    <a class="btn btn--primary masthead__cta" href={site.cv} download>Download CV</a>
+
+    <button
+      type="button"
+      class="masthead__toggle"
+      data-menu-toggle
+      aria-expanded="false"
+      aria-controls="site-menu"
+    >
+      <span class="visually-hidden">Menu</span>
+      <span class="masthead__bars" aria-hidden="true"></span>
+    </button>
+  </div>
+
+  <div class="masthead__panel" id="site-menu" data-menu-panel hidden>
+    <ul>
+      {
+        nav.map((item) => (
+          <li>
+            <a href={item.href} aria-current={isCurrent(item.href) ? 'page' : undefined}>
+              {item.label}
+            </a>
+          </li>
+        ))
+      }
+      <li><a href={site.cv} download>Download CV</a></li>
+    </ul>
+  </div>
+</header>
+
+<style>
+  .masthead {
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    background: var(--brand-ink);
+    border-bottom: 1px solid var(--brand-line);
+    transition: box-shadow 0.3s ease;
+  }
+  .masthead.is-scrolled {
+    box-shadow: 0 12px 28px -20px rgb(0 0 0 / 0.7);
+  }
+
+  .masthead__inner {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    min-height: 72px;
+  }
+
+  .masthead__brand {
+    display: flex;
+    flex: 0 0 auto;
+    margin-right: auto;
+  }
+  .masthead__brand img {
+    height: 34px;
+    width: auto;
+  }
+
+  .masthead__nav ul {
+    display: flex;
+    gap: 1.4rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .masthead__nav a {
+    font-family: var(--font-mono);
+    font-size: 0.73rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #c3cede;
+    text-decoration: none;
+    padding-block: 0.4rem;
+    position: relative;
+    transition: color 0.2s ease;
+  }
+  /* Amber rule draws in under the link on hover and stays on the current page. */
+  .masthead__nav a::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 1px;
+    background: var(--highlight);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.25s var(--ease-out);
+  }
+  .masthead__nav a:hover {
+    color: var(--paper);
+  }
+  .masthead__nav a:hover::after,
+  .masthead__nav a[aria-current='page']::after {
+    transform: scaleX(1);
+  }
+  .masthead__nav a[aria-current='page'] {
+    color: var(--highlight);
+  }
+
+  .masthead__toggle {
+    display: none;
+    width: 44px;
+    height: 44px;
+    background: transparent;
+    border: 1px solid var(--brand-line);
+    border-radius: var(--r-sharp);
+    cursor: pointer;
+    position: relative;
+  }
+  .masthead__bars,
+  .masthead__bars::before,
+  .masthead__bars::after {
+    position: absolute;
+    left: 12px;
+    width: 18px;
+    height: 1.5px;
+    background: var(--highlight);
+    content: '';
+  }
+  .masthead__bars {
+    top: 21px;
+  }
+  .masthead__bars::before {
+    top: -6px;
+    left: 0;
+  }
+  .masthead__bars::after {
+    top: 6px;
+    left: 0;
+  }
+  [aria-expanded='true'] .masthead__bars {
+    background: transparent;
+  }
+  [aria-expanded='true'] .masthead__bars::before {
+    transform: translateY(6px) rotate(45deg);
+  }
+  [aria-expanded='true'] .masthead__bars::after {
+    transform: translateY(-6px) rotate(-45deg);
+  }
+
+  /* The open menu is a paper sheet over the page, with the page behind it
+     dimmed, so it reads as open on the navy sections as well as the light
+     ones. */
+  .masthead__panel {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    max-height: calc(100svh - 100%);
+    overflow-y: auto;
+    z-index: 1;
+    background: var(--paper);
+    border-top: 3px solid var(--highlight);
+    box-shadow: 0 18px 40px rgba(10, 21, 38, 0.35);
+    animation: menu-in 0.22s var(--ease-out);
+  }
+  /* Dims the page while the menu is open, never the header above it. */
+  .masthead:has(.masthead__panel:not([hidden]))::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    height: 100vh;
+    background: rgba(10, 21, 38, 0.6);
+    pointer-events: none;
+  }
+  @keyframes menu-in {
+    from {
+      opacity: 0;
+      transform: translateY(-6px);
+    }
+  }
+  .masthead__panel ul {
+    list-style: none;
+    margin: 0;
+    padding: 0.35rem var(--gutter) 1rem;
+  }
+  .masthead__panel a {
+    display: block;
+    padding: 0.9rem 0 0.9rem 0.85rem;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--brand-deep);
+    text-decoration: none;
+    border-bottom: 1px solid var(--paper-dim);
+    border-left: 3px solid transparent;
+    transition: border-color 0.2s ease, background-color 0.2s ease;
+  }
+  .masthead__panel a:hover {
+    border-left-color: var(--highlight);
+    background: var(--paper-dim);
+  }
+  .masthead__panel a[aria-current='page'] {
+    color: var(--accent-text);
+    border-left-color: var(--highlight);
+    font-weight: 600;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .masthead__panel {
+      animation: none;
+    }
+  }
+
+  @media (max-width: 1040px) {
+    .masthead__nav,
+    .masthead__cta {
+      display: none;
+    }
+    .masthead__toggle {
+      display: block;
+    }
+  }
+</style>
+
+<script>
+  const toggle = document.querySelector<HTMLButtonElement>('[data-menu-toggle]');
+  const panel = document.querySelector<HTMLElement>('[data-menu-panel]');
+
+  toggle?.addEventListener('click', () => {
+    const open = toggle.getAttribute('aria-expanded') === 'true';
+    toggle.setAttribute('aria-expanded', String(!open));
+    if (panel) panel.hidden = open;
+  });
+
+  const close = () => {
+    toggle?.setAttribute('aria-expanded', 'false');
+    if (panel) panel.hidden = true;
+  };
+
+  panel?.querySelectorAll('a').forEach((link) => link.addEventListener('click', close));
+
+  // Tapping the dimmed page or pressing Escape closes the menu too.
+  document.addEventListener('click', (e) => {
+    if (panel?.hidden) return;
+    const target = e.target as Node;
+    if (!panel?.contains(target) && !toggle?.contains(target)) close();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && panel && !panel.hidden) {
+      close();
+      toggle?.focus();
+    }
+  });
+</script>
