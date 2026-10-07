@@ -255,8 +255,8 @@ The project instructions hold the full text. Every change must keep to them.
 11. Live chat: WhatsApp only, no widget (Ismail, 2026-10-07).
 12. Architecture diagrams (official AWS icons) for the four AWS case studies,
     in `public/diagrams/<slug>.svg` and shown on each case study page under
-    "The problem", linked full size. Project 1 approved by Ismail; Projects
-    2, 3 and 4 waiting on his approval before the pull request.
+    "The problem", linked full size. All four approved by Ismail on
+    2026-10-07.
 
 ## Open questions
 
