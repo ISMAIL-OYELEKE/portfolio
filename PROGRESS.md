@@ -212,35 +212,25 @@ The project instructions hold the full text. Every change must keep to them.
 
 ## In progress
 
-- Go-live with Ismail, one step per message (2026-10-07). Done: Web3Forms key
-  (form live on the preview), certificate `1d9649e6...` covering both names
-  (Issued), bucket `ismailoyeleke-com-site`, function `portfolio-clean-urls`
-  (published), headers policy `portfolio-security-headers`, distribution
-  `E2BH4ZWLFJV2MA` (`dwhxjqyi603va.cloudfront.net`, Free plan, private bucket
-  access via OAC). Distribution has index.html root, the clean-urls function, managed
-  SecurityHeadersPolicy and 403/404 -> /404.html. Domain and certificate
-  `1d9649e6...` are NOT attached yet: the old distribution still holds
-  ismailoyeleke.com, so at cutover remove the names from the old distribution,
-  add both names plus the certificate to E2BH4ZWLFJV2MA, then switch Route 53.
-  IAM OIDC provider, deploy role and production environment secrets are set.
-  PR #1 merged. The first deploy failed at AssumeRoleWithWebIdentity because
-  GitHub's sub now carries owner and repo IDs; the trust policy was changed to
-  `repo:ISMAIL-OYELEKE@98213704/portfolio@1407159421:environment:production` and
-  the deploy is green (run 37638464217). The site serves from
-  dwhxjqyi603va.cloudfront.net: home, /about, /contact and /writing all load on
-  clean URLs and an unknown path returns 404. Next: Ismail sets the default
-  branch to main, then the domain cutover.
-  WAF is in monitor mode: switch it to blocking after go-live. The Free plan
-  blocks custom header policies, so the behaviour uses the managed
-  SecurityHeadersPolicy and the CSP is a meta tag in Base.astro. The old single-name
-  certificate `4fc97a3a...` is used by the current site; keep it until cutover.
+- LIVE on 2026-10-07. ismailoyeleke.com and www.ismailoyeleke.com serve the new
+  site from distribution `E2BH4ZWLFJV2MA` (`dwhxjqyi603va.cloudfront.net`, Free
+  plan, private bucket `ismailoyeleke-com-site` via OAC, clean-urls function,
+  managed SecurityHeadersPolicy, CSP as a meta tag, TLSv1.2_2021), certificate
+  `1d9649e6...` covering both names. Route 53 has A and AAAA aliases for the apex
+  and www. Deploys run from main via GitHub OIDC; the role trust sub is
+  `repo:ISMAIL-OYELEKE@98213704/portfolio@1407159421:environment:production`
+  (GitHub now includes owner and repo IDs). Default branch is main.
+  The old distribution `E1AMGG14CCOU14` (no domain names now), old bucket
+  `ismailoyeleke.com` and old certificate `4fc97a3a...` are kept as a fallback;
+  retire them only with Ismail's go-ahead.
+  Still to do: switch WAF from monitor to blocking, confirm the Web3Forms test
+  email arrives, GA4, Search Console, Bing, PageSpeed.
 
 - Pull request #1 merged into main (2026-10-07).
 
 ## Waiting on Ismail
 
-1. Review the preview and merge pull request #1. After merging, set the
-   repository default branch to `main` (Settings > General > Default branch).
+1. Done 2026-10-07: PR #1 merged and default branch set to `main`.
 2. Web3Forms access key (free at web3forms.com, sent to his email). Save as
    a repository secret `PUBLIC_WEB3FORMS_KEY` (read by both the preview and
    the production build).
