@@ -252,13 +252,12 @@ The project instructions hold the full text. Every change must keep to them.
    Nothing gets deleted before then.
 10. Writing page: Medium posts now flow in automatically. The Deploy workflow
     also runs daily at 06:00 UTC, and each build reads the Medium feed.
-11. Project 1 architecture diagram drafted (official AWS icons), waiting on
+11. Live chat: WhatsApp only, no widget (Ismail, 2026-10-07).
+12. Project 1 architecture diagram drafted (official AWS icons), waiting on
     Ismail's approval before it goes on the case study.
 
 ## Open questions
 
-- Live chat: the WhatsApp link currently covers this. Add a chat widget
-  (for example Tawk.to, behind consent) or keep WhatsApp only?
 
 ## How to run, preview and deploy
 
