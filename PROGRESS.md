@@ -225,8 +225,12 @@ The project instructions hold the full text. Every change must keep to them.
   retire them only with Ismail's go-ahead. The contact form on the live site
   works: Ismail got the Web3Forms email and the /thank-you page on 2026-10-07.
   WAF switched to blocking. GA4 live (`G-96WC89XFFM` as repo variable
-  `PUBLIC_GA_ID`, confirmed in Realtime after consent). Still to do: Search Console,
-  Bing, PageSpeed.
+  `PUBLIC_GA_ID`, confirmed in Realtime after consent). Search Console verified (TXT record in Route 53, keep
+  it) with sitemap-index.xml submitted; Bing imported from GSC with the sitemap
+  submitted. Lighthouse on the production build (2026-10-07, local, because the
+  PageSpeed API quota was used up): Home, About, Projects, Contact score 97-99
+  performance on mobile and 100 on desktop, 100 accessibility, best practices
+  and SEO.
 
 - Pull request #1 merged into main (2026-10-07).
 
@@ -242,8 +246,7 @@ The project instructions hold the full text. Every change must keep to them.
 
 1-4. Done 2026-10-07: merged, deployed, live on apex and www, form tested.
 4b-5. Done 2026-10-07: WAF blocking; GA4 live after consent.
-6. Submit the sitemap in Google Search Console and Bing Webmaster Tools.
-7. Run PageSpeed Insights on mobile and desktop, fix anything under 90.
+6-7. Done 2026-10-07: Search Console and Bing set up; Lighthouse 97+ everywhere.
 8. Business email on the domain (for example hello@ismailoyeleke.com) with
    SPF, DKIM and DMARC, then update `site.ts` email.
 9. Retire the old site once the new one is live (ask Ismail before deleting
