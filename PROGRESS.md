@@ -223,8 +223,13 @@ The project instructions hold the full text. Every change must keep to them.
   ismailoyeleke.com, so at cutover remove the names from the old distribution,
   add both names plus the certificate to E2BH4ZWLFJV2MA, then switch Route 53.
   IAM OIDC provider, deploy role and production environment secrets are set.
-  PR #1 merged; the first deploy failed at AssumeRoleWithWebIdentity, so the
-  manual `OIDC check` workflow prints the token's sub/aud to fix the trust policy.
+  PR #1 merged. The first deploy failed at AssumeRoleWithWebIdentity because
+  GitHub's sub now carries owner and repo IDs; the trust policy was changed to
+  `repo:ISMAIL-OYELEKE@98213704/portfolio@1407159421:environment:production` and
+  the deploy is green (run 37638464217). The site serves from
+  dwhxjqyi603va.cloudfront.net: home, /about, /contact and /writing all load on
+  clean URLs and an unknown path returns 404. Next: Ismail sets the default
+  branch to main, then the domain cutover.
   WAF is in monitor mode: switch it to blocking after go-live. The Free plan
   blocks custom header policies, so the behaviour uses the managed
   SecurityHeadersPolicy and the CSP is a meta tag in Base.astro. The old single-name
