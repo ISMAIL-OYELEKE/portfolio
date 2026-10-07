@@ -258,8 +258,8 @@ The project instructions hold the full text. Every change must keep to them.
     "The problem", linked full size. All four approved by Ismail on
     2026-10-07.
 13. Diagrams for the Enterprise staff portal and the Amazon Connect contact
-    centre drafted (staff portal region and routes from its app.js), waiting
-    on Ismail's approval before the pull request.
+    centre drafted (staff portal region and routes from its app.js). Approved by
+    Ismail on 2026-10-07.
 
 ## Open questions
 
