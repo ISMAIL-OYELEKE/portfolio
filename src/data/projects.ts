@@ -20,6 +20,8 @@ export type Project = {
   metaTitle?: string;
   metaDescription?: string;
   media?: { type: 'image' | 'video'; src: string; poster?: string; alt: string; caption?: string }[];
+  /** Architecture diagram in public/diagrams, named after the slug. */
+  diagram?: { width: number; height: number; alt: string };
 };
 
 export const projects: Project[] = [
@@ -77,6 +79,11 @@ export const projects: Project[] = [
   },
   {
     slug: 'portfolio-on-s3-cloudfront-route-53',
+    diagram: {
+      width: 1720,
+      height: 1170,
+      alt: 'Architecture diagram: visitors resolve ismailoyeleke.com in Route 53 and reach CloudFront, protected by AWS WAF with an ACM certificate, which reads from a private S3 bucket through Origin Access Control. GitHub Actions deploys through an IAM role assumed with OIDC.',
+    },
     title: 'This Portfolio: Static Hosting on S3, CloudFront and Route 53',
     kind: 'cloud',
     date: 'December 2025',
@@ -187,6 +194,11 @@ export const projects: Project[] = [
   },
   {
     slug: 'serverless-ai-recruiter-assistant',
+    diagram: {
+      width: 1720,
+      height: 840,
+      alt: 'Architecture diagram: a recruiter chats through a Kommunicate widget, which sends messages to an Amazon Lex V2 bot. Lex calls a Python Lambda function for the answer, under least-privilege IAM roles, and each turn is logged in CloudWatch.',
+    },
     title: 'Serverless AI Recruiter Assistant',
     kind: 'cloud',
     date: 'February 2026',
@@ -224,6 +236,11 @@ export const projects: Project[] = [
   },
   {
     slug: 'highly-available-multi-tier-web-application',
+    diagram: {
+      width: 1720,
+      height: 1460,
+      alt: 'Architecture diagram: users reach an Application Load Balancer through the internet gateway. It sends traffic to EC2 web servers in private subnets across two Availability Zones in an Auto Scaling group, which read credentials from Secrets Manager and query RDS MySQL in private database subnets.',
+    },
     title: 'Highly Available Multi-Tier Web Application on AWS',
     metaTitle: 'Multi-Tier Web Application on AWS',
     kind: 'cloud',
@@ -280,6 +297,11 @@ export const projects: Project[] = [
   },
   {
     slug: 'wordpress-on-lightsail',
+    diagram: {
+      width: 1720,
+      height: 900,
+      alt: 'Architecture diagram: readers reach a Lightsail instance through its static IP over HTTPS. The instance runs Bitnami WordPress with Apache, PHP and MySQL, and a Let’s Encrypt certificate. Lightsail takes daily snapshots.',
+    },
     title: 'WordPress on AWS Lightsail',
     kind: 'cloud',
     date: 'December 2025',
