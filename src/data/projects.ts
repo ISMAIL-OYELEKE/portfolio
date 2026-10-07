@@ -27,6 +27,11 @@ export type Project = {
 export const projects: Project[] = [
   {
     slug: 'enterprise-staff-portal',
+    diagram: {
+      width: 1720,
+      height: 1090,
+      alt: 'Architecture diagram: staff and leadership use a browser portal that calls an API Gateway HTTP API in eu-west-2. Lambda handlers check roles, store requests, sessions and notifications in DynamoDB, and send status email through Amazon SES. EventBridge schedules run reminders and digests.',
+    },
     title: 'Enterprise Staff Portal',
     kind: 'cloud',
     date: 'July 2026',
@@ -152,6 +157,11 @@ export const projects: Project[] = [
   },
   {
     slug: 'cloud-contact-center',
+    diagram: {
+      width: 1720,
+      height: 1090,
+      alt: 'Architecture diagram: callers and web chat customers, from allowlisted bank domains only, enter one Amazon Connect contact flow that checks Africa/Lagos business hours. In hours they join an agent queue and reach an agent in the Contact Control Panel. Out of hours, Amazon Polly reads a closed message and the contact ends.',
+    },
     title: 'Cloud Contact Centre for ThinkFinance MFB',
     kind: 'cloud',
     date: 'June 2026',
