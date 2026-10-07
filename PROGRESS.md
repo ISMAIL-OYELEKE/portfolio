@@ -222,13 +222,15 @@ The project instructions hold the full text. Every change must keep to them.
   `1d9649e6...` are NOT attached yet: the old distribution still holds
   ismailoyeleke.com, so at cutover remove the names from the old distribution,
   add both names plus the certificate to E2BH4ZWLFJV2MA, then switch Route 53.
-  Now on step 8 (IAM OIDC provider).
+  IAM OIDC provider, deploy role and production environment secrets are set.
+  PR #1 merged; the first deploy failed at AssumeRoleWithWebIdentity, so the
+  manual `OIDC check` workflow prints the token's sub/aud to fix the trust policy.
   WAF is in monitor mode: switch it to blocking after go-live. The Free plan
   blocks custom header policies, so the behaviour uses the managed
   SecurityHeadersPolicy and the CSP is a meta tag in Base.astro. The old single-name
   certificate `4fc97a3a...` is used by the current site; keep it until cutover.
 
-- Pull request #1 waiting on Ismail's review and merge.
+- Pull request #1 merged into main (2026-10-07).
 
 ## Waiting on Ismail
 
