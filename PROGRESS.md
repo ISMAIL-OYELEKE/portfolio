@@ -217,8 +217,12 @@ The project instructions hold the full text. Every change must keep to them.
   (Issued), bucket `ismailoyeleke-com-site`, function `portfolio-clean-urls`
   (published), headers policy `portfolio-security-headers`, distribution
   `E2BH4ZWLFJV2MA` (`dwhxjqyi603va.cloudfront.net`, Free plan, private bucket
-  access via OAC). Now finishing the distribution: default root object, then
-  the function, headers policy, error pages and the domain plus certificate.
+  access via OAC). Distribution has index.html root, the clean-urls function, managed
+  SecurityHeadersPolicy and 403/404 -> /404.html. Domain and certificate
+  `1d9649e6...` are NOT attached yet: the old distribution still holds
+  ismailoyeleke.com, so at cutover remove the names from the old distribution,
+  add both names plus the certificate to E2BH4ZWLFJV2MA, then switch Route 53.
+  Now on step 8 (IAM OIDC provider).
   WAF is in monitor mode: switch it to blocking after go-live. The Free plan
   blocks custom header policies, so the behaviour uses the managed
   SecurityHeadersPolicy and the CSP is a meta tag in Base.astro. The old single-name
