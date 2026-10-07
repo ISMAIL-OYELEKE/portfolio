@@ -274,7 +274,7 @@ npm run check          # type and Astro diagnostics
 
 Optional `.env` (copy `.env.example`): `PUBLIC_WEB3FORMS_KEY`, `PUBLIC_GA_ID`.
 
-Preview: every push to `main` or any `claude/**` branch runs
+Preview: every push to a `claude/**` branch (not `main`, which goes live) runs
 `.github/workflows/preview.yml`, which builds with `BASE_PATH=/portfolio` and
 `PUBLIC_NOINDEX=true`, prefixes links with `scripts/apply-base.mjs`, and
 publishes to https://ismail-oyeleke.github.io/portfolio/. The preview is never
