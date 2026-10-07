@@ -176,6 +176,16 @@ distribution:
 
 ## 6. Security headers
 
+**On CloudFront's Free plan (what this site uses):** custom response headers
+policies need the Business plan. The default behaviour uses the managed
+`SecurityHeadersPolicy` (HSTS, nosniff, X-Frame-Options, Referrer-Policy), and
+the Content-Security-Policy below ships as a `<meta http-equiv>` tag in
+`src/layouts/Base.astro`, with `form-action 'self'` added for the redirect back
+to `/thank-you`. A meta tag cannot carry `frame-ancestors`; X-Frame-Options from
+the managed policy covers framing. Keep the meta tag and this section in step.
+
+**On a paid plan,** use the custom policy instead:
+
 Create a CloudFront response headers policy and attach it to the default cache
 behaviour:
 

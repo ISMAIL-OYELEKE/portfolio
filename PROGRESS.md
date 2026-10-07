@@ -219,7 +219,9 @@ The project instructions hold the full text. Every change must keep to them.
   `E2BH4ZWLFJV2MA` (`dwhxjqyi603va.cloudfront.net`, Free plan, private bucket
   access via OAC). Now finishing the distribution: default root object, then
   the function, headers policy, error pages and the domain plus certificate.
-  WAF is in monitor mode: switch it to blocking after go-live. The old single-name
+  WAF is in monitor mode: switch it to blocking after go-live. The Free plan
+  blocks custom header policies, so the behaviour uses the managed
+  SecurityHeadersPolicy and the CSP is a meta tag in Base.astro. The old single-name
   certificate `4fc97a3a...` is used by the current site; keep it until cutover.
 
 - Pull request #1 waiting on Ismail's review and merge.
