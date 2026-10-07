@@ -96,6 +96,30 @@ const schema = {
           <p>{project.problem}</p>
         </section>
 
+        {
+          project.diagram && (
+            <figure class="shot diagram">
+              <a href={`/diagrams/${project.slug}.svg`} target="_blank" rel="noopener">
+                <img
+                  src={`/diagrams/${project.slug}.svg`}
+                  alt={project.diagram.alt}
+                  width={project.diagram.width}
+                  height={project.diagram.height}
+                  loading="lazy"
+                  decoding="async"
+                />
+              </a>
+              <figcaption>
+                The architecture, drawn with the official AWS icons.{' '}
+                <a href={`/diagrams/${project.slug}.svg`} target="_blank" rel="noopener">
+                  Open it full size
+                </a>
+                .
+              </figcaption>
+            </figure>
+          )
+        }
+
         {project.video && <VideoEmbed url={project.video} title={project.title} />}
 
         {
@@ -334,6 +358,10 @@ const schema = {
     border: 1px solid var(--rule);
     border-radius: var(--r-card);
     display: block;
+  }
+  .diagram :global(img) {
+    height: auto;
+    background: #ffffff;
   }
   .shot figcaption {
     font-size: 0.82rem;
