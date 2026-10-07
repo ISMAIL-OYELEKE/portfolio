@@ -185,7 +185,7 @@ behaviour:
 | `X-Content-Type-Options` | `nosniff` |
 | `Referrer-Policy` | `strict-origin-when-cross-origin` |
 | `X-Frame-Options` | `DENY` |
-| `Permissions-Policy` | `camera=(), microphone=(), geolocation=(), interest-cohort=()` |
+| `Permissions-Policy` | `camera=(), microphone=(), geolocation=()` (a custom header in the policy) |
 | `Content-Security-Policy` | see below |
 
 A policy that fits what the site actually loads:
@@ -196,7 +196,7 @@ script-src 'self' 'sha256-bRrXOZfzkSHqxbwz5Za8TNTsnrMa7Kvk+eW1MqoTxsQ=' https://
 style-src 'self' 'unsafe-inline';
 img-src 'self' data: https://i.ytimg.com https://www.googletagmanager.com;
 font-src 'self';
-connect-src 'self' https://api.web3forms.com https://www.google-analytics.com https://region1.google-analytics.com;
+connect-src 'self' https://api.web3forms.com https://www.googletagmanager.com https://www.google-analytics.com https://region1.google-analytics.com https://region1.analytics.google.com;
 frame-src https://www.youtube-nocookie.com;
 form-action https://api.web3forms.com;
 base-uri 'self';
