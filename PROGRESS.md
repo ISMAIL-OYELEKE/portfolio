@@ -224,7 +224,9 @@ The project instructions hold the full text. Every change must keep to them.
   `ismailoyeleke.com` and old certificate `4fc97a3a...` are kept as a fallback;
   retire them only with Ismail's go-ahead. The contact form on the live site
   works: Ismail got the Web3Forms email and the /thank-you page on 2026-10-07.
-  Still to do: switch WAF from monitor to blocking, GA4, Search Console, Bing, PageSpeed.
+  WAF switched to blocking. GA4 live (`G-96WC89XFFM` as repo variable
+  `PUBLIC_GA_ID`, confirmed in Realtime after consent). Still to do: Search Console,
+  Bing, PageSpeed.
 
 - Pull request #1 merged into main (2026-10-07).
 
@@ -232,15 +234,14 @@ The project instructions hold the full text. Every change must keep to them.
 
 1. Done 2026-10-07: PR #1 merged and default branch set to `main`.
 2. Done 2026-10-07: Web3Forms key saved as secret `PUBLIC_WEB3FORMS_KEY`.
-3. GA4 Measurement ID (`G-XXXXXXX`). Save as repository variable `PUBLIC_GA_ID`.
+3. Done 2026-10-07: GA4 ID saved as repository variable `PUBLIC_GA_ID`.
 4. Done 2026-10-07: AWS setup and the production environment secrets.
 5. Optionally the Project 1 architecture diagram as an image.
 
 ## Next steps, in order
 
 1-4. Done 2026-10-07: merged, deployed, live on apex and www, form tested.
-4b. Switch the CloudFront WAF from monitor mode to blocking.
-5. Add the GA4 id, confirm events only fire after consent.
+4b-5. Done 2026-10-07: WAF blocking; GA4 live after consent.
 6. Submit the sitemap in Google Search Console and Bing Webmaster Tools.
 7. Run PageSpeed Insights on mobile and desktop, fix anything under 90.
 8. Business email on the domain (for example hello@ismailoyeleke.com) with
