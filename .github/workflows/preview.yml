@@ -1,15 +1,17 @@
 name: Preview
 
-# Publishes a live preview to GitHub Pages on every push, so the site can be
-# checked on a phone or laptop while it is being built:
+# Publishes a live preview to GitHub Pages on every push to a work branch, so
+# changes can be checked on a phone or laptop before they reach main:
 #   https://ismail-oyeleke.github.io/portfolio/
 # The preview is marked noindex, so it never competes with the real domain.
 #
 # One-time setup: Settings > Pages > Build and deployment > Source: GitHub Actions.
+# main is left out: it deploys to ismailoyeleke.com, and the github-pages
+# environment only accepts deployments from the preview branches.
 
 on:
   push:
-    branches: [main, 'claude/**']
+    branches: ['claude/**']
   workflow_dispatch:
 
 permissions:

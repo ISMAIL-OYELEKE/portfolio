@@ -3,7 +3,7 @@
 The single source of truth for where the ismailoyeleke.com rebuild stands.
 Update this file in the same commit as any change, on every push.
 
-Last updated: 2026-10-06
+Last updated: 2026-10-07
 
 ## Paste this to resume
 
@@ -212,48 +212,41 @@ The project instructions hold the full text. Every change must keep to them.
 
 ## In progress
 
-- Go-live with Ismail, one step per message (2026-10-07). Done: Web3Forms key
-  (form live on the preview), certificate `1d9649e6...` covering both names
-  (Issued), bucket `ismailoyeleke-com-site`, function `portfolio-clean-urls`
-  (published), headers policy `portfolio-security-headers`, distribution
-  `E2BH4ZWLFJV2MA` (`dwhxjqyi603va.cloudfront.net`, Free plan, private bucket
-  access via OAC). Distribution has index.html root, the clean-urls function, managed
-  SecurityHeadersPolicy and 403/404 -> /404.html. Domain and certificate
-  `1d9649e6...` are NOT attached yet: the old distribution still holds
-  ismailoyeleke.com, so at cutover remove the names from the old distribution,
-  add both names plus the certificate to E2BH4ZWLFJV2MA, then switch Route 53.
-  Now on step 8 (IAM OIDC provider).
-  WAF is in monitor mode: switch it to blocking after go-live. The Free plan
-  blocks custom header policies, so the behaviour uses the managed
-  SecurityHeadersPolicy and the CSP is a meta tag in Base.astro. The old single-name
-  certificate `4fc97a3a...` is used by the current site; keep it until cutover.
+- LIVE on 2026-10-07. ismailoyeleke.com and www.ismailoyeleke.com serve the new
+  site from distribution `E2BH4ZWLFJV2MA` (`dwhxjqyi603va.cloudfront.net`, Free
+  plan, private bucket `ismailoyeleke-com-site` via OAC, clean-urls function,
+  managed SecurityHeadersPolicy, CSP as a meta tag, TLSv1.2_2021), certificate
+  `1d9649e6...` covering both names. Route 53 has A and AAAA aliases for the apex
+  and www. Deploys run from main via GitHub OIDC; the role trust sub is
+  `repo:ISMAIL-OYELEKE@98213704/portfolio@1407159421:environment:production`
+  (GitHub now includes owner and repo IDs). Default branch is main.
+  The old distribution `E1AMGG14CCOU14` (no domain names now), old bucket
+  `ismailoyeleke.com` and old certificate `4fc97a3a...` are kept as a fallback;
+  retire them only with Ismail's go-ahead. The contact form on the live site
+  works: Ismail got the Web3Forms email and the /thank-you page on 2026-10-07.
+  WAF switched to blocking. GA4 live (`G-96WC89XFFM` as repo variable
+  `PUBLIC_GA_ID`, confirmed in Realtime after consent). Search Console verified (TXT record in Route 53, keep
+  it) with sitemap-index.xml submitted; Bing imported from GSC with the sitemap
+  submitted. Lighthouse on the production build (2026-10-07, local, because the
+  PageSpeed API quota was used up): Home, About, Projects, Contact score 97-99
+  performance on mobile and 100 on desktop, 100 accessibility, best practices
+  and SEO.
 
-- Pull request #1 waiting on Ismail's review and merge.
+- Pull request #1 merged into main (2026-10-07).
 
 ## Waiting on Ismail
 
-1. Review the preview and merge pull request #1. After merging, set the
-   repository default branch to `main` (Settings > General > Default branch).
-2. Web3Forms access key (free at web3forms.com, sent to his email). Save as
-   a repository secret `PUBLIC_WEB3FORMS_KEY` (read by both the preview and
-   the production build).
-3. GA4 Measurement ID (`G-XXXXXXX`). Save as repository variable `PUBLIC_GA_ID`.
-4. AWS setup, following `go-live-guide.md` in the project folder (the plain
-   version of `docs/deployment.md`), then the environment secrets
-   `AWS_DEPLOY_ROLE_ARN`, `AWS_S3_BUCKET`, `AWS_CLOUDFRONT_DISTRIBUTION_ID`.
+1. Done 2026-10-07: PR #1 merged and default branch set to `main`.
+2. Done 2026-10-07: Web3Forms key saved as secret `PUBLIC_WEB3FORMS_KEY`.
+3. Done 2026-10-07: GA4 ID saved as repository variable `PUBLIC_GA_ID`.
+4. Done 2026-10-07: AWS setup and the production environment secrets.
 5. Optionally the Project 1 architecture diagram as an image.
 
 ## Next steps, in order
 
-1. Confirm the preview at https://ismail-oyeleke.github.io/portfolio/ loads
-   every page, and fix anything Ismail flags.
-2. Merge PR #1, switch the default branch to `main`.
-3. With the AWS secrets in place, let `deploy.yml` run on `main` and check
-   https://ismailoyeleke.com over HTTPS, apex and www.
-4. Add the Web3Forms key and send a real test message through the form.
-5. Add the GA4 id, confirm events only fire after consent.
-6. Submit the sitemap in Google Search Console and Bing Webmaster Tools.
-7. Run PageSpeed Insights on mobile and desktop, fix anything under 90.
+1-4. Done 2026-10-07: merged, deployed, live on apex and www, form tested.
+4b-5. Done 2026-10-07: WAF blocking; GA4 live after consent.
+6-7. Done 2026-10-07: Search Console and Bing set up; Lighthouse 97+ everywhere.
 8. Business email on the domain (for example hello@ismailoyeleke.com) with
    SPF, DKIM and DMARC, then update `site.ts` email.
 9. Retire the old site once the new one is live (ask Ismail before deleting
@@ -281,7 +274,7 @@ npm run check          # type and Astro diagnostics
 
 Optional `.env` (copy `.env.example`): `PUBLIC_WEB3FORMS_KEY`, `PUBLIC_GA_ID`.
 
-Preview: every push to `main` or any `claude/**` branch runs
+Preview: every push to a `claude/**` branch (not `main`, which goes live) runs
 `.github/workflows/preview.yml`, which builds with `BASE_PATH=/portfolio` and
 `PUBLIC_NOINDEX=true`, prefixes links with `scripts/apply-base.mjs`, and
 publishes to https://ismail-oyeleke.github.io/portfolio/. The preview is never
