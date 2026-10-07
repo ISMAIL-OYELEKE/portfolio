@@ -1,0 +1,66 @@
+---
+import Base from './Base.astro';
+import PageHero from '../components/PageHero.astro';
+
+interface Props {
+  title: string;
+  description: string;
+  updated: string;
+}
+const { title, description, updated } = Astro.props;
+---
+
+<Base title={title} description={description} hideStickyCta>
+  <PageHero eyebrow="Legal" title={title} />
+  <section class="section">
+    <div class="shell prose">
+      <p class="prose__updated">Last updated {updated}</p>
+      <slot />
+    </div>
+  </section>
+</Base>
+
+<style>
+  .prose {
+    max-width: 44rem;
+  }
+  .prose__updated {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 2rem;
+  }
+  .prose :global(h2) {
+    font-size: clamp(1.25rem, 2.4vw, 1.6rem);
+    margin-top: 2.5rem;
+  }
+  .prose :global(h2:first-of-type) {
+    margin-top: 0;
+  }
+  .prose :global(ul) {
+    display: grid;
+    gap: 0.6rem;
+    padding-left: 0;
+    list-style: none;
+    margin-bottom: 1.2rem;
+  }
+  .prose :global(li) {
+    position: relative;
+    padding-left: 1.4rem;
+    max-width: 68ch;
+  }
+  .prose :global(li)::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.72em;
+    width: 0.8rem;
+    height: 1px;
+    background: var(--highlight);
+  }
+  .prose :global(a) {
+    color: var(--accent);
+  }
+</style>

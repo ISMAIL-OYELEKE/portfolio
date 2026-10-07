@@ -1,0 +1,359 @@
+---
+/**
+ * Contact form.
+ *
+ * The site is static, so the submission goes to Web3Forms, which validates
+ * the payload server side, filters spam and forwards the message by email.
+ * Set PUBLIC_WEB3FORMS_KEY at build time. Without a key the form is replaced
+ * by the direct contact details, so the page never shows an input that
+ * silently drops what someone types.
+ *
+ * Spam protection: a hidden honeypot field Web3Forms rejects on, a minimum
+ * time on page before a submission is accepted, and the provider's own
+ * filtering. Validation runs in the browser for immediate error states and
+ * again on the server, because the browser can be bypassed.
+ */
+import { site } from '../data/site';
+import SocialIcon from './SocialIcon.astro';
+
+const accessKey = import.meta.env.PUBLIC_WEB3FORMS_KEY ?? '';
+// Absolute and base-aware, so the preview under /portfolio lands on its own
+// thank-you page rather than the live domain's.
+const thankYou = new URL(`${import.meta.env.BASE_URL.replace(/\/$/, '')}/thank-you`, Astro.site).href;
+---
+
+{
+  accessKey ? (
+    <form class="form" data-contact-form method="POST" action="https://api.web3forms.com/submit" novalidate>
+      <input type="hidden" name="access_key" value={accessKey} />
+      <input type="hidden" name="subject" value="New message from ismailoyeleke.com" />
+      <input type="hidden" name="from_name" value="ismailoyeleke.com" />
+      <input type="hidden" name="redirect" value={thankYou} />
+      {/* Honeypot: hidden from people, tempting to bots. */}
+      <input type="checkbox" name="botcheck" class="form__honeypot" tabindex="-1" autocomplete="off" />
+
+      <div class="form__row">
+        <div class="field">
+          <label for="name">Your name</label>
+          <input id="name" name="name" type="text" required minlength="2" maxlength="80" autocomplete="name" aria-describedby="name-error" />
+          <p class="field__error" id="name-error" data-error-for="name" hidden></p>
+        </div>
+
+        <div class="field">
+          <label for="email">Email</label>
+          <input id="email" name="email" type="email" required maxlength="120" autocomplete="email" aria-describedby="email-error" />
+          <p class="field__error" id="email-error" data-error-for="email" hidden></p>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="company">Company or organisation <span class="field__optional">optional</span></label>
+        <input id="company" name="company" type="text" maxlength="120" autocomplete="organization" />
+      </div>
+
+      <div class="field">
+        <label for="topic">What is this about</label>
+        <select id="topic" name="topic" required aria-describedby="topic-error">
+          <option value="">Choose one</option>
+          <option>A cloud or DevOps role</option>
+          <option>A freelance project</option>
+          <option>Consulting or architecture review</option>
+          <option>Something else</option>
+        </select>
+        <p class="field__error" id="topic-error" data-error-for="topic" hidden></p>
+      </div>
+
+      <div class="field">
+        <label for="message">Message</label>
+        <textarea id="message" name="message" rows="6" required minlength="20" maxlength="2000" aria-describedby="message-error message-hint"></textarea>
+        <p class="field__hint" id="message-hint">
+          <span data-count>0</span> of 2000 characters. At least 20.
+        </p>
+        <p class="field__error" id="message-error" data-error-for="message" hidden></p>
+      </div>
+
+      <p class="form__consent">
+        Sending this message shares your name, email and message with me by email. Nothing is stored
+        on this site. See the <a href="/privacy">privacy policy</a>.
+      </p>
+
+      <div class="form__actions">
+        <button type="submit" class="btn btn--primary" data-submit>
+          <span data-submit-label>Send message</span>
+          <span class="spinner" data-spinner hidden aria-hidden="true"></span>
+        </button>
+        <p class="form__status" data-status role="status" aria-live="polite"></p>
+      </div>
+    </form>
+  ) : (
+    <div class="fallback">
+      <p>
+        The form is not connected yet. Until it is, email or WhatsApp reaches me just as quickly.
+      </p>
+      <div class="btn-row">
+        <a class="btn btn--primary" href={`mailto:${site.email}`}>
+          <SocialIcon name="mail" size={15} />
+          Email me
+        </a>
+        <a class="btn btn--ghost" href={site.whatsapp} target="_blank" rel="noopener">
+          <SocialIcon name="whatsapp" size={15} />
+          WhatsApp
+        </a>
+      </div>
+    </div>
+  )
+}
+
+<style>
+  .form {
+    display: grid;
+    gap: 1.25rem;
+    max-width: 38rem;
+  }
+
+  .form__row {
+    display: grid;
+    gap: 1.25rem;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr));
+  }
+
+  .form__honeypot {
+    position: absolute;
+    left: -9999px;
+    opacity: 0;
+  }
+
+  .field {
+    display: grid;
+    gap: 0.4rem;
+  }
+
+  .field label {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  .field__optional {
+    color: var(--text-muted);
+    letter-spacing: 0.08em;
+  }
+
+  .field input,
+  .field select,
+  .field textarea {
+    width: 100%;
+    font: inherit;
+    font-size: 0.95rem;
+    color: var(--text);
+    background: color-mix(in srgb, var(--bg) 70%, transparent);
+    border: 1px solid var(--accent-line);
+    border-radius: var(--r-sharp);
+    padding: 0.8rem 0.9rem;
+  }
+  .field textarea {
+    resize: vertical;
+    min-height: 9rem;
+  }
+  .field select {
+    appearance: none;
+    background-image: linear-gradient(45deg, transparent 50%, currentColor 50%),
+      linear-gradient(135deg, currentColor 50%, transparent 50%);
+    background-position: calc(100% - 18px) 55%, calc(100% - 12px) 55%;
+    background-size: 6px 6px, 6px 6px;
+    background-repeat: no-repeat;
+    padding-right: 2.5rem;
+  }
+  .field input:focus,
+  .field select:focus,
+  .field textarea:focus {
+    border-color: var(--highlight);
+  }
+  .field [aria-invalid='true'] {
+    border-color: #e9a7a7;
+    border-width: 2px;
+  }
+
+  .field__hint {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    margin: 0;
+  }
+
+  .field__error {
+    margin: 0;
+    font-size: 0.82rem;
+    color: #f0b4b4;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+  .field__error::before {
+    content: '!';
+    display: grid;
+    place-items: center;
+    width: 1.1rem;
+    height: 1.1rem;
+    border: 1px solid currentColor;
+    border-radius: 50%;
+    font-size: 0.7rem;
+    font-weight: 600;
+    flex: 0 0 auto;
+  }
+
+  .form__consent {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    margin: 0;
+  }
+  .form__consent a {
+    color: var(--accent);
+  }
+
+  .form__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .form__status {
+    margin: 0;
+    font-size: 0.88rem;
+  }
+  .form__status[data-state='error'] {
+    color: #f0b4b4;
+  }
+  .form__status[data-state='success'] {
+    color: var(--highlight);
+  }
+
+  .spinner {
+    width: 14px;
+    height: 14px;
+    border: 2px solid currentColor;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  button[disabled] {
+    opacity: 0.65;
+    cursor: progress;
+  }
+
+  .fallback p {
+    color: var(--text-muted);
+  }
+</style>
+
+<script>
+  const form = document.querySelector<HTMLFormElement>('[data-contact-form]');
+
+  if (form) {
+    const loadedAt = Date.now();
+    const status = form.querySelector<HTMLElement>('[data-status]')!;
+    const button = form.querySelector<HTMLButtonElement>('[data-submit]')!;
+    const label = form.querySelector<HTMLElement>('[data-submit-label]')!;
+    const spinner = form.querySelector<HTMLElement>('[data-spinner]')!;
+    const message = form.querySelector<HTMLTextAreaElement>('#message')!;
+    const counter = form.querySelector<HTMLElement>('[data-count]')!;
+
+    const rules: Record<string, (value: string) => string | null> = {
+      name: (v) => (v.trim().length < 2 ? 'Please enter your name.' : null),
+      email: (v) =>
+        /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v.trim()) ? null : 'Please enter a valid email address.',
+      topic: (v) => (v ? null : 'Please choose what this is about.'),
+      message: (v) =>
+        v.trim().length < 20 ? 'Please write at least 20 characters so I can reply properly.' : null,
+    };
+
+    function showError(field: HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement, text: string | null) {
+      const slot = form!.querySelector<HTMLElement>(`[data-error-for="${field.name}"]`);
+      if (!slot) return;
+      if (text) {
+        slot.textContent = text;
+        slot.hidden = false;
+        field.setAttribute('aria-invalid', 'true');
+      } else {
+        slot.hidden = true;
+        field.removeAttribute('aria-invalid');
+      }
+    }
+
+    function validateField(name: string) {
+      const field = form!.elements.namedItem(name) as HTMLInputElement | null;
+      if (!field) return true;
+      const error = rules[name](field.value);
+      showError(field, error);
+      return !error;
+    }
+
+    Object.keys(rules).forEach((name) => {
+      const field = form.elements.namedItem(name) as HTMLElement | null;
+      field?.addEventListener('blur', () => validateField(name));
+      field?.addEventListener('input', () => {
+        if (field.getAttribute('aria-invalid') === 'true') validateField(name);
+      });
+    });
+
+    message.addEventListener('input', () => {
+      counter.textContent = String(message.value.length);
+    });
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+
+      const valid = Object.keys(rules).map(validateField).every(Boolean);
+      if (!valid) {
+        status.textContent = 'Please fix the fields marked above.';
+        status.dataset.state = 'error';
+        form.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus();
+        return;
+      }
+
+      // A real person takes longer than three seconds to fill this in.
+      if (Date.now() - loadedAt < 3000) {
+        status.textContent = 'That was quick. Give it a moment and send again.';
+        status.dataset.state = 'error';
+        return;
+      }
+
+      button.disabled = true;
+      spinner.hidden = false;
+      label.textContent = 'Sending';
+      status.textContent = '';
+      delete status.dataset.state;
+
+      try {
+        const response = await fetch(form.action, {
+          method: 'POST',
+          headers: { Accept: 'application/json' },
+          body: new FormData(form),
+        });
+        const result = await response.json();
+
+        if (response.ok && result.success) {
+          window.location.href = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/thank-you`;
+          return;
+        }
+        throw new Error(result.message ?? 'The message could not be sent.');
+      } catch (error) {
+        status.textContent =
+          'Something went wrong sending that. Please email ismailoyeleke2003@gmail.com instead.';
+        status.dataset.state = 'error';
+      } finally {
+        button.disabled = false;
+        spinner.hidden = true;
+        label.textContent = 'Send message';
+      }
+    });
+  }
+</script>

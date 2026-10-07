@@ -1,0 +1,101 @@
+---
+/**
+ * Click-to-load YouTube facade. Nothing from YouTube is requested until the
+ * visitor presses play, which keeps the page fast and sets no third-party
+ * cookie on arrival. The iframe is youtube-nocookie.
+ */
+import SocialIcon from './SocialIcon.astro';
+
+interface Props {
+  url: string;
+  title: string;
+}
+const { url, title } = Astro.props;
+
+const id = url.match(/(?:v=|youtu\.be\/|embed\/)([\w-]{6,})/)?.[1] ?? '';
+const poster = `https://i.ytimg.com/vi/${id}/hqdefault.jpg`;
+---
+
+<div class="facade" data-video-facade data-id={id}>
+  <button type="button" class="facade__btn">
+    <img src={poster} alt="" width="480" height="360" loading="lazy" decoding="async" />
+    <span class="facade__badge">
+      <SocialIcon name="play" size={22} />
+      <span>Play demo</span>
+    </span>
+    <span class="visually-hidden">Play the video: {title}</span>
+  </button>
+  <p class="facade__note">
+    Loads from YouTube when you press play.{' '}
+    <a href={url} target="_blank" rel="noopener">Watch on YouTube</a>.
+  </p>
+</div>
+
+<style>
+  .facade {
+    margin: 1.75rem 0;
+  }
+  .facade__btn {
+    position: relative;
+    display: block;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    padding: 0;
+    border: 1px solid var(--accent-line);
+    border-radius: var(--r-card);
+    background: var(--brand-ink);
+    cursor: pointer;
+    overflow: hidden;
+  }
+  .facade__btn img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0.78;
+    transition: opacity 0.2s ease;
+  }
+  .facade__btn:hover img {
+    opacity: 1;
+  }
+  .facade__badge {
+    position: absolute;
+    inset: auto auto 1rem 1rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    background: var(--brand-ink);
+    color: var(--highlight);
+    border: 1px solid var(--highlight);
+    padding: 0.6rem 1rem;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+  .facade__note {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin: 0.6rem 0 0;
+  }
+  .facade iframe {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    border: 1px solid var(--accent-line);
+    border-radius: var(--r-card);
+  }
+</style>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-video-facade]').forEach((facade) => {
+    const button = facade.querySelector('button');
+    button?.addEventListener('click', () => {
+      const id = facade.dataset.id;
+      const frame = document.createElement('iframe');
+      frame.src = `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0`;
+      frame.title = 'Project demo video';
+      frame.allow = 'accelerometer; autoplay; encrypted-media; picture-in-picture';
+      frame.allowFullscreen = true;
+      button.replaceWith(frame);
+    });
+  });
+</script>
