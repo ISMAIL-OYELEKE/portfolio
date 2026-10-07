@@ -247,18 +247,18 @@ The project instructions hold the full text. Every change must keep to them.
 1-4. Done 2026-10-07: merged, deployed, live on apex and www, form tested.
 4b-5. Done 2026-10-07: WAF blocking; GA4 live after consent.
 6-7. Done 2026-10-07: Search Console and Bing set up; Lighthouse 97+ everywhere.
-8. Business email on the domain (for example hello@ismailoyeleke.com) with
-   SPF, DKIM and DMARC, then update `site.ts` email.
-9. Retire the old site once the new one is live (ask Ismail before deleting
-   anything).
+8. Business email: not needed for now (Ismail, 2026-10-07).
+9. Retire the old site around 2026-10-14, only with Ismail's go-ahead.
+   Nothing gets deleted before then.
+10. Writing page: Medium posts now flow in automatically. The Deploy workflow
+    also runs daily at 06:00 UTC, and each build reads the Medium feed.
+11. Project 1 architecture diagram drafted (official AWS icons), waiting on
+    Ismail's approval before it goes on the case study.
 
 ## Open questions
 
 - Live chat: the WhatsApp link currently covers this. Add a chat widget
   (for example Tawk.to, behind consent) or keep WhatsApp only?
-- Business email provider: Zoho Mail (free tier) or Google Workspace?
-- Should the Writing page keep pulling Medium posts at build time, or move to
-  posts written in the repo?
 
 ## How to run, preview and deploy
 

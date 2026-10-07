@@ -3,6 +3,10 @@ name: Deploy
 on:
   push:
     branches: [main]
+  # A daily rebuild picks up new Medium posts for the Writing page, which
+  # reads the Medium feed at build time.
+  schedule:
+    - cron: '0 6 * * *'
   workflow_dispatch:
 
 concurrency:
