@@ -215,7 +215,11 @@ The project instructions hold the full text. Every change must keep to them.
 - Go-live with Ismail, one step per message (2026-10-07). Done: Web3Forms key
   (form live on the preview), certificate `1d9649e6...` covering both names
   (Issued), bucket `ismailoyeleke-com-site`, function `portfolio-clean-urls`
-  (published). Now on step 6, the headers policy. The old single-name
+  (published), headers policy `portfolio-security-headers`, distribution
+  `E2BH4ZWLFJV2MA` (`dwhxjqyi603va.cloudfront.net`, Free plan, private bucket
+  access via OAC). Now finishing the distribution: default root object, then
+  the function, headers policy, error pages and the domain plus certificate.
+  WAF is in monitor mode: switch it to blocking after go-live. The old single-name
   certificate `4fc97a3a...` is used by the current site; keep it until cutover.
 
 - Pull request #1 waiting on Ismail's review and merge.
