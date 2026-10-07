@@ -3,7 +3,7 @@
 The single source of truth for where the ismailoyeleke.com rebuild stands.
 Update this file in the same commit as any change, on every push.
 
-Last updated: 2026-10-06
+Last updated: 2026-10-07
 
 ## Paste this to resume
 
@@ -222,32 +222,24 @@ The project instructions hold the full text. Every change must keep to them.
   (GitHub now includes owner and repo IDs). Default branch is main.
   The old distribution `E1AMGG14CCOU14` (no domain names now), old bucket
   `ismailoyeleke.com` and old certificate `4fc97a3a...` are kept as a fallback;
-  retire them only with Ismail's go-ahead.
-  Still to do: switch WAF from monitor to blocking, confirm the Web3Forms test
-  email arrives, GA4, Search Console, Bing, PageSpeed.
+  retire them only with Ismail's go-ahead. The contact form on the live site
+  works: Ismail got the Web3Forms email and the /thank-you page on 2026-10-07.
+  Still to do: switch WAF from monitor to blocking, GA4, Search Console, Bing, PageSpeed.
 
 - Pull request #1 merged into main (2026-10-07).
 
 ## Waiting on Ismail
 
 1. Done 2026-10-07: PR #1 merged and default branch set to `main`.
-2. Web3Forms access key (free at web3forms.com, sent to his email). Save as
-   a repository secret `PUBLIC_WEB3FORMS_KEY` (read by both the preview and
-   the production build).
+2. Done 2026-10-07: Web3Forms key saved as secret `PUBLIC_WEB3FORMS_KEY`.
 3. GA4 Measurement ID (`G-XXXXXXX`). Save as repository variable `PUBLIC_GA_ID`.
-4. AWS setup, following `go-live-guide.md` in the project folder (the plain
-   version of `docs/deployment.md`), then the environment secrets
-   `AWS_DEPLOY_ROLE_ARN`, `AWS_S3_BUCKET`, `AWS_CLOUDFRONT_DISTRIBUTION_ID`.
+4. Done 2026-10-07: AWS setup and the production environment secrets.
 5. Optionally the Project 1 architecture diagram as an image.
 
 ## Next steps, in order
 
-1. Confirm the preview at https://ismail-oyeleke.github.io/portfolio/ loads
-   every page, and fix anything Ismail flags.
-2. Merge PR #1, switch the default branch to `main`.
-3. With the AWS secrets in place, let `deploy.yml` run on `main` and check
-   https://ismailoyeleke.com over HTTPS, apex and www.
-4. Add the Web3Forms key and send a real test message through the form.
+1-4. Done 2026-10-07: merged, deployed, live on apex and www, form tested.
+4b. Switch the CloudFront WAF from monitor mode to blocking.
 5. Add the GA4 id, confirm events only fire after consent.
 6. Submit the sitemap in Google Search Console and Bing Webmaster Tools.
 7. Run PageSpeed Insights on mobile and desktop, fix anything under 90.
