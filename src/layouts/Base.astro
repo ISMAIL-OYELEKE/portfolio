@@ -59,6 +59,11 @@ const schemas = [personSchema, ...(schema ? (Array.isArray(schema) ? schema : [s
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- CSP lives in the page because CloudFront's Free plan only allows its
+         managed header policies. frame-ancestors cannot be set from a meta
+         tag; the managed policy's X-Frame-Options covers framing instead.
+         form-action includes 'self' for the redirect back to /thank-you. -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-bRrXOZfzkSHqxbwz5Za8TNTsnrMa7Kvk+eW1MqoTxsQ=' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://i.ytimg.com https://www.googletagmanager.com; font-src 'self'; connect-src 'self' https://api.web3forms.com https://www.googletagmanager.com https://www.google-analytics.com https://region1.google-analytics.com https://region1.analytics.google.com; frame-src https://www.youtube-nocookie.com; form-action 'self' https://api.web3forms.com; base-uri 'self'; object-src 'none'" />
     <meta name="generator" content={Astro.generator} />
     <meta name="author" content={site.name} />
     <meta name="theme-color" content="#0F1E33" />
