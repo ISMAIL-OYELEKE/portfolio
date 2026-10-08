@@ -275,6 +275,9 @@ The project instructions hold the full text. Every change must keep to them.
       of claiming no cost when idle.
     - cloud-chariots-portal PR #3 adds a README: frontend only, backend lives
       in the company's AWS account (Ismail no longer has access).
+15. 2026-10-08: the four headline certification cards (Certifications page)
+    centre their badge, text and link. The other badge groups stay
+    left-aligned. Approved by Ismail from screenshots.
 
 ## Open questions
 
