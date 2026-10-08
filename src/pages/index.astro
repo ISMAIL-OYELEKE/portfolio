@@ -2,7 +2,7 @@
 import { isWide } from '../lib/grid';
 import { Image } from 'astro:assets';
 import Base from '../layouts/Base.astro';
-import ArchPortrait from '../components/ArchPortrait.astro';
+import Portrait from '../components/Portrait.astro';
 import ProjectCard from '../components/ProjectCard.astro';
 import SocialIcon from '../components/SocialIcon.astro';
 import { site, stats } from '../data/site';
@@ -42,7 +42,7 @@ const description =
       </div>
 
       <div class="hero__portrait">
-        <ArchPortrait alt={`${site.name}, ${site.role}`} width={400} smallWidth={150} priority />
+        <Portrait alt={`${site.name}, ${site.role}`} width={400} smallWidth={150} priority />
       </div>
     </div>
 
@@ -505,7 +505,7 @@ const description =
     }
   }
   @media (max-width: 560px) {
-    /* Phones: a centred circular portrait above the copy, with the
+    /* Phones: a small centred portrait above the copy, with the
        availability line back in its usual place above the headline. */
     .hero__portrait {
       justify-content: center;
@@ -520,19 +520,9 @@ const description =
       letter-spacing: 0.1em;
       white-space: nowrap;
     }
-    .hero__portrait :global(.arch) {
-      --arch-w: 116px;
+    .hero__portrait :global(.portrait) {
+      --portrait-w: 132px;
       aspect-ratio: 1;
-      border-radius: 50%;
-      padding: 5px;
-    }
-    .hero__portrait :global(.arch::after) {
-      inset: 5px;
-      border-radius: 50%;
-    }
-    .hero__portrait :global(.arch img) {
-      border-radius: 50%;
-      object-position: 50% 18%;
     }
     .hero h1 {
       font-size: clamp(1.55rem, 7.1vw, 1.85rem);
