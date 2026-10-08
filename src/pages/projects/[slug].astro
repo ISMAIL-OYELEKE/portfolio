@@ -52,7 +52,7 @@ const schema = {
             <p class="lede case-hero__summary">{project.summary}</p>
           </div>
 
-          <aside class="case-card" aria-label="Project details">
+          <div class="case-card">
             <dl class="case-facts">
               <div>
                 <dt>When</dt>
@@ -68,7 +68,6 @@ const schema = {
               </div>
             </dl>
 
-            <p class="case-card__label">Stack</p>
             <ul class="tag-row case-card__stack">
               {project.stack.map((s) => <li class="tag">{s}</li>)}
             </ul>
@@ -91,7 +90,7 @@ const schema = {
                 </div>
               )
             }
-          </aside>
+          </div>
         </div>
       </div>
     </header>
@@ -267,74 +266,84 @@ const schema = {
     text-decoration: none;
   }
 
-  /* Two columns on wide screens: the title and summary to read first on
-     the left, and every fact about the build in one card on the right.
-     They stack on phones and tablets, card last. */
+  /* Everything sits on the centre line: crumbs, title and summary, then
+     one strip with When, Context and Role in equal columns, then the
+     stack and the links. On phones the strip stacks into rows. */
+  .case-hero .shell {
+    text-align: center;
+  }
+  .crumbs {
+    justify-content: center;
+  }
   .case-hero__grid {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(18rem, 22rem);
-    gap: clamp(2rem, 5vw, 4.5rem);
-    align-items: start;
+    gap: 2.25rem;
   }
   .case-hero h1 {
     font-size: clamp(2rem, 4.4vw, 3.3rem);
-    max-width: 22ch;
-    margin-bottom: 0.5em;
+    max-width: 24ch;
+    margin: 0 auto 0.5em;
   }
   .case-hero__summary {
-    max-width: 52ch;
-    margin: 0;
+    max-width: 60ch;
+    margin: 0 auto;
   }
 
   .case-card {
-    border: 1px solid var(--rule);
-    border-top: 2px solid var(--highlight);
-    border-radius: var(--r-card);
-    padding: 1.4rem 1.5rem 1.5rem;
+    display: grid;
+    gap: 1.4rem;
   }
   .case-facts {
-    margin: 0 0 1.4rem;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    margin: 0;
+    border-block: 1px solid var(--rule);
   }
   .case-facts > div {
-    display: grid;
-    grid-template-columns: 5.5rem minmax(0, 1fr);
-    gap: 1rem;
-    padding-block: 0.75rem;
-    border-bottom: 1px solid var(--rule);
+    padding: 1.1rem 1.4rem;
   }
-  .case-facts > div:first-child {
-    padding-top: 0;
+  .case-facts > div + div {
+    border-left: 1px solid var(--rule);
   }
-  .case-facts dt,
-  .case-card__label {
+  .case-facts dt {
     font-family: var(--font-mono);
     font-size: 0.66rem;
     letter-spacing: 0.16em;
     text-transform: uppercase;
     color: var(--text-muted);
-    padding-top: 0.25rem;
+    margin-bottom: 0.45rem;
   }
   .case-facts dd {
     margin: 0;
     font-size: 0.95rem;
     line-height: 1.45;
   }
-  .case-card__label {
-    margin: 0 0 0.6rem;
-    padding: 0;
+  .case-card__stack,
+  .case-card__links {
+    justify-content: center;
   }
   .case-card__links {
-    display: grid;
-    gap: 0.6rem;
-    margin-top: 1.4rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
   }
-  .case-card__links .btn {
-    justify-content: center;
-    width: 100%;
-  }
-  @media (max-width: 900px) {
-    .case-hero__grid {
+  @media (max-width: 700px) {
+    .case-facts {
       grid-template-columns: minmax(0, 1fr);
+    }
+    .case-facts > div {
+      padding: 0.9rem 0;
+    }
+    .case-facts > div + div {
+      border-left: 0;
+      border-top: 1px solid var(--rule);
+    }
+    .case-card__links {
+      display: grid;
+      justify-items: stretch;
+    }
+    .case-card__links .btn {
+      justify-content: center;
     }
   }
 
