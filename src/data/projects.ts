@@ -48,7 +48,7 @@ export const projects: Project[] = [
       {
         heading: 'Serverless application tier',
         points: [
-          'A decoupled application on AWS Lambda behind API Gateway, so the portal costs nothing when nobody is using it and scales on its own when everyone requests leave in the same week.',
+          'A decoupled application on AWS Lambda behind API Gateway, so it reduces always-on compute costs and scales on its own when everyone requests leave in the same week.',
           'DynamoDB holds request state, sessions and the notification feed, read back in real time by the portal.',
         ],
       },
@@ -69,8 +69,8 @@ export const projects: Project[] = [
     ],
     decisions: [
       {
-        title: 'Serverless over a always-on server',
-        body: 'Approval traffic is bursty and internal. Pay-per-use removes idle cost and the patching work that comes with instances.',
+        title: 'Serverless over an always-on server',
+        body: 'Approval traffic is bursty and internal. Pay-per-use reduces always-on compute costs and removes the patching work that comes with instances.',
       },
       {
         title: 'Events over polling',
@@ -79,7 +79,7 @@ export const projects: Project[] = [
     ],
     result: [
       'Leave and payroll-advance approvals run as a tracked workflow with an audit trail instead of email threads.',
-      'No servers to patch, and no cost while the portal is idle.',
+      'No servers to patch, and serverless pay-per-use reduces always-on compute costs.',
     ],
   },
   {
