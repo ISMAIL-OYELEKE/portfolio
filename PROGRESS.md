@@ -278,6 +278,10 @@ The project instructions hold the full text. Every change must keep to them.
 15. 2026-10-08: the four headline certification cards (Certifications page)
     centre their badge, text and link. The other badge groups stay
     left-aligned. Approved by Ismail from screenshots.
+16. 2026-10-08: case study header (every project page) is centred: crumbs,
+    title and summary, then one strip with When, Context and Role in three
+    equal columns (rows on phones), then the stack tags and the links.
+    Ismail picked this (option C) over a side card and a left-aligned strip.
 
 ## Open questions
 
