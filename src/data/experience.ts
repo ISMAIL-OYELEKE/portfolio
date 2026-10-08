@@ -1,3 +1,4 @@
+import { certCount } from './certifications';
 export type Role = {
   title: string;
   company: string;
@@ -125,7 +126,7 @@ export const values = [
 ];
 
 export const remember = [
-  'AWS Certified Solutions Architect, Associate, plus KCNA, with 23 verified certifications and badges.',
+  `AWS Certified Solutions Architect, Associate, plus KCNA, with ${certCount} verified certifications and badges.`,
   'Real AWS delivery at an AWS Partner: serverless applications, Amazon Connect, infrastructure as code, CI/CD and containers.',
   'Ships to production: client systems are live and used daily.',
   'Security first by habit: least-privilege IAM, Secrets Manager, private subnets, strict CSP, row-level security.',

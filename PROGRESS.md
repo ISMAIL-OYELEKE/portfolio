@@ -66,7 +66,7 @@ fast, accessible, indexed by Google, and deployed automatically from GitHub.
 | Brand | Harbour navy `#0F1E33`, blue `#1D5BA6` and amber `#E0A33A` on paper `#F4F5F2` (chosen 2026-10-06 after his mentor asked for a reason beyond favourite colour). Blue is accent text on light; amber only on navy or as the button fill, never text on paper. Tokens in `src/styles/global.css`. Logo shapes are final. |
 | Positioning | Cloud / DevOps first, freelance second |
 | Content excluded | No .NET projects |
-| Headshot | `headshot-portrait-stone.jpg` (grey backdrop, with sash) in the arched portrait |
+| Headshot | `headshot-portrait-cutout.png` (transparent, with sash) with no frame, edges faded into the page (Ismail, 2026-10-08). `src/components/Portrait.astro` |
 | References | None on the site (mentor's advice, 2026-10-06). Available on request only. |
 | Pages | Home, About, Experience, Projects (+ 8 case studies), Certifications, Freelance, Writing, Contact, Thank you, 404, Privacy, Terms |
 
@@ -262,6 +262,19 @@ The project instructions hold the full text. Every change must keep to them.
 13. Diagrams for the Enterprise staff portal and the Amazon Connect contact
     centre drafted (staff portal region and routes from its app.js). Approved by
     Ismail on 2026-10-07.
+14. 2026-10-08, approved by Ismail from screenshots:
+    - Headshot has no shape: a transparent cutout on the page colour, with
+      the cropped shoulders faded at the sides and bottom.
+    - Homepage heading split in two: the title, then "I build secure,
+      automated infrastructure that ships to production." smaller in amber.
+      On phones the hero copy and buttons are centred under the photo.
+    - Certifications count comes from certifications.ts everywhere. Keep the
+      count-up animation: Ismail likes it. A "14" a reviewer saw was a
+      mid-animation screenshot, not a data error.
+    - Staff portal case study says "reduces always-on compute costs" instead
+      of claiming no cost when idle.
+    - cloud-chariots-portal PR #3 adds a README: frontend only, backend lives
+      in the company's AWS account (Ismail no longer has access).
 
 ## Open questions
 

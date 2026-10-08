@@ -1,7 +1,7 @@
 ---
 import Base from '../layouts/Base.astro';
 import PageHero from '../components/PageHero.astro';
-import ArchPortrait from '../components/ArchPortrait.astro';
+import Portrait from '../components/Portrait.astro';
 import SocialIcon from '../components/SocialIcon.astro';
 import { site } from '../data/site';
 import { story, values, remember, education, community } from '../data/experience';
@@ -33,7 +33,7 @@ const description =
       </div>
 
       <aside class="about__aside">
-        <ArchPortrait alt={`${site.name} in Lagos`} width={320} />
+        <Portrait alt={`${site.name} in Lagos`} width={320} />
 
         <div class="panel">
           <h2 class="panel__heading">Education</h2>
@@ -351,7 +351,7 @@ const description =
       grid-template-columns: 1fr;
     }
     /* Stacked on phones and tablets: centre the portrait under the buttons. */
-    .about__aside > :global(.arch) {
+    .about__aside > :global(.portrait) {
       justify-self: center;
     }
     .numbered__item {

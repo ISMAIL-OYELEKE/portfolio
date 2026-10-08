@@ -2,7 +2,7 @@
 import { isWide } from '../lib/grid';
 import { Image } from 'astro:assets';
 import Base from '../layouts/Base.astro';
-import ArchPortrait from '../components/ArchPortrait.astro';
+import Portrait from '../components/Portrait.astro';
 import ProjectCard from '../components/ProjectCard.astro';
 import SocialIcon from '../components/SocialIcon.astro';
 import { site, stats } from '../data/site';
@@ -27,7 +27,9 @@ const description =
             </p>
           )
         }
-        <h1>{site.headline}</h1>
+        <h1>
+          {site.headline} <span class="hero__sub">{site.headlineSub}</span>
+        </h1>
         <p class="lede">{site.subheadline}</p>
         <div class="btn-row">
           <a class="btn btn--primary" href="/contact">
@@ -42,7 +44,7 @@ const description =
       </div>
 
       <div class="hero__portrait">
-        <ArchPortrait alt={`${site.name}, ${site.role}`} width={400} smallWidth={150} priority />
+        <Portrait alt={`${site.name}, ${site.role}`} width={400} smallWidth={150} priority />
       </div>
     </div>
 
@@ -302,6 +304,17 @@ const description =
     max-width: 46ch;
   }
 
+  /* The second sentence of the heading, on its own lines and smaller, so
+     the title reads first and no word is left hanging at a line end. */
+  .hero__sub {
+    display: block;
+    margin-top: 0.35em;
+    font-size: 0.62em;
+    line-height: 1.2;
+    font-weight: 500;
+    color: var(--highlight);
+  }
+
   @media (max-width: 560px) {
     .hero .lede {
       font-size: 0.97rem;
@@ -505,9 +518,19 @@ const description =
     }
   }
   @media (max-width: 560px) {
-    /* Phones: a centred circular portrait above the copy, with the
+    /* Phones: a small centred portrait above the copy, with the
        availability line back in its usual place above the headline. */
     .hero__portrait {
+      justify-content: center;
+    }
+    /* Centre the copy too, so it lines up with the photo above it. */
+    .hero__copy {
+      text-align: center;
+    }
+    .hero .lede {
+      margin-inline: auto;
+    }
+    .hero .btn-row {
       justify-content: center;
     }
     .hero__grid {
@@ -520,19 +543,9 @@ const description =
       letter-spacing: 0.1em;
       white-space: nowrap;
     }
-    .hero__portrait :global(.arch) {
-      --arch-w: 116px;
+    .hero__portrait :global(.portrait) {
+      --portrait-w: 132px;
       aspect-ratio: 1;
-      border-radius: 50%;
-      padding: 5px;
-    }
-    .hero__portrait :global(.arch::after) {
-      inset: 5px;
-      border-radius: 50%;
-    }
-    .hero__portrait :global(.arch img) {
-      border-radius: 50%;
-      object-position: 50% 18%;
     }
     .hero h1 {
       font-size: clamp(1.55rem, 7.1vw, 1.85rem);
