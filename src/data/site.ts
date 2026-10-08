@@ -16,8 +16,9 @@ export const site = {
   availableForWork: true,
   openTo:
     'international relocation with employer sponsorship, and remote roles that can hire from Nigeria',
-  headline:
-    'AWS-certified Cloud and DevOps Engineer. I build secure, automated infrastructure that ships to production.',
+  headline: 'AWS-certified Cloud and DevOps Engineer.',
+  /** Second half of the homepage heading, set smaller underneath it. */
+  headlineSub: 'I build secure, automated infrastructure that ships to production.',
   subheadline:
     'I design and automate AWS infrastructure with Terraform, CI/CD and containers, from serverless applications to multi-AZ architectures. I also build production software that real businesses use every day.',
   shortBio:
