@@ -250,8 +250,10 @@ The project instructions hold the full text. Every change must keep to them.
 8. Business email: not needed for now (Ismail, 2026-10-07).
 9. Retire the old site around 2026-10-14, only with Ismail's go-ahead.
    Nothing gets deleted before then.
-10. Writing page: Medium posts now flow in automatically. The Deploy workflow
-    also runs daily at 06:00 UTC, and each build reads the Medium feed.
+10. Writing page: Medium posts now flow in automatically. Each build reads
+    the Medium feed. The Deploy workflow also runs every six hours (00:17,
+    06:17, 12:17, 18:17 UTC). On 2026-10-08, GitHub never ran the first
+    scheduled 06:00 run, so the schedule moved off the hour and runs more often.
 11. Live chat: WhatsApp only, no widget (Ismail, 2026-10-07).
 12. Architecture diagrams (official AWS icons) for the four AWS case studies,
     in `public/diagrams/<slug>.svg` and shown on each case study page under
