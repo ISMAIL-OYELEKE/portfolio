@@ -125,6 +125,9 @@ const description = `All ${certCount} of Ismail Oyeleke's certifications and bad
     background: var(--surface);
     display: flex;
     flex-direction: column;
+    /* Badge, text and link sit on the centre line of each card. */
+    align-items: center;
+    text-align: center;
   }
   .headline__badge {
     transition: translate 0.3s var(--ease-out);
@@ -160,7 +163,6 @@ const description = `All ${certCount} of Ismail Oyeleke's certifications and bad
     align-items: center;
     gap: 0.4rem;
     margin-top: auto;
-    align-self: flex-start;
   }
 
   .group + .group {
