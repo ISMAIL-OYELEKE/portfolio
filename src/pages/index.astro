@@ -52,7 +52,7 @@ const description =
           stats.map((s) => (
             <div class="stats__item">
               <dt>{s.label}</dt>
-              <dd data-count={/^\d+/.test(s.value) ? s.value : undefined}>{s.value}</dd>
+              <dd>{s.value}</dd>
             </div>
           ))
         }
@@ -231,39 +231,6 @@ const description =
     </div>
   </section>
 </Base>
-
-<script>
-  // The two numbers in the stats row count up once when they come into view.
-  // The real value is in the HTML from the start; this only animates it.
-  const counters = document.querySelectorAll<HTMLElement>('[data-count]');
-  const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if (counters.length && !still && 'IntersectionObserver' in window) {
-    const run = (el: HTMLElement) => {
-      const final = el.dataset.count ?? '';
-      const target = parseInt(final, 10);
-      const suffix = final.replace(/^\d+/, '');
-      const start = performance.now();
-      const step = (now: number) => {
-        const t = Math.min((now - start) / 1100, 1);
-        const eased = 1 - Math.pow(1 - t, 3);
-        el.textContent = `${Math.round(target * eased)}${t === 1 ? suffix : ''}`;
-        if (t < 1) requestAnimationFrame(step);
-      };
-      requestAnimationFrame(step);
-    };
-    const io = new IntersectionObserver(
-      (entries) =>
-        entries.forEach((e) => {
-          if (e.isIntersecting) {
-            run(e.target as HTMLElement);
-            io.unobserve(e.target);
-          }
-        }),
-      { threshold: 0.6 }
-    );
-    counters.forEach((el) => io.observe(el));
-  }
-</script>
 
 <style>
   .hero {

@@ -1,3 +1,4 @@
+import { certCount } from './certifications';
 export const site = {
   name: 'Ismail Oyeleke',
   shortName: 'Ismail O.',
@@ -44,6 +45,6 @@ export const nav = [
 
 export const stats = [
   { value: '20+', label: 'Projects delivered' },
-  { value: '23', label: 'Certifications and badges' },
+  { value: String(certCount), label: 'Certifications and badges' },
   { value: 'First Class', label: 'BSc Computer Science, 3.85/4.00' },
 ];
