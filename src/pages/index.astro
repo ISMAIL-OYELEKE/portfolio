@@ -27,7 +27,9 @@ const description =
             </p>
           )
         }
-        <h1>{site.headline}</h1>
+        <h1>
+          {site.headline} <span class="hero__sub">{site.headlineSub}</span>
+        </h1>
         <p class="lede">{site.subheadline}</p>
         <div class="btn-row">
           <a class="btn btn--primary" href="/contact">
@@ -269,6 +271,17 @@ const description =
     max-width: 46ch;
   }
 
+  /* The second sentence of the heading, on its own lines and smaller, so
+     the title reads first and no word is left hanging at a line end. */
+  .hero__sub {
+    display: block;
+    margin-top: 0.35em;
+    font-size: 0.62em;
+    line-height: 1.2;
+    font-weight: 500;
+    color: var(--highlight);
+  }
+
   @media (max-width: 560px) {
     .hero .lede {
       font-size: 0.97rem;
@@ -475,6 +488,16 @@ const description =
     /* Phones: a small centred portrait above the copy, with the
        availability line back in its usual place above the headline. */
     .hero__portrait {
+      justify-content: center;
+    }
+    /* Centre the copy too, so it lines up with the photo above it. */
+    .hero__copy {
+      text-align: center;
+    }
+    .hero .lede {
+      margin-inline: auto;
+    }
+    .hero .btn-row {
       justify-content: center;
     }
     .hero__grid {
