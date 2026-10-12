@@ -457,12 +457,12 @@ export const projects: Project[] = [
       {
         type: 'image',
         src: 'pos-dashboard.png',
-        alt: 'The point of sale dashboard, with customer names, invoice numbers and amounts blurred',
-        caption: 'Dashboard. Customer names, invoice numbers and amounts are blurred.',
+        alt: 'The point of sale dashboard in the test environment: today\'s revenue, items in stock, low stock alerts, debts owed, a low stock list and recent sales with paid, partial and unpaid status',
+        caption: 'Dashboard, from the test environment. All names and figures are sample data.',
       },
       { type: 'image', src: 'pos-login.png', alt: 'The point of sale sign-in screen' },
     ],
-    note: 'Private client repository. The screenshots are redacted.',
+    note: 'Private client repository. The screenshots come from a separate test environment with sample data.',
   },
 ];
 
