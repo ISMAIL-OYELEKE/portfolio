@@ -282,6 +282,9 @@ The project instructions hold the full text. Every change must keep to them.
     title and summary, then one strip with When, Context and Role in three
     equal columns (rows on phones), then the stack tags and the links.
     Ismail picked this (option C) over a side card and a left-aligned strip.
+17. 2026-10-12: Cerbiol POS dashboard screenshot replaced with one from the
+    new Cerbiol test environment (sample data only, no blurring). Captions and
+    the project note say so. Approved by Ismail from screenshots.
 
 ## Open questions
 
