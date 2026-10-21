@@ -26,6 +26,135 @@ export type Project = {
 
 export const projects: Project[] = [
   {
+    slug: 'kestrel-loan-platform',
+    diagram: {
+      width: 1800,
+      height: 1260,
+      alt: 'Architecture diagram: customers reach an Application Load Balancer protected by AWS WAF in public subnets across two availability zones in eu-west-1. ECS Fargate API tasks in private subnets store applications in RDS PostgreSQL (Multi-AZ, isolated subnets) and queue them on SQS. A Lambda scorer reads the queue, saves the decision and publishes it to SNS. VPC endpoints are the only way out of the private subnets. KMS customer managed keys, Secrets Manager, ECR and CloudWatch sit alongside, with CloudTrail, GuardDuty, Security Hub, Config and GitHub OIDC deploy roles at account level.',
+    },
+    title: 'Kestrel Loan Platform on AWS',
+    kind: 'cloud',
+    date: 'October 2026',
+    dateISO: '2026-10-14',
+    context: 'A production style build for a fictional microfinance bank',
+    summary:
+      'A loan application platform built end to end with Terraform: an API on ECS Fargate, a Lambda scorer behind SQS, and a pipeline that deploys to prod only after a human approves.',
+    problem:
+      'Kestrel Microfinance Bank, a fictional lender, needed customers to apply for a loan through an API and get a decision in seconds, not overnight. It had to be secure enough for bank data, survive a payday rush, recover from a lost database and stay under a USD 1,500 monthly budget. I built, tested, load tested, recovered and then tore it all down in 5 days.',
+    stack: [
+      'ECS Fargate',
+      'RDS PostgreSQL',
+      'AWS Lambda',
+      'Amazon SQS',
+      'AWS WAF',
+      'AWS KMS',
+      'Terraform',
+      'GitHub Actions',
+      'Application Load Balancer',
+      'VPC endpoints',
+      'CloudWatch',
+      'k6',
+    ],
+    featured: true,
+    repo: 'https://github.com/ISMAIL-OYELEKE/kestrel-platform',
+    metaTitle: 'Kestrel Loan Platform on AWS with Terraform',
+    metaDescription:
+      'How Ismail Oyeleke built a loan platform on ECS Fargate, RDS, SQS and Lambda with Terraform, then load tested it, ran a restore drill and tore it down for USD 9.20.',
+    build: [
+      {
+        heading: 'The application',
+        points: [
+          'Customers reach a Python API on ECS Fargate through an Application Load Balancer protected by AWS WAF, with common attack rules and a rate limit of 2,000 requests per IP per 5 minutes.',
+          'Applications are stored in PostgreSQL on RDS, Multi-AZ in prod, and queued on SQS.',
+          'A Lambda scorer reads the queue, scores each application and publishes the decision. Decisions are idempotent, so a retried message never creates a second decision.',
+        ],
+      },
+      {
+        heading: 'Network and data protection',
+        points: [
+          'Everything runs in private subnets with no internet route. AWS services are reached through VPC endpoints instead of a NAT gateway.',
+          'HTTPS for customers and TLS to the database. Data at rest is encrypted with customer managed KMS keys.',
+          "The customer's BVN (bank verification number) is encrypted at field level, so it is never readable in the database.",
+        ],
+      },
+      {
+        heading: 'Infrastructure as code',
+        points: [
+          '9 reusable Terraform modules: network, database, api, messaging, worker, kms, observability, security and governance.',
+          'Dev and prod use the same modules with different settings. Prod runs 2 tasks across 2 availability zones with a standby database and auto scales up to 20 tasks.',
+        ],
+      },
+      {
+        heading: 'CI/CD and security',
+        points: [
+          'A GitHub Actions pipeline runs lint, unit and database tests, terraform fmt and validate, a Checkov security scan, and posts the Terraform plan on every pull request.',
+          'After merge it deploys to dev, waits for a human approval, then deploys the same tested image to prod.',
+          'GitHub signs in to AWS with OIDC, so there are no long lived access keys anywhere, and no IAM user has an access key.',
+          'Each deploy stops on a critical container vulnerability (an ECR scan gate) and checks that every resource carries cost tags.',
+          'CloudTrail in every region to a tamper resistant encrypted bucket, plus GuardDuty, Security Hub (AWS Foundational Security Best Practices) and AWS Config.',
+        ],
+      },
+      {
+        heading: 'Observability',
+        points: [
+          'A CloudWatch dashboard per environment and 6 alarms that email on fire and on recovery: API 5xx error rate, p95 latency, no healthy tasks, a stuck scoring queue, the dead letter queue and low database storage.',
+          'A runbook entry for every alarm: how to confirm it, the immediate fix and the permanent fix.',
+        ],
+      },
+    ],
+    decisions: [
+      {
+        title: 'VPC endpoints instead of a NAT gateway',
+        body: 'Nothing in the private subnets has a route to the internet. The tasks and the scorer reach AWS services only through VPC endpoints.',
+      },
+      {
+        title: 'Scorer on Lambda with idempotent decisions',
+        body: 'The scorer reads from SQS, which can deliver a message more than once. Making each decision idempotent means a retry never creates a second decision.',
+      },
+      {
+        title: 'Field level protection for the BVN',
+        body: 'Disk encryption is not enough for a bank verification number. It is encrypted at field level, so it is never readable in the database.',
+      },
+      {
+        title: 'A pipeline with a prod approval',
+        body: 'Every merge deploys to dev first. Prod gets the same tested image only after a human approves it.',
+      },
+    ],
+    result: [
+      'Load test with k6 against prod at a payday peak of 50 requests a second, 25 times a normal day: 19,602 requests in 8 minutes, 0 failed, and p95 latency of 58 ms against a 1 second target. Auto scaling went from 2 to 5 tasks and back down, and no alarm fired.',
+      'Automatic rollback proven: a deliberately broken image was deployed, and the ECS deployment circuit breaker rolled back to the working version by itself while customers kept being served.',
+      'Restore drill on prod: the service was stable 21 minutes after the restore was requested, against a 2 hour target, and the newest restorable point was under 5 minutes old, against a 15 minute target.',
+      'Estimated running cost at the client\'s scale: about USD 273 a month, against a USD 1,500 limit.',
+      'Actual AWS spend for the whole build: USD 9.20, confirmed in Cost Explorer. Everything was torn down with terraform destroy on 17 October 2026, and spend on 18 October was USD 0.00.',
+    ],
+    lessons: [
+      "GitHub's OIDC token used permanent owner and repository IDs in its subject, so AWS rejected it. I found the real subject in CloudTrail and fixed the role trust policy.",
+      'terraform destroy failed on large versioned log buckets with a provider error (bufio token too long). I emptied the buckets with the AWS CLI in batches and re-ran the destroy.',
+      'The rollback check originally passed too easily, so I rewrote it to pass only when ECS itself logs the failed deployment and the rollback.',
+      'AWS Config was 76% of the whole bill (USD 6.98 of USD 9.20), because it bills for every recorded change while infrastructure is created and destroyed.',
+    ],
+    media: [
+      {
+        type: 'image',
+        src: 'kestrel-k6-summary.png',
+        alt: 'k6 summary of the prod load test: 19,602 checks, 100% succeeded, 0% of requests failed, p95 request duration 58.08 ms',
+        caption: 'The k6 payday load test against prod: 19,602 requests, 0 failed, p95 58 ms.',
+      },
+      {
+        type: 'image',
+        src: 'kestrel-dashboard-peak.png',
+        alt: 'The kestrel-prod CloudWatch dashboard during the load test: requests climbing to about 3,000 a minute, a 5xx error rate of 0, latency far below the 1 second alarm line, and empty scoring and dead letter queues',
+        caption: 'The prod dashboard at peak: about 3,000 requests a minute, no errors, queues empty.',
+      },
+      {
+        type: 'image',
+        src: 'kestrel-cost-daily.png',
+        alt: 'Cost Explorer daily spend from 14 to 18 October 2026, rising to under 4 US dollars a day and falling to zero on 18 October after the teardown',
+        caption: 'Daily AWS spend for the whole build: USD 9.20 in total, USD 0.00 after the teardown.',
+      },
+    ],
+  },
+  {
     slug: 'enterprise-staff-portal',
     diagram: {
       width: 1720,
