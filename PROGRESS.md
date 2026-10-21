@@ -3,7 +3,7 @@
 The single source of truth for where the ismailoyeleke.com rebuild stands.
 Update this file in the same commit as any change, on every push.
 
-Last updated: 2026-10-07
+Last updated: 2026-10-21
 
 ## Paste this to resume
 
@@ -209,6 +209,11 @@ The project instructions hold the full text. Every change must keep to them.
       `--accent-text`, `--paper`). Logo SVGs, favicon set, app icons, manifest,
       theme colour and share card all regenerated. Headshot switched to the
       grey-backdrop version so the green photo background does not clash.
+- [x] Home page certification cards centred (2026-10-21) to match the
+      Certifications page: badge, text and Verify link on each card's centre
+      line, and the grid now runs four across, two by two, or one column, so
+      the 3+1 orphan row around 1024px is gone. Waiting on Ismail's approval
+      of the screenshots before merge.
 
 ## In progress
 
