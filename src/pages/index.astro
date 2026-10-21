@@ -442,7 +442,9 @@ const description =
     padding: 0;
     display: grid;
     gap: 1px;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
+    /* Same rhythm as the Certifications page: four across, two by two, or
+       one column, never three and an orphan. */
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     background: var(--rule);
     border: 1px solid var(--rule);
   }
@@ -451,6 +453,9 @@ const description =
     padding: 1.6rem 1.4rem;
     display: flex;
     flex-direction: column;
+    /* Badge, text and link sit on the centre line of each card. */
+    align-items: center;
+    text-align: center;
   }
   .certs__badge {
     width: 80px;
@@ -483,7 +488,16 @@ const description =
     align-items: center;
     gap: 0.4rem;
     margin-top: auto;
-    align-self: flex-start;
+  }
+  @media (min-width: 1100px) {
+    .certs {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+  @media (max-width: 600px) {
+    .certs {
+      grid-template-columns: minmax(0, 1fr);
+    }
   }
 
   .closing__inner {
