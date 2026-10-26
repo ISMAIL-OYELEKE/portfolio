@@ -291,6 +291,21 @@ The project instructions hold the full text. Every change must keep to them.
     new Cerbiol test environment (sample data only, no blurring). Captions and
     the project note say so. Approved by Ismail from screenshots.
 
+18. 2026-10-21: Kestrel Loan Platform case study added as the first cloud
+    project (slug kestrel-loan-platform), written only from Ismail's project
+    brief. Diagram is the repo's docs/design/architecture.svg with the account
+    number removed. Three evidence screenshots (k6 summary, prod dashboard,
+    Cost Explorer daily) cropped so no account ID shows. No video link yet:
+    add the YouTube URL once it is published. The repo link needs the
+    kestrel-platform repo to be public before going live.
+
+19. 2026-10-26: Kestrel case study gets a "Read on Medium" button (new
+    optional `article` field on projects, rendered next to View the code).
+    Cross-linking rule: each project page links its repo, YouTube video,
+    Medium article and LinkedIn post as each goes live. YouTube video
+    (dCuNLgKuf78) added the same day as the case study's video embed, and the LinkedIn
+    post (new optional `linkedin` field, button next to Read on Medium).
+
 ## Open questions
 
 
