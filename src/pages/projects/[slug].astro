@@ -73,7 +73,7 @@ const schema = {
             </ul>
 
             {
-              (project.repo || project.live) && (
+              (project.repo || project.live || project.article || project.linkedin) && (
                 <div class="case-card__links">
                   {project.repo && (
                     <a class="btn btn--ghost" href={project.repo} target="_blank" rel="noopener">
@@ -85,6 +85,18 @@ const schema = {
                     <a class="btn btn--ghost" href={project.live} target="_blank" rel="noopener">
                       <SocialIcon name="external" size={15} />
                       Visit the site
+                    </a>
+                  )}
+                  {project.article && (
+                    <a class="btn btn--ghost" href={project.article} target="_blank" rel="noopener">
+                      <SocialIcon name="medium" size={15} />
+                      Read on Medium
+                    </a>
+                  )}
+                  {project.linkedin && (
+                    <a class="btn btn--ghost" href={project.linkedin} target="_blank" rel="noopener">
+                      <SocialIcon name="linkedin" size={15} />
+                      LinkedIn post
                     </a>
                   )}
                 </div>
