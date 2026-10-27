@@ -306,6 +306,9 @@ The project instructions hold the full text. Every change must keep to them.
     (dCuNLgKuf78) added the same day as the case study's video embed, and the LinkedIn
     post (new optional `linkedin` field, button next to Read on Medium).
 
+20. 2026-10-27: CV replaced with Ismail's latest (from the career coach
+    thread, adds Kestrel), same file name so existing links keep working.
+
 ## Open questions
 
 
