@@ -1,0 +1,345 @@
+---
+/* Career as a release history: a rail that fills as the page scrolls, with
+   each release lighting up as the rail reaches it. Oldest first. */
+import { roles, education, community } from '../data/experience';
+import { site } from '../data/site';
+
+const releases = [
+  ...roles.map((r) => ({
+    iso: r.startISO,
+    year: r.startISO.slice(0, 4),
+    when: r.period,
+    tag: r.company,
+    title: r.title,
+    body: r.did[0],
+    notes: r.did.slice(1),
+    shipped: r.shipped ?? [],
+    tools: r.tools,
+  })),
+  {
+    iso: '2024-09',
+    year: '2024',
+    when: `Graduated ${education.graduated}`,
+    tag: `Education · ${education.school.split(' (')[0]}`,
+    title: education.degree + ', First Class',
+    body: `${education.result}. Final year research: ${education.research.charAt(0).toLowerCase()}${education.research.slice(1)}`,
+    notes: [] as string[],
+    shipped: [] as string[],
+    tools: [] as string[],
+  },
+  {
+    iso: '2025-10',
+    year: '2025',
+    when: community.founded.period,
+    tag: `Community · ${community.founded.role}`,
+    title: `Started ${community.founded.name}`,
+    body: community.founded.detail,
+    notes: [] as string[],
+    shipped: [] as string[],
+    tools: [] as string[],
+  },
+].sort((a, b) => a.iso.localeCompare(b.iso));
+
+// Each step in the career gets a version tag, like a release train heading to v1.0.
+const version = (i: number) => `v0.${i + 1}.0`;
+---
+
+<div class="history" data-history>
+  <span class="history__rail" aria-hidden="true"></span>
+  <span class="history__fill" data-history-fill aria-hidden="true"></span>
+  <ol>
+    {
+      releases.map((r, i) => (
+        <li class="rel">
+          <span class="rel__dot" aria-hidden="true" />
+          <p class="rel__when">
+            {(i === 0 || releases[i - 1].year !== r.year) && <b>{r.year}</b>}
+            <span class="rel__ver">{version(i)}</span> {r.when}
+          </p>
+          <div class="rel__what">
+            <span class="rel__tag">{r.tag}</span>
+            <h3>{r.title}</h3>
+            <p>{r.body}</p>
+            {(r.notes.length > 0 || r.shipped.length > 0) && (
+              <details class="notes">
+                <summary>
+                  Release notes <span aria-hidden="true">({r.notes.length + r.shipped.length} changes)</span>
+                </summary>
+                <ul class="notes__list">
+                  {r.shipped.map((s) => (
+                    <li>
+                      <code class="notes__kind notes__kind--feat">feat</code> {s}
+                    </li>
+                  ))}
+                  {r.notes.map((n) => (
+                    <li>
+                      <code class="notes__kind">chore</code> {n}
+                    </li>
+                  ))}
+                </ul>
+                {r.tools.length > 0 && (
+                  <p class="notes__deps">
+                    <span>dependencies</span>
+                    {r.tools.map((t) => (
+                      <code>{t}</code>
+                    ))}
+                  </p>
+                )}
+              </details>
+            )}
+          </div>
+        </li>
+      ))
+    }
+    <li class="rel rel--next">
+      <span class="rel__dot" aria-hidden="true"></span>
+      <p class="rel__when"><b>Next</b><span class="rel__ver">v1.0.0</span> Open to work</p>
+      <div class="rel__what">
+        <span class="rel__tag">Next release</span>
+        <h3>Your team</h3>
+        <p>I am open to {site.openTo}.</p>
+      </div>
+    </li>
+  </ol>
+</div>
+
+<style>
+  .history {
+    position: relative;
+    max-width: 52rem;
+    margin: 0 auto;
+  }
+  .history ol {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  /* One reading order: dates on the left of the rail, the release on the right. */
+  .history {
+    --rail: 10.5rem;
+  }
+  .history__rail,
+  .history__fill {
+    position: absolute;
+    left: var(--rail);
+    top: 0;
+    width: 2px;
+    margin-left: -1px;
+  }
+  .history__rail {
+    bottom: 0;
+    background: var(--rule);
+  }
+  .history__fill {
+    height: 0;
+    background: var(--highlight);
+  }
+  .rel {
+    position: relative;
+    display: grid;
+    grid-template-columns: calc(var(--rail) - 1.75rem) minmax(0, 1fr);
+    gap: 3.5rem;
+    margin-bottom: 2.75rem;
+    transition: opacity 0.6s ease, transform 0.6s var(--ease-out);
+  }
+  /* Entries not reached yet sit slightly back and lower, but stay readable:
+     0.86 keeps every line above 4.5:1 contrast in both themes. */
+  .history.is-live .rel {
+    opacity: 0.86;
+    transform: translateY(14px);
+  }
+  .history.is-live .rel.is-on {
+    opacity: 1;
+    transform: none;
+  }
+  .rel__dot {
+    position: absolute;
+    left: var(--rail);
+    top: 0.4rem;
+    width: 16px;
+    height: 16px;
+    margin-left: -8px;
+    border-radius: 50%;
+    background: var(--bg);
+    border: 2px solid var(--rule);
+    transition: background-color 0.4s ease, border-color 0.4s ease;
+  }
+  .rel.is-on .rel__dot,
+  .history:not(.is-live) .rel__dot {
+    background: var(--highlight);
+    border-color: var(--highlight);
+  }
+  .rel__when {
+    text-align: right;
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    margin: 0;
+  }
+  .rel__when b {
+    display: block;
+    font-family: var(--font-display);
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.1;
+  }
+  .rel__tag {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 0.66rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 0.35rem;
+  }
+  .rel__what h3 {
+    font-size: 1.2rem;
+    margin-bottom: 0.35rem;
+  }
+  .rel__what p {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 0.95rem;
+  }
+  .rel__ver {
+    font-weight: 600;
+    color: var(--accent);
+  }
+  .notes {
+    margin-top: 0.75rem;
+  }
+  .notes__list,
+  .notes__deps {
+    text-align: left;
+  }
+  .notes summary {
+    display: inline-flex;
+    gap: 0.4rem;
+    cursor: pointer;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text);
+    border: 1px solid var(--rule);
+    padding: 0.4rem 0.7rem;
+    list-style: none;
+    transition: border-color 0.2s ease, background-color 0.2s ease;
+  }
+  .notes summary::-webkit-details-marker {
+    display: none;
+  }
+  .notes summary::before {
+    content: '+';
+    color: var(--accent);
+    font-weight: 700;
+  }
+  .notes[open] summary::before {
+    content: '−';
+  }
+  .notes summary:hover {
+    border-color: var(--accent);
+  }
+  .notes summary span {
+    color: var(--text-muted);
+  }
+  .notes__list {
+    list-style: none;
+    margin: 0.8rem 0 0;
+    padding: 0.8rem 0 0 0.9rem;
+    border-left: 2px solid var(--rule);
+    display: grid;
+    gap: 0.55rem;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+  }
+  .notes__list li {
+    animation: note-in 0.45s var(--ease-out) both;
+  }
+  .notes__list li:nth-child(2) { animation-delay: 0.08s; }
+  .notes__list li:nth-child(3) { animation-delay: 0.16s; }
+  .notes__list li:nth-child(4) { animation-delay: 0.24s; }
+  .notes__list li:nth-child(5) { animation-delay: 0.32s; }
+  .notes__list li:nth-child(6) { animation-delay: 0.4s; }
+  .notes__list li:nth-child(7) { animation-delay: 0.48s; }
+  @keyframes note-in {
+    from {
+      opacity: 0;
+      transform: translateX(-8px);
+    }
+  }
+  .notes__kind {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    padding: 0.1rem 0.35rem;
+    margin-right: 0.3rem;
+    border: 1px solid var(--rule);
+    color: var(--text-muted);
+  }
+  .notes__kind--feat {
+    color: var(--accent);
+    border-color: var(--accent-line);
+  }
+  .notes__deps {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    align-items: center;
+    margin-top: 0.8rem !important;
+  }
+  .notes__deps span {
+    font-family: var(--font-mono);
+    font-size: 0.66rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-right: 0.2rem;
+  }
+  .notes__deps code {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    padding: 0.15rem 0.45rem;
+    background: var(--bg-sunken);
+    color: var(--text);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .notes__list li {
+      animation: none;
+    }
+  }
+  @media (max-width: 720px) {
+    .history__rail,
+    .history__fill,
+    .rel__dot {
+      left: 8px;
+    }
+    .rel {
+      grid-template-columns: 1fr;
+      gap: 0.4rem;
+      padding-left: 2.25rem;
+    }
+    .rel__when {
+      text-align: left;
+    }
+  }
+</style>
+
+<script>
+  const history = document.querySelector<HTMLElement>('[data-history]');
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (history && !reduce) {
+    const fill = history.querySelector<HTMLElement>('[data-history-fill]')!;
+    const rels = [...history.querySelectorAll<HTMLElement>('.rel')];
+    history.classList.add('is-live');
+    const update = () => {
+      const r = history.getBoundingClientRect();
+      const line = window.innerHeight * 0.62;
+      fill.style.height = `${Math.min(Math.max(line - r.top, 0), r.height)}px`;
+      rels.forEach((el) => el.classList.toggle('is-on', el.getBoundingClientRect().top < line));
+    };
+    update();
+    window.addEventListener('scroll', update, { passive: true });
+    window.addEventListener('resize', update);
+  }
+</script>

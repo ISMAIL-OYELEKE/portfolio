@@ -32,6 +32,15 @@ const thankYou = new URL(`${import.meta.env.BASE_URL.replace(/\/$/, '')}/thank-y
       {/* Honeypot: hidden from people, tempting to bots. */}
       <input type="checkbox" name="botcheck" class="form__honeypot" tabindex="-1" autocomplete="off" />
 
+      {/* The form as a pipeline: each stage goes green as its field passes. */}
+      <ol class="pipe" data-pipe aria-hidden="true" hidden>
+        <li data-stage="name">Name</li>
+        <li data-stage="email">Email</li>
+        <li data-stage="topic">Topic</li>
+        <li data-stage="message">Message</li>
+        <li data-stage="ship">Ship</li>
+      </ol>
+
       <div class="form__row">
         <div class="field">
           <label for="name">Your name</label>
@@ -172,7 +181,7 @@ const thankYou = new URL(`${import.meta.env.BASE_URL.replace(/\/$/, '')}/thank-y
     border-color: var(--highlight);
   }
   .field [aria-invalid='true'] {
-    border-color: #e9a7a7;
+    border-color: var(--form-error);
     border-width: 2px;
   }
 
@@ -185,10 +194,13 @@ const thankYou = new URL(`${import.meta.env.BASE_URL.replace(/\/$/, '')}/thank-y
   .field__error {
     margin: 0;
     font-size: 0.82rem;
-    color: #f0b4b4;
+    color: var(--form-error);
     display: flex;
     align-items: center;
     gap: 0.4rem;
+  }
+  .field__error[hidden] {
+    display: none;
   }
   .field__error::before {
     content: '!';
@@ -224,10 +236,17 @@ const thankYou = new URL(`${import.meta.env.BASE_URL.replace(/\/$/, '')}/thank-y
     font-size: 0.88rem;
   }
   .form__status[data-state='error'] {
-    color: #f0b4b4;
+    color: var(--form-error);
   }
   .form__status[data-state='success'] {
-    color: var(--highlight);
+    color: var(--accent);
+  }
+  /* Error red that reads on the light page and the dark one. */
+  form {
+    --form-error: #b3261e;
+  }
+  :global(:root[data-theme='dark']) form {
+    --form-error: #f0b4b4;
   }
 
   .spinner {
@@ -251,6 +270,79 @@ const thankYou = new URL(`${import.meta.env.BASE_URL.replace(/\/$/, '')}/thank-y
 
   .fallback p {
     color: var(--text-muted);
+  }
+</style>
+
+<style>
+  .pipe {
+    list-style: none;
+    margin: 0 0 1.5rem;
+    padding: 0;
+    display: flex;
+    counter-reset: stage;
+  }
+  .pipe[hidden] {
+    display: none;
+  }
+  .pipe li {
+    position: relative;
+    flex: 1;
+    text-align: center;
+    font-family: var(--font-mono);
+    font-size: 0.66rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    padding-top: 1.6rem;
+  }
+  /* Connector to the previous stage. */
+  .pipe li + li::before {
+    content: '';
+    position: absolute;
+    top: 0.55rem;
+    right: 50%;
+    width: 100%;
+    height: 2px;
+    background: var(--rule);
+    transition: background-color 0.35s ease;
+  }
+  .pipe li::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 1.2rem;
+    height: 1.2rem;
+    margin-left: -0.6rem;
+    border-radius: 50%;
+    border: 2px solid var(--rule);
+    background: var(--bg);
+    transition: background-color 0.3s ease, border-color 0.3s ease, transform 0.3s var(--ease-out);
+  }
+  .pipe li.is-pass {
+    color: var(--text);
+  }
+  .pipe li.is-pass::after {
+    background: var(--highlight);
+    border-color: var(--highlight);
+    transform: scale(1.1);
+  }
+  .pipe li.is-pass + li::before,
+  .pipe li.is-pass + li.is-pass::before {
+    background: var(--highlight);
+  }
+  .pipe li[data-stage='ship'].is-pass::after {
+    animation: ship 0.6s var(--ease-out);
+  }
+  @keyframes ship {
+    40% {
+      transform: scale(1.5);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .pipe li[data-stage='ship'].is-pass::after {
+      animation: none;
+    }
   }
 </style>
 
@@ -308,6 +400,45 @@ const thankYou = new URL(`${import.meta.env.BASE_URL.replace(/\/$/, '')}/thank-y
       counter.textContent = String(message.value.length);
     });
 
+    // Pipeline: stages pass quietly as fields become valid, without showing
+    // errors before someone has finished typing.
+    const pipe = form.querySelector<HTMLElement>('[data-pipe]');
+    const pipeline = () => {
+      if (!pipe) return;
+      let all = true;
+      Object.keys(rules).forEach((name) => {
+        const field = form.elements.namedItem(name) as HTMLInputElement | null;
+        const ok = !!field && !rules[name](field.value);
+        all &&= ok;
+        pipe.querySelector(`[data-stage="${name}"]`)?.classList.toggle('is-pass', ok);
+      });
+      pipe.querySelector('[data-stage="ship"]')?.classList.toggle('is-pass', all);
+      label.textContent = all ? 'Ship it' : 'Send message';
+    };
+    if (pipe) {
+      pipe.hidden = false;
+      form.addEventListener('input', pipeline);
+      form.addEventListener('change', pipeline);
+    }
+
+    // A brief picked on the freelance page arrives as ?need=...
+    const need = new URLSearchParams(location.search).get('need');
+    const needs: Record<string, string> = {
+      'business-system': 'a business system (inventory, point of sale, invoicing)',
+      'marketing-site': 'a marketing site that passes a security review',
+      'cloud-hosting': 'cloud hosting and a deployment pipeline',
+    };
+    const picked = (need ?? '').split(',').map((k) => needs[k]).filter(Boolean);
+    if (picked.length) {
+      const topic = form.elements.namedItem('topic') as HTMLSelectElement;
+      topic.value = 'A freelance project';
+      if (!message.value) {
+        message.value = `Hi Ismail, I need ${picked.join(', and ')}. `;
+        counter.textContent = String(message.value.length);
+      }
+    }
+    pipeline();
+
     form.addEventListener('submit', async (event) => {
       event.preventDefault();
 
@@ -353,6 +484,7 @@ const thankYou = new URL(`${import.meta.env.BASE_URL.replace(/\/$/, '')}/thank-y
         button.disabled = false;
         spinner.hidden = true;
         label.textContent = 'Send message';
+        pipeline();
       }
     });
   }

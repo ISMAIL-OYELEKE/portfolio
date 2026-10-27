@@ -5,6 +5,14 @@ import SocialIcon from '../components/SocialIcon.astro';
 import { roles, education } from '../data/experience';
 import { site } from '../data/site';
 
+// Months in each role, counted inclusively from the dates in the data.
+const months = (a: string, b: string) => {
+  const [ay, am] = a.split('-').map(Number);
+  const [by, bm] = b.split('-').map(Number);
+  return (by - ay) * 12 + (bm - am) + 1;
+};
+const allTools = [...new Set(roles.flatMap((r) => r.tools))];
+
 const description =
   'The roles behind the work: cloud and DevOps engineering at an AWS Partner, backend development at KGE Technologies, and IT support at Nigeria\u2019s airports authority.';
 ---
@@ -18,13 +26,41 @@ const description =
 
   <section class="section">
     <div class="shell">
+      <div class="router" data-router>
+        <p class="router__label">
+          Route by tool. Pick one to see where I used it.
+          <span class="router__out" data-router-out aria-live="polite"></span>
+        </p>
+        <div class="router__chips" role="group" aria-label="Filter roles by tool">
+          {
+            allTools.map((t) => (
+              <button type="button" class="chip" aria-pressed="false" data-tool={t}>
+                {t}
+              </button>
+            ))
+          }
+        </div>
+      </div>
+
+      <div class="router__bar" data-router-bar hidden>
+        <span data-router-bar-text></span>
+        <button type="button" class="btn btn--primary router__all" data-router-all>Show all roles</button>
+      </div>
+
+      <div class="timeline-wrap" data-timeline>
+      <span class="timeline__rail" aria-hidden="true"><span data-rail-fill></span></span>
       <ol class="timeline">
         {
           roles.map((role) => (
-            <li class="timeline__item reveal">
+            <li class="timeline__item reveal" data-tools={role.tools.join('|')}>
+              <span class="timeline__dot" aria-hidden="true" />
               <div class="timeline__aside">
                 <p class="timeline__period">{role.period}</p>
                 <p class="timeline__mode">{role.mode}</p>
+                <p class="uptime">
+                  <b data-months={months(role.startISO, role.endISO)}>{months(role.startISO, role.endISO)}</b>
+                  <span>months in the role</span>
+                </p>
               </div>
 
               <div class="timeline__body">
@@ -62,7 +98,9 @@ const description =
                 <h3 class="timeline__heading">Tools</h3>
                 <ul class="tag-row">
                   {role.tools.map((t) => (
-                    <li class="tag">{t}</li>
+                    <li class="tag" data-tag={t}>
+                      {t}
+                    </li>
                   ))}
                 </ul>
               </div>
@@ -70,6 +108,7 @@ const description =
           ))
         }
       </ol>
+      </div>
     </div>
   </section>
 
@@ -97,11 +136,242 @@ const description =
   </section>
 </Base>
 
+<script>
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* Tool router: pick a tool, the roles that used it stay lit. */
+  const router = document.querySelector<HTMLElement>('[data-router]');
+  const items = [...document.querySelectorAll<HTMLElement>('.timeline__item')];
+  if (router) {
+    router.hidden = false;
+    const out = router.querySelector<HTMLElement>('[data-router-out]')!;
+    const chips = [...router.querySelectorAll<HTMLButtonElement>('[data-tool]')];
+    let active: string | null = null;
+    const bar = document.querySelector<HTMLElement>('[data-router-bar]')!;
+    const barText = bar.querySelector<HTMLElement>('[data-router-bar-text]')!;
+    const apply = () => {
+      chips.forEach((c) => c.setAttribute('aria-pressed', String(c.dataset.tool === active)));
+      let hits = 0;
+      items.forEach((it) => {
+        const on = !active || it.dataset.tools!.split('|').includes(active);
+        if (on && active) hits += 1;
+        it.classList.toggle('is-dim', !on);
+        it.querySelectorAll<HTMLElement>('[data-tag]').forEach((t) => t.classList.toggle('is-hit', t.dataset.tag === active));
+      });
+      out.textContent = active ? `${active}: ${hits} of ${items.length} roles` : '';
+      // While a tool is picked, a bar stays pinned above the roles with a way back.
+      bar.hidden = !active;
+      barText.textContent = active ? `Showing the ${hits} of ${items.length} roles where I used ${active}.` : '';
+    };
+    const clear = () => {
+      active = null;
+      apply();
+    };
+    bar.querySelector('[data-router-all]')!.addEventListener('click', clear);
+    // Tapping a faded role also brings every role back.
+    items.forEach((it) => it.addEventListener('click', () => it.classList.contains('is-dim') && clear()));
+    chips.forEach((c) =>
+      c.addEventListener('click', () => {
+        active = active === c.dataset.tool ? null : c.dataset.tool!;
+        apply();
+        const first = items.find((it) => !it.classList.contains('is-dim'));
+        if (active && first && first.getBoundingClientRect().top > window.innerHeight) {
+          first.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
+        }
+      }),
+    );
+  }
+
+  /* Rail fills as you read; each role counts its months up as it arrives. */
+  const timeline = document.querySelector<HTMLElement>('[data-timeline]');
+  if (timeline && !reduce) {
+    const fill = timeline.querySelector<HTMLElement>('[data-rail-fill]')!;
+    timeline.classList.add('is-live');
+    const update = () => {
+      const r = timeline.getBoundingClientRect();
+      const line = window.innerHeight * 0.6;
+      fill.style.height = `${Math.min(Math.max(line - r.top, 0), r.height)}px`;
+      items.forEach((it) => it.classList.toggle('is-on', it.getBoundingClientRect().top < line));
+    };
+    update();
+    window.addEventListener('scroll', update, { passive: true });
+    window.addEventListener('resize', update);
+
+    const io = new IntersectionObserver(
+      (entries) =>
+        entries.forEach((e) => {
+          if (!e.isIntersecting) return;
+          io.unobserve(e.target);
+          const b = e.target as HTMLElement;
+          const to = Number(b.dataset.months);
+          const start = performance.now();
+          const step = (t: number) => {
+            const k = Math.min(1, (t - start) / 900);
+            b.textContent = String(Math.round(to * (1 - Math.pow(1 - k, 3))));
+            if (k < 1) requestAnimationFrame(step);
+          };
+          b.textContent = '0';
+          requestAnimationFrame(step);
+        }),
+      { threshold: 1 },
+    );
+    timeline.querySelectorAll('[data-months]').forEach((b) => io.observe(b));
+  }
+</script>
+
 <style>
+  .timeline-wrap {
+    position: relative;
+    padding-left: 2.5rem;
+  }
   .timeline {
     list-style: none;
     margin: 0;
     padding: 0;
+  }
+  .timeline__rail {
+    position: absolute;
+    left: 7px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: var(--rule);
+  }
+  .timeline__rail span {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--highlight);
+  }
+  .timeline-wrap.is-live .timeline__rail span {
+    height: 0;
+  }
+  .timeline__item {
+    position: relative;
+    transition: opacity 0.35s ease, filter 0.35s ease;
+  }
+  .timeline__item.is-dim {
+    opacity: 0.28;
+    filter: grayscale(1);
+    cursor: pointer;
+  }
+  .router__bar {
+    position: sticky;
+    top: calc(var(--mast, 73px) + 0.6rem);
+    z-index: 5;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem 1rem;
+    margin: 0 auto 1.5rem;
+    padding: 0.6rem 0.9rem;
+    max-width: 44rem;
+    background: var(--brand-ink);
+    color: var(--paper);
+    border: 1px solid var(--highlight);
+    font-size: 0.9rem;
+    text-align: center;
+  }
+  .router__bar[hidden] {
+    display: none;
+  }
+  .router__all {
+    padding: 0.5rem 0.9rem;
+    font-size: 0.72rem;
+  }
+  .timeline__dot {
+    position: absolute;
+    left: -2.5rem;
+    top: clamp(2rem, 4vw, 3rem);
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--bg);
+    border: 2px solid var(--highlight);
+    transition: background-color 0.3s ease;
+  }
+  .timeline__item:first-child .timeline__dot {
+    top: 0;
+  }
+  .timeline-wrap:not(.is-live) .timeline__dot,
+  .timeline__item.is-on .timeline__dot {
+    background: var(--highlight);
+  }
+  .uptime {
+    margin-top: 1rem;
+    display: flex;
+    align-items: baseline;
+    gap: 0.45rem;
+  }
+  .uptime b {
+    font-family: var(--font-display);
+    font-size: 2.2rem;
+    line-height: 1;
+    color: var(--text);
+  }
+  .uptime span {
+    font-family: var(--font-mono);
+    font-size: 0.66rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    max-width: 8rem;
+  }
+  .router {
+    margin: 0 auto clamp(2rem, 4vw, 3rem);
+    text-align: center;
+  }
+  /* Without the script the filter does nothing, so it is not shown. */
+  :global(.no-js) .router {
+    display: none;
+  }
+  .router__label {
+    font-family: var(--font-mono);
+    font-size: 0.74rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 0.9rem;
+  }
+  .router__out {
+    display: block;
+    margin-top: 0.35rem;
+    color: var(--accent);
+    min-height: 1.2em;
+  }
+  .router__chips {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.4rem;
+    max-width: 60rem;
+    margin: 0 auto;
+  }
+  .chip {
+    font-family: var(--font-mono);
+    font-size: 0.74rem;
+    padding: 0.4rem 0.7rem;
+    color: var(--text);
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    cursor: pointer;
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.15s var(--ease-out);
+  }
+  .chip:hover {
+    border-color: var(--accent);
+    transform: translateY(-1px);
+  }
+  .chip[aria-pressed='true'] {
+    background: var(--highlight);
+    border-color: var(--highlight);
+    color: var(--brand-ink);
+  }
+  .tag.is-hit {
+    background: var(--highlight);
+    color: var(--brand-ink);
   }
 
   .timeline__item {
@@ -188,12 +458,17 @@ const description =
 
   .education {
     display: grid;
-    grid-template-columns: minmax(0, 1.4fr) minmax(0, auto);
-    gap: 1.5rem 3rem;
-    align-items: center;
+    justify-items: center;
+    gap: 1.5rem;
+    text-align: center;
+  }
+  .education .lede,
+  .education__research {
+    margin-inline: auto;
   }
   .education .btn-row {
     margin-top: 0;
+    justify-content: center;
   }
   .education__research {
     color: var(--text-muted);
@@ -201,8 +476,7 @@ const description =
   }
 
   @media (max-width: 860px) {
-    .timeline__item,
-    .education {
+    .timeline__item {
       grid-template-columns: 1fr;
     }
   }

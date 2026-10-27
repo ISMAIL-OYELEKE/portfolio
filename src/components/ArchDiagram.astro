@@ -1,0 +1,275 @@
+---
+/* A project's real architecture diagram (public/diagrams) with its traffic
+   animated on it: in each numbered step, small packets glide along that
+   step's own arrows, while the caption reads the step from the legend.
+   `cropped` drops the title band and legend for the compact project stage.
+   The diagram loads only when it is first shown. Without JavaScript, or with
+   reduced motion, it is the plain diagram with step 1 in the caption. */
+import { diagramFlows } from '../data/diagramFlows';
+
+interface Props {
+  slug: string;
+  alt: string;
+  cropped?: boolean;
+  /** Start playing on its own once on screen (case study pages). */
+  auto?: boolean;
+  /** Load the drawing with the page instead of when first shown. */
+  eager?: boolean;
+}
+const { slug, alt, cropped = false, auto = false, eager = auto } = Astro.props;
+const flow = diagramFlows[slug];
+const box = cropped ? flow.crop : [0, 0, flow.w, flow.h];
+const first = flow.steps[0];
+---
+
+<figure class:list={['adg', { 'adg--cropped': cropped }]} data-adg data-auto={auto ? '' : undefined} data-flow={JSON.stringify(flow.steps)}>
+  <div class="adg__sheet">
+    <svg viewBox={box.join(' ')} role="img" aria-label={alt} preserveAspectRatio="xMidYMid meet">
+      <image data-adg-img href={eager ? `/diagrams/${slug}.svg` : undefined} width={flow.w} height={flow.h}></image>
+      <g data-adg-flow></g>
+      <g data-adg-pk></g>
+    </svg>
+  </div>
+  <figcaption class="adg__cap">
+    <span class="adg__step" data-adg-step><b>Step {first.n} of {flow.steps.length}.</b> {first.text}</span>
+    <a class="adg__full" href={`/diagrams/${slug}.svg`} target="_blank" rel="noopener" data-adg-src>Full size</a>
+  </figcaption>
+</figure>
+
+<style>
+  .adg {
+    margin: 0;
+    min-width: 0;
+  }
+  .adg__sheet {
+    background: #fff;
+    border: 1px solid var(--rule);
+    border-radius: var(--r-card);
+    padding: 0.5rem;
+    overflow: hidden;
+  }
+  .adg__sheet svg {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  /* Traffic on the step's own arrows: the arrow line itself runs as a
+     moving dashed line in the site's blue, and amber packets ride along it,
+     easing in and out at each end. */
+  .adg :global(.adg__flow) {
+    fill: none;
+    stroke: #1d5ba6;
+    stroke-width: 5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-dasharray: 16 12;
+    stroke-dashoffset: 0;
+    animation: adg-march 0.6s linear infinite;
+  }
+  @keyframes adg-march {
+    from {
+      stroke-dashoffset: 28;
+    }
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+  .adg :global(.adg__p) {
+    fill: #e0a33a;
+    stroke: #0f1e33;
+    stroke-width: 4;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .adg :global(.adg__flow) {
+      animation: none;
+    }
+  }
+  .adg__cap {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.3rem 1rem;
+    margin-top: 0.7rem;
+    font-size: 0.88rem;
+    color: var(--text-muted);
+    min-height: 2.8em;
+  }
+  .adg__step {
+    flex: 1 1 18rem;
+  }
+  .adg__step b {
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+  }
+  .adg__full {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+</style>
+
+<script>
+  type Step = { n: number; text: string; paths: [number, number][][] };
+  const NS = 'http://www.w3.org/2000/svg';
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // Each step shows for STEP_MS; packets fade in and out at its edges.
+  const STEP_MS = 2400;
+  const FADE_MS = 300;
+  // Laps per second along an arrow.
+  const SPEED = 0.55;
+  // Packets per arrow: one per ~240 units of length, between one and three.
+  const perArrow = (L: number) => Math.max(1, Math.min(3, Math.round(L / 240)));
+
+  const lengthOf = (p: [number, number][]) => p.slice(1).reduce((s, q, i) => s + Math.hypot(q[0] - p[i][0], q[1] - p[i][1]), 0);
+  const pointAt = (p: [number, number][], d: number): [number, number] => {
+    for (let i = 1; i < p.length; i++) {
+      const l = Math.hypot(p[i][0] - p[i - 1][0], p[i][1] - p[i - 1][1]);
+      if (d <= l) {
+        const k = l ? d / l : 0;
+        return [p[i - 1][0] + (p[i][0] - p[i - 1][0]) * k, p[i - 1][1] + (p[i][1] - p[i - 1][1]) * k];
+      }
+      d -= l;
+    }
+    return p[p.length - 1];
+  };
+
+  document.querySelectorAll<HTMLElement>('[data-adg]').forEach((root) => {
+    const steps: Step[] = JSON.parse(root.dataset.flow || '[]');
+    const img = root.querySelector<SVGImageElement>('[data-adg-img]')!;
+    const pkG = root.querySelector<SVGGElement>('[data-adg-pk]')!;
+    const flowG = root.querySelector<SVGGElement>('[data-adg-flow]')!;
+    const cap = root.querySelector<HTMLElement>('[data-adg-step]')!;
+    const src = root.querySelector<HTMLAnchorElement>('[data-adg-src]')!.getAttribute('href')!;
+    let visible = false;
+    let playing = false;
+    let step = 0;
+    let t0 = 0;
+    let raf = 0;
+    let packets: { c: SVGCircleElement; p: [number, number][]; L: number; o: number }[] = [];
+
+    // The drawing is fetched once, then shown; the flow never runs over an
+    // empty box while it is still on its way.
+    let ready = false;
+    let fetching = false;
+    let wanted = false;
+    const load = () => {
+      if (ready || fetching) return;
+      fetching = true;
+      const probe = new Image();
+      probe.onload = () => {
+        img.setAttribute('href', src);
+        ready = true;
+        root.classList.add('is-ready');
+        if (wanted) play();
+      };
+      probe.onerror = () => {
+        fetching = false;
+      };
+      probe.src = src;
+    };
+    const show = (i: number) => {
+      step = i;
+      const s = steps[i];
+      pkG.innerHTML = '';
+      flowG.innerHTML = '';
+      flowG.style.opacity = reduce ? '1' : '0';
+      packets = s.paths.flatMap((p, k) => {
+        const L = lengthOf(p);
+        const line = document.createElementNS(NS, 'polyline');
+        line.setAttribute('points', p.map((q) => q.join(',')).join(' '));
+        line.setAttribute('class', 'adg__flow');
+        flowG.appendChild(line);
+        const n = perArrow(L);
+        return Array.from({ length: n }, (_, j) => {
+          const c = document.createElementNS(NS, 'circle');
+          c.setAttribute('r', '14');
+          c.setAttribute('class', 'adg__p');
+          c.style.opacity = '0';
+          pkG.appendChild(c);
+          return { c, p, L, o: j / n + k * 0.17 };
+        });
+      });
+      cap.innerHTML = `<b>Step ${s.n} of ${steps.length}.</b> `;
+      cap.append(s.text);
+    };
+    const frame = (now: number) => {
+      if (!playing) return;
+      const e = now - t0;
+      const edge = Math.min(1, e / FADE_MS, (STEP_MS - e) / FADE_MS);
+      flowG.style.opacity = String(Math.max(0, edge));
+      packets.forEach(({ c, p, L, o }) => {
+        const f = ((e / 1000) * SPEED + o) % 1;
+        const [x, y] = pointAt(p, L * f);
+        c.setAttribute('cx', String(x));
+        c.setAttribute('cy', String(y));
+        c.style.opacity = String(Math.max(0, edge) * Math.min(1, Math.sin(f * Math.PI) * 2));
+      });
+      if (e >= STEP_MS) {
+        if (step === steps.length - 1) root.dispatchEvent(new CustomEvent('adg:cycle', { bubbles: true }));
+        // The listener may have stopped this diagram to move on to the next one.
+        if (!playing) return;
+        show((step + 1) % steps.length);
+        t0 = now;
+      }
+      raf = requestAnimationFrame(frame);
+    };
+    const play = () => {
+      load();
+      wanted = true;
+      if (!ready || reduce || playing || !steps.length) return;
+      playing = true;
+      t0 = performance.now();
+      raf = requestAnimationFrame(frame);
+    };
+    const stop = () => {
+      wanted = false;
+      playing = false;
+      cancelAnimationFrame(raf);
+    };
+
+    // The project stage tells each diagram when it is the one on show.
+    root.addEventListener('adg:play', () => {
+      show(0);
+      root.dataset.on = '';
+      // Off screen, it waits; the drawing itself is fetched early (below).
+      if (visible) play();
+      else if (document.readyState === 'complete') load();
+    });
+    root.addEventListener('adg:stop', () => {
+      stop();
+      delete root.dataset.on;
+    });
+    if (root.dataset.auto !== undefined) root.dataset.on = '';
+
+    new IntersectionObserver(
+      ([entry]) => {
+        visible = entry.isIntersecting;
+        if (visible && root.dataset.on !== undefined) play();
+        else if (!visible) stop();
+      },
+      { rootMargin: '200px 0px' },
+    ).observe(root);
+    // Fetch well before it scrolls into view.
+    new IntersectionObserver(
+      ([entry], io) => {
+        if (!entry.isIntersecting) return;
+        load();
+        io.disconnect();
+      },
+      { rootMargin: '1500px 0px' },
+    ).observe(root);
+    // The diagram on show is fetched as soon as the page itself has loaded,
+    // after the opening has what it needs.
+    const early = () => root.dataset.on !== undefined && load();
+    if (document.readyState === 'complete') setTimeout(early, 300);
+    else addEventListener('load', () => setTimeout(early, 300), { once: true });
+
+    if (steps.length) show(0);
+  });
+</script>

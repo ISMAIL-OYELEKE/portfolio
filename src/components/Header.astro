@@ -1,6 +1,7 @@
 ---
 import { nav, site } from '../data/site';
 import logo from '../assets/logo/lockup-horizontal-reversed.svg';
+import ThemeSwitch from './ThemeSwitch.astro';
 
 const path = Astro.url.pathname.replace(/\/$/, '') || '/';
 const isCurrent = (href: string) => path === href || (href !== '/' && path.startsWith(href + '/'));
@@ -13,18 +14,21 @@ const isCurrent = (href: string) => path === href || (href !== '/' && path.start
     </a>
 
     <nav class="masthead__nav" aria-label="Main">
-      <ul>
+      <ul data-cloud-track>
+        <li class="masthead__cloud" aria-hidden="true"><svg data-cloud></svg></li>
         {
           nav.map((item) => (
             <li>
               <a href={item.href} aria-current={isCurrent(item.href) ? 'page' : undefined}>
-                {item.label}
+                <span>{item.label}</span>
               </a>
             </li>
           ))
         }
       </ul>
     </nav>
+
+    <ThemeSwitch />
 
     <a class="btn btn--primary masthead__cta" href={site.cv} download>Download CV</a>
 
@@ -41,17 +45,21 @@ const isCurrent = (href: string) => path === href || (href !== '/' && path.start
   </div>
 
   <div class="masthead__panel" id="site-menu" data-menu-panel hidden>
-    <ul>
+    <ul data-cloud-track>
+      <li class="masthead__cloud" aria-hidden="true"><svg data-cloud></svg></li>
+      <li>
+        <a href="/" aria-current={isCurrent('/') ? 'page' : undefined}><span>Home</span></a>
+      </li>
       {
         nav.map((item) => (
           <li>
             <a href={item.href} aria-current={isCurrent(item.href) ? 'page' : undefined}>
-              {item.label}
+              <span>{item.label}</span>
             </a>
           </li>
         ))
       }
-      <li><a href={site.cv} download>Download CV</a></li>
+      <li><a class="masthead__panel-cv" href={site.cv} download>Download CV</a></li>
     </ul>
   </div>
 </header>
@@ -121,12 +129,50 @@ const isCurrent = (href: string) => path === href || (href !== '/' && path.start
   .masthead__nav a:hover {
     color: var(--paper);
   }
-  .masthead__nav a:hover::after,
-  .masthead__nav a[aria-current='page']::after {
+  .masthead__nav a:hover::after {
     transform: scaleX(1);
   }
-  .masthead__nav a[aria-current='page'] {
+  .masthead__nav a[aria-current='page'],
+  .masthead__nav a.is-here {
     color: var(--highlight);
+  }
+  /* Without JavaScript the current page keeps the amber rule under it. */
+  :global(:root.no-js) .masthead__nav a[aria-current='page']::after {
+    transform: scaleX(1);
+  }
+
+  /* Where you are: a thin amber cloud drawn around the current page, or on
+     the home page the section you are reading, gliding from item to item. */
+  [data-cloud-track] {
+    position: relative;
+  }
+  .masthead__cloud {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 0;
+    height: 0;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  .masthead__cloud.is-on {
+    opacity: 1;
+  }
+  .masthead__cloud svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+  }
+  .masthead__cloud :global(path) {
+    fill: none;
+    stroke: var(--highlight);
+    stroke-width: 1.4;
+    stroke-linejoin: round;
+  }
+  :global(:root[data-theme='dark']) .masthead__panel .masthead__cloud :global(path) {
+    stroke: #b97a12;
   }
 
   .masthead__toggle {
@@ -170,9 +216,8 @@ const isCurrent = (href: string) => path === href || (href !== '/' && path.start
     transform: translateY(-6px) rotate(-45deg);
   }
 
-  /* The open menu is a paper sheet over the page, with the page behind it
-     dimmed, so it reads as open on the navy sections as well as the light
-     ones. */
+  /* The open menu continues the navy header down over the page, with the
+     page behind it dimmed. */
   .masthead__panel {
     position: absolute;
     top: 100%;
@@ -181,9 +226,10 @@ const isCurrent = (href: string) => path === href || (href !== '/' && path.start
     max-height: calc(100svh - 100%);
     overflow-y: auto;
     z-index: 1;
-    background: var(--paper);
+    background: var(--brand-ink);
     border-top: 3px solid var(--highlight);
     box-shadow: 0 18px 40px rgba(10, 21, 38, 0.35);
+    text-align: center;
     animation: menu-in 0.22s var(--ease-out);
   }
   /* Dims the page while the menu is open, never the header above it. */
@@ -210,30 +256,58 @@ const isCurrent = (href: string) => path === href || (href !== '/' && path.start
   }
   .masthead__panel a {
     display: block;
-    padding: 0.9rem 0 0.9rem 0.85rem;
+    padding: 0.9rem 0;
     font-family: var(--font-mono);
     font-size: 0.8rem;
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: var(--brand-deep);
+    color: var(--paper);
     text-decoration: none;
-    border-bottom: 1px solid var(--paper-dim);
-    border-left: 3px solid transparent;
-    transition: border-color 0.2s ease, background-color 0.2s ease;
+    border-bottom: 1px solid var(--brand-line);
+    transition: color 0.2s ease, background-color 0.2s ease;
   }
   .masthead__panel a:hover {
-    border-left-color: var(--highlight);
-    background: var(--paper-dim);
+    color: var(--highlight);
+    background: rgb(255 255 255 / 0.04);
   }
-  .masthead__panel a[aria-current='page'] {
-    color: var(--accent-text);
-    border-left-color: var(--highlight);
+  .masthead__panel a[aria-current='page'],
+  .masthead__panel a.is-here {
+    color: var(--highlight);
     font-weight: 600;
+  }
+  .masthead__panel a.masthead__panel-cv {
+    margin-top: 1rem;
+    padding-left: 0;
+    border: 1px solid var(--highlight);
+    background: var(--highlight);
+    color: var(--brand-ink);
   }
   @media (prefers-reduced-motion: reduce) {
     .masthead__panel {
       animation: none;
     }
+  }
+  /* In Dark theme the page is navy too, so the open menu turns light to stand
+     apart from it. In Light theme it stays navy over the light page. */
+  :global(:root[data-theme='dark']) .masthead__panel {
+    background: var(--paper);
+  }
+  :global(:root[data-theme='dark']) .masthead__panel a {
+    color: var(--brand-ink);
+    border-bottom-color: #d5dae1;
+  }
+  :global(:root[data-theme='dark']) .masthead__panel a:hover {
+    color: #1d5ba6;
+    background: rgb(15 30 51 / 0.05);
+  }
+  /* The current item matches its darker amber cloud on the light menu. */
+  :global(:root[data-theme='dark']) .masthead__panel a[aria-current='page'],
+  :global(:root[data-theme='dark']) .masthead__panel a.is-here {
+    color: #8a5a0c;
+  }
+  :global(:root[data-theme='dark']) .masthead__panel a.masthead__panel-cv {
+    color: var(--brand-ink);
+    border-color: var(--highlight);
   }
 
   @media (max-width: 1040px) {
@@ -276,4 +350,117 @@ const isCurrent = (href: string) => path === href || (href !== '/' && path.start
       toggle?.focus();
     }
   });
+
+  /* ---- where you are: the cloud marker ---- */
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const NS = 'http://www.w3.org/2000/svg';
+
+  // A cloud outline of any width: puffs along the top meet just above the
+  // label, and a flat base runs under it.
+  const cloudPath = (w: number, h: number) => {
+    const r0 = h * 0.3;
+    const base = h * 0.94;
+    const join = h * 0.36;
+    const n = Math.max(3, Math.round((w - 2 * r0) / 30));
+    const step = (w - 2 * r0) / n;
+    let d = `M ${r0} ${base} A ${r0} ${r0} 0 0 1 ${r0} ${base - 2 * r0} L ${r0} ${join}`;
+    let x = r0;
+    for (let i = 0; i < n; i++) {
+      const r = step * (i % 2 ? 0.56 : 0.64);
+      x += step;
+      d += ` A ${r} ${r} 0 0 1 ${x} ${join}`;
+    }
+    return `${d} L ${w - r0} ${base - 2 * r0} A ${r0} ${r0} 0 0 1 ${w - r0} ${base} Z`;
+  };
+
+  // Paths are compared by their end, so a preview build under a sub-path matches too.
+  const pathOf = (a: HTMLAnchorElement) => new URL(a.href).pathname.replace(/(\.html)?\/?$/, '');
+  const isAt = (a: HTMLAnchorElement, href: string) => !!href && pathOf(a).endsWith(href);
+
+  // On the home page each section names the page it previews.
+  const sections = [...document.querySelectorAll<HTMLElement>('[data-nav-section]')];
+  // Elsewhere, the page you are on: read from the address, so it also holds
+  // on a preview build served under a sub-path.
+  const here = location.pathname.replace(/(\.html)?\/?$/, '');
+  const pageHref = (() => {
+    const a = [...document.querySelectorAll<HTMLAnchorElement>('.masthead__nav a')].find((l) => {
+      const p = pathOf(l);
+      return p && (here === p || here.startsWith(p + '/'));
+    });
+    return a ? pathOf(a) : '';
+  })();
+  const activeHref = () => {
+    if (!sections.length) return pageHref;
+    const line = window.innerHeight * 0.4;
+    const s = sections.find((el) => {
+      const r = el.getBoundingClientRect();
+      return r.top <= line && r.bottom > line;
+    });
+    return s ? s.dataset.navSection! : '';
+  };
+
+  type Track = { root: HTMLElement; mark: HTMLElement; svg: SVGSVGElement; path: SVGPathElement; links: HTMLAnchorElement[]; box: number[] | null };
+  const tracks: Track[] = [...document.querySelectorAll<HTMLElement>('[data-cloud-track]')].map((root) => {
+    const mark = root.querySelector<HTMLElement>('.masthead__cloud')!;
+    const svg = mark.querySelector<SVGSVGElement>('[data-cloud]')!;
+    const path = document.createElementNS(NS, 'path');
+    svg.appendChild(path);
+    return { root, mark, svg, path, links: [...root.querySelectorAll<HTMLAnchorElement>('a:not(.masthead__panel-cv)')], box: null };
+  });
+
+  // Only works while something changes: a scroll, a resize, the menu opening,
+  // or the marker still gliding to its place. Idle pages cost nothing.
+  let current = '';
+  let queued = false;
+  const frame = () => {
+    queued = false;
+    const href = activeHref();
+    if (href !== current) {
+      current = href;
+      tracks.forEach((t) =>
+        t.links.forEach((a) => {
+          const on = isAt(a, href) && a.getAttribute('aria-current') !== 'page';
+          a.classList.toggle('is-here', on);
+        }),
+      );
+    }
+    let moving = false;
+    tracks.forEach((t) => {
+      const link = t.links.find((a) => isAt(a, current));
+      const label = link?.firstElementChild as HTMLElement | undefined;
+      const shown = !!label && label.offsetParent !== null;
+      t.mark.classList.toggle('is-on', shown);
+      if (!shown) {
+        t.box = null;
+        return;
+      }
+      const box = t.root.getBoundingClientRect();
+      const r = label!.getBoundingClientRect();
+      const goal = [r.left - box.left - 12, r.top - box.top - 14, r.width + 24, r.height + 21];
+      // Glide from the last place, or jump there the first time.
+      if (!t.box || reduce) t.box = goal;
+      else {
+        t.box = t.box.map((v, i) => v + (goal[i] - v) * 0.16);
+        if (t.box.some((v, i) => Math.abs(goal[i] - v) > 0.3)) moving = true;
+        else t.box = goal;
+      }
+      const [x, y, w, h] = t.box;
+      t.mark.style.transform = `translate(${x}px, ${y}px)`;
+      t.mark.style.width = `${w}px`;
+      t.mark.style.height = `${h}px`;
+      t.svg.setAttribute('viewBox', `0 0 ${w} ${h}`);
+      t.path.setAttribute('d', cloudPath(w, h));
+    });
+    if (moving) kick();
+  };
+  const kick = () => {
+    if (queued) return;
+    queued = true;
+    requestAnimationFrame(frame);
+  };
+  if (sections.length) addEventListener('scroll', kick, { passive: true });
+  addEventListener('resize', kick);
+  toggle?.addEventListener('click', () => setTimeout(kick));
+  document.fonts?.ready.then(kick);
+  kick();
 </script>

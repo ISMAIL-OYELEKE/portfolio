@@ -1,0 +1,137 @@
+---
+/* A short request path drawn with the same AWS icons as the project flows:
+   a packet runs along it once, and the last hop either answers (ok) or
+   fails (miss). Used on the 404 and thank-you pages. Without JavaScript or
+   with reduced motion it shows its end state. */
+import { archIcon, type ArchIcon } from '../lib/archIcons';
+
+interface Props {
+  hops: { icon: ArchIcon; label: string }[];
+  end: 'ok' | 'miss';
+  /** Short status under the last hop, such as "NoSuchKey" or "Delivered". */
+  status: string;
+}
+const { hops, end, status } = Astro.props;
+const W = 420;
+const gap = W / hops.length;
+const xs = hops.map((_, i) => gap / 2 + i * gap);
+---
+
+<div class:list={['route', `route--${end}`]} data-route>
+  <svg viewBox={`0 0 ${W} 120`} role="img" aria-label={`${hops.map((h) => h.label).join(', then ')}: ${status}`}>
+    {
+      xs.slice(1).map((x, i) => (
+        <line class="route__link" x1={xs[i] + 32} y1="40" x2={x - 32} y2="40" style={`--i:${i}`} />
+      ))
+    }
+    {
+      hops.map((h, i) => (
+        <g transform={`translate(${xs[i]},40)`} class="route__hop" style={`--i:${i}`}>
+          <g set:html={archIcon(h.icon, 46)} />
+          <text y="44">{h.label}</text>
+        </g>
+      ))
+    }
+    <g transform={`translate(${xs[xs.length - 1] + 22},18)`} class="route__badge">
+      <circle r="11" />
+      {end === 'ok' ? <path d="M-5 0l3.5 3.5L5.5-4" /> : <path d="M-4.5-4.5l9 9M4.5-4.5l-9 9" />}
+    </g>
+    <circle class="route__pk" r="5" cx={xs[0]} cy="40" />
+  </svg>
+  <p class="route__status">{status}</p>
+</div>
+
+<style>
+  .route {
+    max-width: 30rem;
+    margin: 0 auto 2rem;
+  }
+  .route svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    overflow: visible;
+  }
+  .route__link {
+    stroke: var(--text-muted);
+    stroke-width: 1.6;
+    stroke-dasharray: 3 5;
+  }
+  .route__hop text {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    fill: var(--text);
+    text-anchor: middle;
+  }
+  .route__hop :global(.arch__ring) {
+    fill: var(--bg);
+    stroke: var(--highlight);
+    stroke-width: 2;
+  }
+  .route__hop {
+    color: var(--text);
+  }
+  .route__badge circle {
+    fill: #3fa36b;
+  }
+  .route--miss .route__badge circle {
+    fill: #c4553f;
+  }
+  .route__badge path {
+    fill: none;
+    stroke: #fff;
+    stroke-width: 2.2;
+    stroke-linecap: round;
+  }
+  .route__pk {
+    fill: var(--highlight);
+    opacity: 0;
+  }
+  .route__status {
+    margin: 0.4rem 0 0;
+    text-align: center;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #3fa36b;
+  }
+  .route--miss .route__status {
+    color: #e0806c;
+  }
+
+  /* The run: the packet hops along, then the badge on the last hop appears. */
+  .route.is-run .route__badge,
+  .route.is-run .route__status {
+    opacity: 0;
+    animation: route-show 0.35s ease-out 1.9s forwards;
+  }
+  @keyframes route-show {
+    to {
+      opacity: 1;
+    }
+  }
+
+</style>
+
+<script>
+  // The packet hops from the first icon to the last, then the result shows.
+  if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    document.querySelectorAll<HTMLElement>('[data-route]').forEach((root) => {
+      const pk = root.querySelector<SVGCircleElement>('.route__pk')!;
+      const xs = [...root.querySelectorAll<SVGGElement>('.route__hop')].map((h) => h.transform.baseVal[0].matrix.e);
+      const from = xs[0];
+      const to = xs[xs.length - 1];
+      const start = performance.now();
+      root.classList.add('is-run');
+      const tick = (now: number) => {
+        const k = Math.min(1, (now - start) / 1800);
+        const e = k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
+        pk.setAttribute('cx', String(from + (to - from) * e));
+        pk.style.opacity = k < 1 ? '1' : '0';
+        if (k < 1) requestAnimationFrame(tick);
+      };
+      requestAnimationFrame(tick);
+    });
+  }
+</script>

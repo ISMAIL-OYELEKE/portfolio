@@ -2,6 +2,7 @@
 import Base from '../layouts/Base.astro';
 import PageHero from '../components/PageHero.astro';
 import SocialIcon from '../components/SocialIcon.astro';
+import VideoEmbed from '../components/VideoEmbed.astro';
 import { projects } from '../data/projects';
 
 const description =
@@ -113,21 +114,41 @@ const demos = projects.filter((p) => p.video);
         <span class="rule-tick"></span>
       </div>
 
-      <ul class="posts">
-        {
-          demos.map((d) => (
-            <li>
-              <a href={d.video} target="_blank" rel="noopener">
-                <span class="posts__date">{d.date}</span>
-                <span class="posts__title">{d.title}</span>
-                <span class="posts__icon">
-                  <SocialIcon name="play" size={16} />
-                </span>
-              </a>
-            </li>
-          ))
-        }
-      </ul>
+      <div class="channel" data-channel>
+        <div class="channel__screens">
+          {
+            demos.map((d, i) => (
+              <div class="channel__screen" id={`ch-${i}`} role="tabpanel" aria-labelledby={`ch-tab-${i}`} data-screen={i} hidden={i !== 0}>
+                <VideoEmbed url={d.video!} title={d.title} />
+                <a class="text-link" href={`/projects/${d.slug}`}>
+                  Read the case study
+                  <SocialIcon name="arrow" size={14} />
+                </a>
+              </div>
+            ))
+          }
+        </div>
+        <div class="channel__list" role="tablist" aria-label="Walkthroughs" aria-orientation="vertical">
+          {
+            demos.map((d, i) => (
+              <button
+                type="button"
+                role="tab"
+                class="channel__item"
+                id={`ch-tab-${i}`}
+                aria-controls={`ch-${i}`}
+                aria-selected={i === 0 ? 'true' : 'false'}
+                tabindex={i === 0 ? 0 : -1}
+                data-ch={i}
+              >
+                <span class="channel__num">CH {String(i + 1).padStart(2, '0')}</span>
+                <span class="channel__title">{d.title}</span>
+                <span class="channel__date">{d.date}</span>
+              </button>
+            ))
+          }
+        </div>
+      </div>
 
       <div class="btn-row">
         <a
@@ -144,7 +165,121 @@ const demos = projects.filter((p) => p.video);
   </section>
 </Base>
 
+<script>
+  /* Channel surfing: one screen, a list of walkthroughs beside it. Switching
+     away stops whatever was playing. */
+  const channel = document.querySelector<HTMLElement>('[data-channel]');
+  if (channel) {
+    const tabs = [...channel.querySelectorAll<HTMLButtonElement>('[data-ch]')];
+    const screens = [...channel.querySelectorAll<HTMLElement>('[data-screen]')];
+    const select = (i: number, focus = false) => {
+      screens.forEach((s, k) => {
+        if (k !== i) {
+          const frame = s.querySelector('iframe');
+          if (frame) frame.src = frame.src.replace('autoplay=1', 'autoplay=0');
+        }
+        s.hidden = k !== i;
+      });
+      tabs.forEach((t, k) => {
+        t.setAttribute('aria-selected', String(k === i));
+        t.tabIndex = k === i ? 0 : -1;
+      });
+      if (focus) tabs[i].focus();
+      screens[i].classList.remove('is-tuning');
+      void screens[i].offsetWidth;
+      screens[i].classList.add('is-tuning');
+    };
+    tabs.forEach((t, i) => {
+      t.addEventListener('click', () => select(i));
+      t.addEventListener('keydown', (e) => {
+        const d = e.key === 'ArrowDown' || e.key === 'ArrowRight' ? 1 : e.key === 'ArrowUp' || e.key === 'ArrowLeft' ? -1 : 0;
+        if (!d) return;
+        e.preventDefault();
+        select((i + d + tabs.length) % tabs.length, true);
+      });
+    });
+  }
+</script>
+
 <style>
+  .channel {
+    display: grid;
+    grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+    gap: 1.5rem;
+    align-items: start;
+  }
+  @media (max-width: 860px) {
+    .channel {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+  .channel__screen :global(.facade) {
+    margin-top: 0;
+  }
+  .channel__screen.is-tuning {
+    animation: tune 0.45s var(--ease-out);
+  }
+  @keyframes tune {
+    0% {
+      opacity: 0;
+      transform: scaleY(0.02);
+    }
+    40% {
+      opacity: 1;
+      transform: scaleY(0.04);
+    }
+    100% {
+      transform: none;
+    }
+  }
+  .channel__list {
+    display: grid;
+    gap: 0.4rem;
+  }
+  .channel__item {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 0.15rem 0.9rem;
+    text-align: left;
+    padding: 0.85rem 1rem;
+    color: var(--text);
+    background: transparent;
+    border: 1px solid var(--rule);
+    cursor: pointer;
+    transition: border-color 0.2s ease, background-color 0.2s ease;
+  }
+  .channel__item:hover {
+    border-color: var(--accent);
+  }
+  .channel__item[aria-selected='true'] {
+    border-color: var(--highlight);
+    box-shadow: inset 3px 0 0 var(--highlight);
+  }
+  .channel__num {
+    grid-row: span 2;
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    color: var(--highlight);
+    padding-top: 0.2rem;
+  }
+  .channel__title {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 1rem;
+    line-height: 1.3;
+  }
+  .channel__date {
+    font-family: var(--font-mono);
+    font-size: 0.66rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .channel__screen.is-tuning {
+      animation: none;
+    }
+  }
   .posts {
     list-style: none;
     margin: 0;

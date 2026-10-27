@@ -1,6 +1,7 @@
 ---
 import Base from '../layouts/Base.astro';
 import SocialIcon from '../components/SocialIcon.astro';
+import RouteTrace from '../components/RouteTrace.astro';
 import { site } from '../data/site';
 import { featuredProjects } from '../data/projects';
 
@@ -15,12 +16,15 @@ const next = featuredProjects.slice(0, 2);
 >
   <section class="on-dark done">
     <div class="shell done__inner">
-      <span class="done__mark" aria-hidden="true">
-        <svg viewBox="0 0 48 48" width="44" height="44" fill="none" stroke="currentColor" stroke-width="1.6">
-          <rect x="4" y="4" width="40" height="40" />
-          <path d="M14 24.5l7 7 14-15" stroke-linecap="square" />
-        </svg>
-      </span>
+      <RouteTrace
+        hops={[
+          { icon: 'chat', label: 'Your message' },
+          { icon: 'internet', label: 'Web3Forms' },
+          { icon: 'user', label: 'My inbox' },
+        ]}
+        end="ok"
+        status="Delivered"
+      />
 
       <span class="eyebrow">Sent</span>
       <h1>Thank you. Your message is with me.</h1>
@@ -80,11 +84,13 @@ const next = featuredProjects.slice(0, 2);
   }
   .done__inner {
     max-width: 44rem;
+    text-align: center;
   }
-  .done__mark {
-    display: inline-flex;
-    color: var(--highlight);
-    margin-bottom: 1.75rem;
+  .done .lede {
+    margin-inline: auto;
+  }
+  .done .btn-row {
+    justify-content: center;
   }
   .done h1 {
     font-size: clamp(2rem, 4.8vw, 3.1rem);
@@ -92,7 +98,8 @@ const next = featuredProjects.slice(0, 2);
 
   .next {
     list-style: none;
-    margin: 0;
+    margin: 0 auto;
+    max-width: 56rem;
     padding: 0;
     border-top: 1px solid var(--rule);
   }

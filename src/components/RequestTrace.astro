@@ -1,0 +1,218 @@
+---
+/* "Your request, traced": the visitor's own page load from the Navigation
+   Timing API, drawn as a waterfall. Nothing is sent anywhere. On the live site
+   the CloudFront edge that answered is read from the x-amz-cf-pop response
+   header of a same-origin HEAD request. Without JavaScript, or where the
+   browser hides timing, the panel stays hidden. */
+---
+
+<section class="trace" data-trace hidden aria-labelledby="trace-title">
+  <div class="trace__head">
+    <span class="eyebrow">Your request, traced</span>
+    <h2 id="trace-title">This page, as your browser just fetched it</h2>
+    <p class="trace__lede" data-trace-lede>
+      Real numbers from your visit, measured by your own browser. On ismailoyeleke.com that path runs
+      through Route 53, CloudFront and an ACM certificate. Nothing here is sent anywhere.
+    </p>
+  </div>
+  <ol class="trace__rows" data-trace-rows></ol>
+  <p class="trace__total" data-trace-total></p>
+  <button type="button" class="trace__again" data-trace-again>Trace it again</button>
+</section>
+
+<style>
+  .trace {
+    max-width: 52rem;
+    margin: 0 auto;
+  }
+  .trace[hidden] {
+    display: none;
+  }
+  .trace__head {
+    text-align: center;
+    margin-bottom: 1.75rem;
+  }
+  .trace__head h2 {
+    margin: 0.4rem 0 0.5rem;
+  }
+  .trace__lede {
+    color: var(--text-muted);
+    margin: 0 auto;
+    max-width: 44rem;
+    text-wrap: balance;
+  }
+  .trace__rows {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 0.55rem;
+  }
+  .trace__rows :global(li) {
+    display: grid;
+    grid-template-columns: 11rem minmax(0, 1fr) 4.5rem;
+    gap: 0.9rem;
+    align-items: center;
+    font-size: 0.88rem;
+  }
+  .trace__rows :global(.trace__name) {
+    font-family: var(--font-mono);
+    font-size: 0.74rem;
+    color: var(--text);
+  }
+  .trace__rows :global(.trace__name small) {
+    display: block;
+    color: var(--text-muted);
+    font-size: 0.68rem;
+  }
+  .trace__rows :global(.trace__lane) {
+    position: relative;
+    height: 12px;
+    background: color-mix(in srgb, var(--rule) 55%, transparent);
+  }
+  .trace__rows :global(.trace__bar) {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    min-width: 3px;
+    background: var(--highlight);
+    transform-origin: left;
+    transform: scaleX(0);
+    transition: transform 0.6s var(--ease-out);
+  }
+  .trace__rows :global(.is-drawn .trace__bar) {
+    transform: scaleX(1);
+  }
+  .trace__rows :global(.trace__ms) {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    text-align: right;
+    color: var(--text-muted);
+  }
+  .trace__total {
+    margin: 1.25rem 0 0;
+    text-align: center;
+    font-size: 0.95rem;
+  }
+  .trace__total :global(b) {
+    color: var(--accent);
+  }
+  .trace__again {
+    display: block;
+    margin: 1rem auto 0;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text);
+    background: transparent;
+    border: 1px solid var(--rule);
+    padding: 0.5rem 0.9rem;
+    cursor: pointer;
+  }
+  .trace__again:hover {
+    border-color: var(--accent);
+  }
+  /* Phones: the phase name on its own line, so the bar gets the full width. */
+  @media (max-width: 640px) {
+    .trace__rows {
+      gap: 0.9rem;
+    }
+    .trace__rows :global(li) {
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 0.3rem 0.6rem;
+    }
+    .trace__rows :global(.trace__name) {
+      grid-column: 1;
+    }
+    .trace__rows :global(.trace__name small) {
+      display: inline;
+      margin-left: 0.4rem;
+    }
+    .trace__rows :global(.trace__ms) {
+      grid-column: 2;
+      grid-row: 1;
+    }
+    .trace__rows :global(.trace__lane) {
+      grid-column: 1 / -1;
+      height: 14px;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .trace__rows :global(.trace__bar) {
+      transition: none;
+    }
+  }
+</style>
+
+<script>
+  const root = document.querySelector<HTMLElement>('[data-trace]');
+  const nav = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming | undefined;
+  if (root && nav) {
+    const rowsEl = root.querySelector<HTMLOListElement>('[data-trace-rows]')!;
+    const total = root.querySelector<HTMLElement>('[data-trace-total]')!;
+    const again = root.querySelector<HTMLButtonElement>('[data-trace-again]')!;
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let pop = '';
+
+    const esc = (s: string) => s.replace(/[&<>"]/g, (c) => `&#${c.charCodeAt(0)};`);
+
+    const draw = (t: PerformanceNavigationTiming | PerformanceResourceTiming, label: string) => {
+      const phases = [
+        { name: 'DNS lookup', note: 'finding the address', a: t.domainLookupStart, b: t.domainLookupEnd },
+        { name: 'TCP connect', note: 'opening a connection', a: t.connectStart, b: t.secureConnectionStart || t.connectEnd },
+        { name: 'TLS handshake', note: 'agreeing encryption', a: t.secureConnectionStart, b: t.connectEnd },
+        { name: 'Waiting', note: 'time to first byte', a: t.requestStart, b: t.responseStart },
+        { name: 'Download', note: 'the HTML itself', a: t.responseStart, b: t.responseEnd },
+      ];
+      if ('domContentLoadedEventEnd' in t && t.domContentLoadedEventEnd > 0) {
+        phases.push({ name: 'Page ready', note: 'parsed and styled', a: t.responseEnd, b: t.domContentLoadedEventEnd });
+      }
+      const start = t.startTime;
+      const end = Math.max(...phases.map((p) => p.b), t.responseEnd) - start || 1;
+      rowsEl.innerHTML = phases
+        .map((p) => {
+          const ms = p.a > 0 && p.b >= p.a ? p.b - p.a : 0;
+          const left = p.a > 0 ? ((p.a - start) / end) * 100 : 0;
+          const width = (ms / end) * 100;
+          return `<li><span class="trace__name">${p.name}<small>${p.note}</small></span><span class="trace__lane"><span class="trace__bar" style="left:${left.toFixed(2)}%;width:${width.toFixed(2)}%"></span></span><span class="trace__ms">${ms < 1 ? (ms === 0 ? 'reused' : '<1 ms') : `${Math.round(ms)} ms`}</span></li>`;
+        })
+        .join('');
+      const items = [...rowsEl.children] as HTMLElement[];
+      items.forEach((li, i) => window.setTimeout(() => li.classList.add('is-drawn'), reduce ? 0 : 120 * i));
+      const proto = t.nextHopProtocol ? ` over ${t.nextHopProtocol.toUpperCase().replace('H2', 'HTTP/2').replace('H3', 'HTTP/3')}` : '';
+      const where = pop ? `CloudFront edge <b>${esc(pop)}</b>` : 'the edge';
+      total.innerHTML = `${label}: <b>${Math.round(end)} ms</b> in all, served from ${where}${esc(proto)}.`;
+    };
+
+    root.hidden = false;
+    draw(nav, 'Your first load');
+    // The page-ready mark only exists once the document has finished parsing.
+    if (!nav.domContentLoadedEventEnd) {
+      window.addEventListener('load', () => window.setTimeout(() => draw(nav, 'Your first load'), 0), { once: true });
+    }
+
+    // The edge location only exists on the live CloudFront site.
+    fetch(location.href, { method: 'HEAD', cache: 'no-store' })
+      .then((r) => {
+        pop = r.headers.get('x-amz-cf-pop') || '';
+        if (pop) draw(nav, 'Your first load');
+      })
+      .catch(() => {});
+
+    again.addEventListener('click', async () => {
+      again.disabled = true;
+      const url = `${location.pathname}?trace=${Date.now()}`;
+      try {
+        const r = await fetch(url, { cache: 'no-store' });
+        await r.text();
+        pop = r.headers.get('x-amz-cf-pop') || pop;
+        const entry = performance.getEntriesByName(new URL(url, location.href).href).pop() as PerformanceResourceTiming | undefined;
+        if (entry) draw(entry, 'That trace');
+      } catch {
+        /* Offline or blocked: keep the first trace. */
+      }
+      again.disabled = false;
+    });
+  }
+</script>
