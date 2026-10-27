@@ -42,6 +42,11 @@ const description =
         </div>
       </div>
 
+      <div class="router__bar" data-router-bar hidden>
+        <span data-router-bar-text></span>
+        <button type="button" class="btn btn--primary router__all" data-router-all>Show all roles</button>
+      </div>
+
       <div class="timeline-wrap" data-timeline>
       <span class="timeline__rail" aria-hidden="true"><span data-rail-fill></span></span>
       <ol class="timeline">
@@ -142,6 +147,8 @@ const description =
     const out = router.querySelector<HTMLElement>('[data-router-out]')!;
     const chips = [...router.querySelectorAll<HTMLButtonElement>('[data-tool]')];
     let active: string | null = null;
+    const bar = document.querySelector<HTMLElement>('[data-router-bar]')!;
+    const barText = bar.querySelector<HTMLElement>('[data-router-bar-text]')!;
     const apply = () => {
       chips.forEach((c) => c.setAttribute('aria-pressed', String(c.dataset.tool === active)));
       let hits = 0;
@@ -152,7 +159,17 @@ const description =
         it.querySelectorAll<HTMLElement>('[data-tag]').forEach((t) => t.classList.toggle('is-hit', t.dataset.tag === active));
       });
       out.textContent = active ? `${active}: ${hits} of ${items.length} roles` : '';
+      // While a tool is picked, a bar stays pinned above the roles with a way back.
+      bar.hidden = !active;
+      barText.textContent = active ? `Showing the ${hits} of ${items.length} roles where I used ${active}.` : '';
     };
+    const clear = () => {
+      active = null;
+      apply();
+    };
+    bar.querySelector('[data-router-all]')!.addEventListener('click', clear);
+    // Tapping a faded role also brings every role back.
+    items.forEach((it) => it.addEventListener('click', () => it.classList.contains('is-dim') && clear()));
     chips.forEach((c) =>
       c.addEventListener('click', () => {
         active = active === c.dataset.tool ? null : c.dataset.tool!;
@@ -238,6 +255,32 @@ const description =
   .timeline__item.is-dim {
     opacity: 0.28;
     filter: grayscale(1);
+    cursor: pointer;
+  }
+  .router__bar {
+    position: sticky;
+    top: calc(var(--mast, 73px) + 0.6rem);
+    z-index: 5;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem 1rem;
+    margin: 0 auto 1.5rem;
+    padding: 0.6rem 0.9rem;
+    max-width: 44rem;
+    background: var(--brand-ink);
+    color: var(--paper);
+    border: 1px solid var(--highlight);
+    font-size: 0.9rem;
+    text-align: center;
+  }
+  .router__bar[hidden] {
+    display: none;
+  }
+  .router__all {
+    padding: 0.5rem 0.9rem;
+    font-size: 0.72rem;
   }
   .timeline__dot {
     position: absolute;
