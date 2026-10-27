@@ -6,27 +6,48 @@
 import { site } from '../data/site';
 import SocialIcon from './SocialIcon.astro';
 
+// The opening line, typed out letter by letter: each letter carries its
+// place in the line (--c) so CSS alone can time it from the first paint.
+const titleLines = [['Every', 'system', 'starts'], ['on', 'the', 'ground.']];
+let charAt = 0;
+const title = titleLines.map((line) =>
+  line.map((text) => {
+    const word = { text, em: text === 'ground.', chars: [...text].map((ch) => ({ ch, c: charAt++ })) };
+    return word;
+  }),
+);
+const lastChar = charAt - 1;
+
 const loopPath =
   'M300,150 C370,50 545,50 545,150 C545,250 370,250 300,150 C230,50 55,50 55,150 C55,250 230,250 300,150 Z';
 ---
 
 <section class="on-dark flight" data-flight aria-label="Introduction">
   <div class="flight__scene">
-    {/* The opening frame as plain images, so the skyline is there the moment
-        the page appears; the canvas paints over it once the script runs. */}
-    <img class="flight__poster flight__poster--day-wide" src="/hero/day-wide.webp" alt="" loading="lazy" decoding="async" />
-    <img class="flight__poster flight__poster--day-tall" src="/hero/day-tall.webp" alt="" loading="lazy" decoding="async" />
-    <img class="flight__poster flight__poster--night-wide" src="/hero/night-wide.webp" alt="" loading="lazy" decoding="async" />
-    <img class="flight__poster flight__poster--night-tall" src="/hero/night-tall.webp" alt="" loading="lazy" decoding="async" />
     <canvas class="flight__sky" data-flight-sky aria-hidden="true"></canvas>
     <div class="flight__commit" data-commit aria-hidden="true"></div>
 
     <div class="flight__intro" data-intro aria-hidden="true">
       <span class="eyebrow">{site.locality}, {site.country}</span>
-      <p class="flight__title">
-        {['Every', 'system', 'starts'].map((w, i) => <Fragment><span class="w" style={`--i:${i}`}><span>{w}</span></span>{i < 2 ? ' ' : ''}</Fragment>)}<br />
-        {['on', 'the'].map((w, i) => <Fragment><span class="w" style={`--i:${i + 3}`}><span>{w}</span></span>{' '}</Fragment>)}
-        <span class="w" style="--i:5"><em>ground.</em></span>
+      <p class="flight__title" aria-label="Every system starts on the ground.">
+        {
+          title.map((line, li) => (
+            <Fragment>
+              {line.map((word, wi) => {
+                const letters = word.chars.map(({ ch, c }) => (
+                  <span class:list={['c', { 'c--end': c === lastChar }]} style={`--c:${c}`}>{ch}</span>
+                ));
+                return (
+                  <Fragment>
+                    <span class="w">{word.em ? <em>{letters}</em> : letters}</span>
+                    {wi < line.length - 1 ? ' ' : ''}
+                  </Fragment>
+                );
+              })}
+              {li === 0 && <br />}
+            </Fragment>
+          ))
+        }
       </p>
       <p class="flight__note">This one ends up in the cloud. Scroll to take it there.</p>
     </div>
@@ -82,6 +103,29 @@ const loopPath =
     min-height: 560px;
     overflow: hidden;
   }
+  /* The painted sky's own colours, day and night, shown from the first paint. */
+  .flight__scene {
+    background: linear-gradient(#1d58a4, #8fc0ea);
+  }
+  :global(:root[data-theme='dark']) .flight__scene {
+    background: linear-gradient(#060e1b, #1a2f4f);
+  }
+  /* The flight's scroll length is set from the first paint too, not when the
+     script arrives, so the page never changes height under the reader. */
+  @media (prefers-reduced-motion: no-preference) {
+    :global(:root:not(.no-js)) .flight {
+      height: 400vh;
+    }
+    :global(:root:not(.no-js)) .flight .flight__scene {
+      position: sticky;
+      top: var(--mast);
+    }
+  }
+  @media (prefers-reduced-motion: no-preference) and (max-width: 640px) {
+    :global(:root:not(.no-js)) .flight {
+      height: 350vh;
+    }
+  }
   /* The scroll-driven version, switched on by the script. */
   /* The last part of the scroll holds the finished frame (name, role and
      buttons) still, so it can be read before the page moves on. */
@@ -98,39 +142,6 @@ const loopPath =
     }
   }
 
-  .flight__poster {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: center bottom;
-    display: none;
-  }
-  /* One poster shows: the theme's, in the screen's shape. */
-  @media (min-aspect-ratio: 1/1) {
-    .flight__poster--day-wide {
-      display: block;
-    }
-    :global(:root[data-theme='dark']) .flight__poster--day-wide {
-      display: none;
-    }
-    :global(:root[data-theme='dark']) .flight__poster--night-wide {
-      display: block;
-    }
-  }
-  @media (max-aspect-ratio: 1/1) {
-    .flight__poster--day-tall {
-      display: block;
-    }
-    :global(:root[data-theme='dark']) .flight__poster--day-tall {
-      display: none;
-    }
-    :global(:root[data-theme='dark']) .flight__poster--night-tall {
-      display: block;
-    }
-  }
-
   .flight__sky {
     position: absolute;
     inset: 0;
@@ -138,7 +149,8 @@ const loopPath =
     height: 100%;
     display: block;
   }
-  /* The live sky dissolves in over the poster, so the hand-over never jumps. */
+  /* The live sky fades in over a plain sky of the same colours, so the page
+     never shows an empty box while the script loads. */
   :global(:root:not(.no-js)) .flight__sky {
     opacity: 0;
     transition: opacity 0.4s ease-out;
@@ -191,40 +203,69 @@ const loopPath =
     font-style: normal;
     color: var(--highlight);
   }
-  /* Each word sits in its own clip, so it can rise into place. The padding
-     keeps the descenders (y, g) inside the clip. */
+  /* Words never break inside; each letter is typed in on its own beat. */
   .flight__title .w {
-    display: inline-block;
-    overflow: hidden;
-    padding: 0 0.04em 0.14em;
-    margin: 0 -0.04em -0.14em;
-    vertical-align: top;
+    white-space: nowrap;
   }
-  .flight__title .w > * {
-    display: inline-block;
+  .flight__title .c {
+    position: relative;
   }
 
-  /* The opening, on first load: the place, then the line word by word, then
-     the two hints. `backwards` hands opacity back to the scroll script once
-     each piece is in place. */
+  /* The opening, on first load: the place, then the line typed out letter by
+     letter with an amber caret, then the two hints. `backwards` hands opacity
+     back to the scroll script once each piece is in place. */
   @media (prefers-reduced-motion: no-preference) {
     .flight__intro .eyebrow {
-      animation: fl-fade 0.7s ease-out 0.15s backwards;
+      animation: fl-fade 0.6s ease-out 0.1s backwards;
     }
-    .flight__title .w > * {
-      animation: fl-rise 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) backwards;
-      animation-delay: calc(0.3s + var(--i) * 0.09s);
+    .flight__title .c {
+      animation: fl-type 1ms steps(1) backwards;
+      animation-delay: calc(0.45s + var(--c) * 65ms);
+    }
+    .flight__title .c::after {
+      content: '';
+      position: absolute;
+      top: 0.12em;
+      bottom: 0.02em;
+      right: -0.05em;
+      width: 0.055em;
+      background: var(--highlight);
+      opacity: 0;
+      animation: fl-caret 65ms steps(1);
+      animation-delay: calc(0.45s + var(--c) * 65ms);
+    }
+    .flight__title .c--end::after {
+      animation: fl-caret-end 2.6s steps(1);
+      animation-delay: calc(0.45s + var(--c) * 65ms);
     }
     .flight__note {
-      animation: fl-fade 0.8s ease-out 1.15s backwards;
+      animation: fl-fade 0.8s ease-out 2.7s backwards;
     }
-    .flight__cue {
-      animation: fl-fade 0.8s ease-out 1.5s backwards;
+    .flight__cue,
+    .flight__alt {
+      animation: fl-fade 0.8s ease-out 3s backwards;
     }
   }
-  @keyframes fl-rise {
+  @keyframes fl-type {
     from {
-      transform: translateY(110%);
+      opacity: 0;
+    }
+  }
+  @keyframes fl-caret {
+    from {
+      opacity: 1;
+    }
+  }
+  @keyframes fl-caret-end {
+    0%,
+    30%,
+    60% {
+      opacity: 1;
+    }
+    15%,
+    45%,
+    75% {
+      opacity: 0;
     }
   }
   @keyframes fl-fade {
@@ -482,6 +523,12 @@ const loopPath =
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   if (section) {
+    // A reload always starts at the opening of the flight, not wherever the
+    // page was last scrolled to.
+    if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+    const navEntry = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming | undefined;
+    if (navEntry?.type === 'reload' && !location.hash) window.scrollTo(0, 0);
+
     const NS = 'http://www.w3.org/2000/svg';
     const q = <T extends Element>(sel: string) => section.querySelector<T>(sel)!;
     const clamp = (v: number, a = 0, b = 1) => Math.min(b, Math.max(a, v));

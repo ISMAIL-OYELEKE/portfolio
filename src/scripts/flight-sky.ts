@@ -378,6 +378,8 @@ export function createSky(el: HTMLCanvasElement) {
   add(3, 3, 2.3, 105, 150, 30);
   let dpr = 1;
   let drawn = false;
+  let bornAt = 0;
+  const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const resize = () => {
     dpr = Math.min(2, window.devicePixelRatio || 1);
     el.width = Math.round(el.clientWidth * dpr);
@@ -400,6 +402,7 @@ export function createSky(el: HTMLCanvasElement) {
     // The first paint lets the canvas fade in over the poster image behind it.
     if (!drawn) {
       drawn = true;
+      bornAt = t;
       requestAnimationFrame(() => el.classList.add('is-drawn'));
     }
     const W = el.width / dpr;
@@ -466,7 +469,9 @@ export function createSky(el: HTMLCanvasElement) {
     const cityScale = W < 700 ? Math.max(W / CITY_W, Math.min(0.46, (H * 0.5) / CITY_H)) : Math.max(W / CITY_W, (H * 0.55) / CITY_H);
     const cw = CITY_W * cityScale;
     const ch = CITY_H * cityScale;
-    const cityY = H - ch + ease(seg(p, 0, 0.42)) * H * 1.05;
+    // On first paint the skyline rises into place from the water.
+    const rise = still ? 1 : ease((t - bornAt) / 1.6);
+    const cityY = H - ch + ease(seg(p, 0, 0.42)) * H * 1.05 + (1 - rise) * ch * 0.45;
     if (cityY < H) {
       ctx.drawImage(a.city, (W - cw) / 2, cityY, cw, ch);
       // Traffic on the bridge and blinking aviation lights.

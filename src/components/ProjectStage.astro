@@ -45,7 +45,7 @@ const month = (d: string) => d.replace(/^(\w{3})\w*/, '$1').toUpperCase();
           <SocialIcon name="arrow" size={15} />
         </a>
         <div class="ps__visual">
-          <ArchDiagram slug={p.slug} alt={p.diagram?.alt ?? `${p.title} architecture`} cropped eager={i === 0} />
+          <ArchDiagram slug={p.slug} alt={p.diagram?.alt ?? `${p.title} architecture`} cropped />
           <a class="btn btn--primary ps__case ps__case--under" href={`/projects/${p.slug}`}>
             Case study
             <SocialIcon name="arrow" size={15} />
