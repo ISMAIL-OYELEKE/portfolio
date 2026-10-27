@@ -426,6 +426,23 @@ The project instructions hold the full text. Every change must keep to them.
     (manual scroll restoration). Diagrams load only when they scroll near, so
     nothing competes with the opening. Phones show the current page (or home
     section) as a small tab under the top bar, circled by the same cloud.
+28. Pre-launch pass. The phone tab from item 27 is removed (Ismail: it
+    overlapped the page while scrolling); the cloud marker stays in the
+    laptop nav and the phone menu. The marker now only runs while something
+    moves instead of every frame, the hero builds its clouds one per frame
+    and blurs each cloud's highlights in one pass, which took the home page
+    on a phone from 46 to 96-97 in Lighthouse. Layout jumps fixed on
+    Experience (tool filter now shown before the script runs) and Projects
+    (only the first project shows from the first paint). About's skill tags
+    use real buttons, cert cards read only the face you can see, Freelance
+    headings run in order. Every page now scores 96-100 for speed on phones
+    and 100 on laptops, with no layout shift. A crawl of all 21 pages on
+    phone and laptop in light and dark found no console errors, failed
+    files, broken internal links or sideways scroll. The contact form was
+    run end to end with the Web3Forms reply simulated (success goes to
+    /thank-you, failure shows the email fallback). Known and kept: the
+    release timeline dims entries until you scroll to them, which Lighthouse
+    reads as low contrast (home accessibility 97).
 
 ## Open questions
 

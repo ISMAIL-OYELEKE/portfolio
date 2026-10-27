@@ -298,23 +298,26 @@ function buildCloud(theme: Theme, w: number, h: number, seed: number) {
 
   // 3. Soft highlights on the upper side of each big puff, and soft shadow
   //    where puffs tuck under one another.
-  g.globalCompositeOperation = 'source-atop';
-  // A wide blur and light touch, so no single puff reads as a round blob.
-  g.filter = 'blur(18px)';
+  //    Painted sharp on their own layer, then blurred once in a single pass.
+  const lights = canvas(w, h);
+  const l = lights.getContext('2d')!;
   for (const p of puffs) {
     if (p.r < h * 0.08) continue;
-    g.globalAlpha = theme === 'day' ? 0.4 : 0.18;
-    g.fillStyle = pal.cloudLight;
-    g.beginPath();
-    g.arc(p.x - p.r * 0.15, p.y - p.r * 0.3, p.r * 0.6, 0, Math.PI * 2);
-    g.fill();
-    g.globalAlpha = 0.16;
-    g.fillStyle = pal.cloudShadow;
-    g.beginPath();
-    g.arc(p.x + p.r * 0.2, p.y + p.r * 0.75, p.r * 0.55, 0, Math.PI * 2);
-    g.fill();
+    l.globalAlpha = theme === 'day' ? 0.4 : 0.18;
+    l.fillStyle = pal.cloudLight;
+    l.beginPath();
+    l.arc(p.x - p.r * 0.15, p.y - p.r * 0.3, p.r * 0.6, 0, Math.PI * 2);
+    l.fill();
+    l.globalAlpha = 0.16;
+    l.fillStyle = pal.cloudShadow;
+    l.beginPath();
+    l.arc(p.x + p.r * 0.2, p.y + p.r * 0.75, p.r * 0.55, 0, Math.PI * 2);
+    l.fill();
   }
-  g.globalAlpha = 1;
+  // A wide blur and light touch, so no single puff reads as a round blob.
+  g.globalCompositeOperation = 'source-atop';
+  g.filter = 'blur(18px)';
+  g.drawImage(lights, 0, 0);
 
   // 4. Cut the painted body to the softened silhouette.
   g.globalCompositeOperation = 'destination-in';
@@ -328,17 +331,26 @@ function buildCloud(theme: Theme, w: number, h: number, seed: number) {
 type Assets = {
   city: HTMLCanvasElement;
   beacons: Beacon[];
-  clouds: HTMLCanvasElement[];
+  clouds: (HTMLCanvasElement | undefined)[];
+  /** When each cloud was ready, so it can fade in rather than pop. */
+  readyAt: number[];
 };
 
 const cache: Partial<Record<Theme, Assets>> = {};
-function assets(theme: Theme): Assets {
+/** The city at once; the clouds one per frame, so no single frame stalls. */
+function assets(theme: Theme, t: number): Assets {
   if (!cache[theme]) {
     const { canvas: city, beacons } = buildCity(theme);
-    const clouds = Array.from({ length: 6 }, (_, i) => buildCloud(theme, 640, 300, 101 + i * 37));
-    cache[theme] = { city, beacons, clouds };
+    cache[theme] = { city, beacons, clouds: [], readyAt: [] };
+    return cache[theme]!;
   }
-  return cache[theme]!;
+  const a = cache[theme]!;
+  const i = a.clouds.length;
+  if (i < 6) {
+    a.clouds.push(buildCloud(theme, 640, 300, 101 + i * 37));
+    a.readyAt.push(t);
+  }
+  return a;
 }
 
 function mix(a: string, b: string, t: number) {
@@ -409,7 +421,7 @@ export function createSky(el: HTMLCanvasElement) {
     const H = el.height / dpr;
     const th = theme();
     const pal = PALETTES[th];
-    const a = assets(th);
+    const a = assets(th, t);
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     const ease = (v: number) => 1 - Math.pow(1 - Math.min(1, Math.max(0, v)), 3);
     const seg = (v: number, x: number, y: number) => Math.min(1, Math.max(0, (v - x) / (y - x)));
@@ -504,8 +516,11 @@ export function createSky(el: HTMLCanvasElement) {
       // The near banks are thin, so the camera passes through wisps, not a wall.
       const thin = c.layer === 3 ? 0.55 : c.layer === 2 ? 0.8 : 1;
       ctx.globalAlpha = thin * (c.layer >= 2 ? 1 - seg(p, 0.6, 0.68) : 1 - seg(p, 0.6, 0.7));
+      const sprite = a.clouds[c.sprite];
+      if (!sprite) continue;
+      if (!still) ctx.globalAlpha *= Math.min(1, Math.max(0, (t - a.readyAt[c.sprite]) / 0.6));
       if (ctx.globalAlpha <= 0) continue;
-      ctx.drawImage(a.clouds[c.sprite], x * vw, yy, w, h);
+      ctx.drawImage(sprite, x * vw, yy, w, h);
     }
     ctx.globalAlpha = 1;
 

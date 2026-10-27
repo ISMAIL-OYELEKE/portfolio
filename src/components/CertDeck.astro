@@ -16,7 +16,7 @@ const cards = [
   <div class="deck" data-deck>
     {
       cards.map((c, i) => (
-        <div class:list={['dcard', { 'dcard--major': c.major }]} tabindex="0" role="button" aria-label={`${c.name}. Flip for details`}>
+        <div class:list={['dcard', { 'dcard--major': c.major }]} tabindex="0" role="button" aria-label={`${c.issuer} ${c.name}. Flip for details`}>
           <div class="dcard__in">
             <div class="dcard__face dcard__front">
               <span class="dcard__issuer">{c.issuer}</span>
@@ -266,8 +266,12 @@ const cards = [
     const setLinks = () =>
       cards.forEach((c) => {
         const link = c.querySelector('a');
-        if (link) link.tabIndex = dealt && c.classList.contains('is-flipped') ? 0 : -1;
+        const open = dealt && c.classList.contains('is-flipped');
+        if (link) link.tabIndex = open ? 0 : -1;
+        // Only the face you can see is read out.
+        c.querySelector('.dcard__back')?.setAttribute('aria-hidden', String(!open));
       });
+    setLinks();
 
     cards.forEach((c) => {
       const flip = () => {

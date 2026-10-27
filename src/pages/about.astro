@@ -288,16 +288,18 @@ const description =
       }
       if (panel.getBoundingClientRect().bottom > window.innerHeight - 80) panel.scrollIntoView({ block: 'center', behavior: 'smooth' });
     };
+    // A real button stretched over each tag, so the list stays a list.
     skills.forEach((el) => {
-      el.tabIndex = 0;
-      el.setAttribute('role', 'button');
-      el.addEventListener('click', () => show(el));
-      el.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          show(el);
-        }
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'skill__hit';
+      b.setAttribute('aria-label', `${el.dataset.skill}: where I used it`);
+      b.setAttribute('aria-pressed', 'false');
+      b.addEventListener('click', () => {
+        show(el);
+        skills.forEach((s) => s.querySelector('.skill__hit')?.setAttribute('aria-pressed', String(s === current)));
       });
+      el.append(b);
     });
   }
 </script>
@@ -531,9 +533,28 @@ const description =
     text-decoration: underline dotted var(--accent);
     text-underline-offset: 3px;
   }
+  .tag[data-skill] {
+    position: relative;
+  }
   .tag[data-skill]:hover,
-  .tag[data-skill]:focus-visible {
+  .tag[data-skill]:has(:focus-visible) {
     border-color: var(--accent);
+  }
+  .tag[data-skill]:has(:focus-visible) {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+  .tag :global(.skill__hit) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: inherit;
+    background: none;
+    cursor: pointer;
+    outline: none;
   }
   .tag.is-picked {
     background: var(--highlight);
