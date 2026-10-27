@@ -26,6 +26,7 @@ const first = flow.steps[0];
   <div class="adg__sheet">
     <svg viewBox={box.join(' ')} role="img" aria-label={alt} preserveAspectRatio="xMidYMid meet">
       <image data-adg-img href={eager ? `/diagrams/${slug}.svg` : undefined} width={flow.w} height={flow.h}></image>
+      <g data-adg-flow></g>
       <g data-adg-pk></g>
     </svg>
   </div>
@@ -52,12 +53,36 @@ const first = flow.steps[0];
     width: 100%;
     height: auto;
   }
-  /* The same packets as the old flow drawings: small amber dots that glide
-     along the diagram's own arrows, easing in and out at each end. */
+  /* Traffic on the step's own arrows: the arrow line itself runs as a
+     moving dashed line in the site's blue, and amber packets ride along it,
+     easing in and out at each end. */
+  .adg :global(.adg__flow) {
+    fill: none;
+    stroke: #1d5ba6;
+    stroke-width: 5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-dasharray: 16 12;
+    stroke-dashoffset: 0;
+    animation: adg-march 0.6s linear infinite;
+  }
+  @keyframes adg-march {
+    from {
+      stroke-dashoffset: 28;
+    }
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
   .adg :global(.adg__p) {
     fill: #e0a33a;
-    stroke: #fff;
-    stroke-width: 3;
+    stroke: #0f1e33;
+    stroke-width: 4;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .adg :global(.adg__flow) {
+      animation: none;
+    }
   }
   .adg__cap {
     display: flex;
@@ -96,9 +121,10 @@ const first = flow.steps[0];
   // Each step shows for STEP_MS; packets fade in and out at its edges.
   const STEP_MS = 2400;
   const FADE_MS = 300;
-  // Laps per second along an arrow, and packets per arrow.
+  // Laps per second along an arrow.
   const SPEED = 0.55;
-  const PER_ARROW = 2;
+  // Packets per arrow: one per ~240 units of length, between one and three.
+  const perArrow = (L: number) => Math.max(1, Math.min(3, Math.round(L / 240)));
 
   const lengthOf = (p: [number, number][]) => p.slice(1).reduce((s, q, i) => s + Math.hypot(q[0] - p[i][0], q[1] - p[i][1]), 0);
   const pointAt = (p: [number, number][], d: number): [number, number] => {
@@ -117,6 +143,7 @@ const first = flow.steps[0];
     const steps: Step[] = JSON.parse(root.dataset.flow || '[]');
     const img = root.querySelector<SVGImageElement>('[data-adg-img]')!;
     const pkG = root.querySelector<SVGGElement>('[data-adg-pk]')!;
+    const flowG = root.querySelector<SVGGElement>('[data-adg-flow]')!;
     const cap = root.querySelector<HTMLElement>('[data-adg-step]')!;
     const src = root.querySelector<HTMLAnchorElement>('[data-adg-src]')!.getAttribute('href')!;
     let visible = false;
@@ -133,15 +160,22 @@ const first = flow.steps[0];
       step = i;
       const s = steps[i];
       pkG.innerHTML = '';
+      flowG.innerHTML = '';
+      flowG.style.opacity = reduce ? '1' : '0';
       packets = s.paths.flatMap((p, k) => {
         const L = lengthOf(p);
-        return Array.from({ length: PER_ARROW }, (_, j) => {
+        const line = document.createElementNS(NS, 'polyline');
+        line.setAttribute('points', p.map((q) => q.join(',')).join(' '));
+        line.setAttribute('class', 'adg__flow');
+        flowG.appendChild(line);
+        const n = perArrow(L);
+        return Array.from({ length: n }, (_, j) => {
           const c = document.createElementNS(NS, 'circle');
-          c.setAttribute('r', '12');
+          c.setAttribute('r', '14');
           c.setAttribute('class', 'adg__p');
           c.style.opacity = '0';
           pkG.appendChild(c);
-          return { c, p, L, o: j / PER_ARROW + k * 0.17 };
+          return { c, p, L, o: j / n + k * 0.17 };
         });
       });
       cap.innerHTML = `<b>Step ${s.n} of ${steps.length}.</b> `;
@@ -151,6 +185,7 @@ const first = flow.steps[0];
       if (!playing) return;
       const e = now - t0;
       const edge = Math.min(1, e / FADE_MS, (STEP_MS - e) / FADE_MS);
+      flowG.style.opacity = String(Math.max(0, edge));
       packets.forEach(({ c, p, L, o }) => {
         const f = ((e / 1000) * SPEED + o) % 1;
         const [x, y] = pointAt(p, L * f);

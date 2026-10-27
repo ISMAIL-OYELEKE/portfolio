@@ -401,6 +401,16 @@ The project instructions hold the full text. Every change must keep to them.
     blurry sky after coming back to the home page on phones. Architecture
     diagrams: the gold highlight lines are gone; small amber packets glide
     along each step's own arrows, like the old flow drawings.
+25. Hero polish, 27 October evening. The opening line rises in word by word
+    on first load, then the hints fade in. Poster images of the opening frame
+    (public/hero/*.webp, made from the canvas itself, day and night, wide and
+    tall) show the skyline the moment the page appears; the live canvas
+    dissolves in over them. Sun and moon sit in the top corner on phones, clear
+    of the DevOps loop. The daytime palette is deeper and crisper with less
+    haze. Diagram steps now run a moving dashed blue line along their arrows
+    with amber packets riding it, one to three per arrow by length.
+    Regenerate the posters (scratchpad poster.mjs: 1536x864 at 1.25x and
+    390x844 at 2x, at scroll 0) whenever the sky drawing changes.
 
 ## Open questions
 
