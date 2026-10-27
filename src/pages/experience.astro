@@ -54,7 +54,7 @@ const description =
                 <p class="timeline__mode">{role.mode}</p>
                 <p class="uptime">
                   <b data-months={months(role.startISO, role.endISO)}>{months(role.startISO, role.endISO)}</b>
-                  <span>months in production</span>
+                  <span>months in the role</span>
                 </p>
               </div>
 
@@ -414,12 +414,17 @@ const description =
 
   .education {
     display: grid;
-    grid-template-columns: minmax(0, 1.4fr) minmax(0, auto);
-    gap: 1.5rem 3rem;
-    align-items: center;
+    justify-items: center;
+    gap: 1.5rem;
+    text-align: center;
+  }
+  .education .lede,
+  .education__research {
+    margin-inline: auto;
   }
   .education .btn-row {
     margin-top: 0;
+    justify-content: center;
   }
   .education__research {
     color: var(--text-muted);
@@ -427,8 +432,7 @@ const description =
   }
 
   @media (max-width: 860px) {
-    .timeline__item,
-    .education {
+    .timeline__item {
       grid-template-columns: 1fr;
     }
   }

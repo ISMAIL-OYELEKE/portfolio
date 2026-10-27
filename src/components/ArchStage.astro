@@ -8,6 +8,7 @@
 import type { Project } from '../data/projects';
 import { architectures, type ArchNode } from '../data/architectures';
 import SocialIcon from './SocialIcon.astro';
+import { archIcon } from '../lib/archIcons';
 
 interface Props {
   projects: Project[];
@@ -19,23 +20,31 @@ const compact = Astro.props.compact ?? false;
 
 const W = 800;
 const H = 400;
-const boxW = (n: ArchNode) => n.label.length * 7.4 + 30;
-const BOX_H = 36;
+const TW = 400;
+// Icon half size, and how far the label reaches below the icon centre.
+const HALF = 26;
+const BELOW = 50;
 
-// Trim an edge so it starts and ends at the edge of each box, not its centre.
-function trim(a: ArchNode, b: ArchNode) {
-  const dx = b.x - a.x;
-  const dy = b.y - a.y;
-  const cut = (n: ArchNode) => {
-    const hw = n.actor ? 22 : boxW(n) / 2 + 4;
-    const hh = n.actor ? 22 : BOX_H / 2 + 4;
+type Pt = { x: number; y: number };
+const at = (n: ArchNode, tall: boolean): Pt => (tall ? { x: n.tx, y: n.ty } : { x: n.x, y: n.y });
+
+// Trim an edge so it starts and ends at the edge of each icon, and clear of
+// the label when it leaves or arrives from below. Labels are about 4 units
+// per character either side of the centre.
+function trim(a: ArchNode, b: ArchNode, tall: boolean) {
+  const p = at(a, tall);
+  const q = at(b, tall);
+  const dx = q.x - p.x;
+  const dy = q.y - p.y;
+  const cut = (n: ArchNode, below: boolean) => {
+    const hw = below ? Math.max(HALF, n.label.length * 4 + 6) : HALF + 4;
     const tx = dx === 0 ? Infinity : hw / Math.abs(dx);
-    const ty = dy === 0 ? Infinity : hh / Math.abs(dy);
+    const ty = dy === 0 ? Infinity : (below ? BELOW : HALF + 4) / Math.abs(dy);
     return Math.min(tx, ty);
   };
-  const ta = cut(a);
-  const tb = 1 - cut(b);
-  return { x1: a.x + dx * ta, y1: a.y + dy * ta, x2: a.x + dx * tb, y2: a.y + dy * tb };
+  const ta = cut(a, dy > 0);
+  const tb = 1 - cut(b, dy < 0);
+  return { x1: p.x + dx * ta, y1: p.y + dy * ta, x2: p.x + dx * tb, y2: p.y + dy * tb };
 }
 ---
 
@@ -60,6 +69,21 @@ function trim(a: ArchNode, b: ArchNode) {
     }
   </div>
 
+  {!compact && (
+    <div class="arch__step" data-stepper>
+      <button type="button" data-step="-1" aria-label="Previous project">
+        <SocialIcon name="arrow" size={16} />
+      </button>
+      <p aria-live="polite">
+        <b data-step-name>{architectures[items[0].slug].short}</b>
+        <span data-step-count>1 of {items.length}</span>
+      </p>
+      <button type="button" data-step="1" aria-label="Next project">
+        <SocialIcon name="arrow" size={16} />
+      </button>
+    </div>
+  )}
+
   {
     items.map((p, i) => {
       const a = architectures[p.slug];
@@ -71,35 +95,39 @@ function trim(a: ArchNode, b: ArchNode) {
               <i aria-hidden="true" />
               <span>Healthy</span>
             </span>
-            <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`Request flow for ${p.title}: ${a.nodes.map((n) => n.label).join(', ')}`}>
-              <defs>
-                <marker id={`arrow-${i}`} viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-                  <path d="M0,0 L10,5 L0,10 z" class="arch__arrowhead" />
-                </marker>
-              </defs>
-              <g class="arch__edges">
-                {a.edges.map(([from, to], k) => {
-                  const l = trim(byId[from], byId[to]);
-                  return <line {...l} style={`--k:${k}`} marker-end={`url(#arrow-${i})`} data-edge={k} />;
-                })}
-              </g>
-              <g class="arch__nodes">
-                {a.nodes.map((n, k) =>
-                  n.actor ? (
-                    <g class="arch__node arch__node--actor" style={`--k:${k}`} transform={`translate(${n.x},${n.y})`}>
-                      <circle r="20" />
-                      <text y="38">{n.label}</text>
-                    </g>
-                  ) : (
-                    <g class="arch__node" style={`--k:${k}`} transform={`translate(${n.x},${n.y})`}>
-                      <rect x={-boxW(n) / 2} y={-BOX_H / 2} width={boxW(n)} height={BOX_H} rx="3" />
-                      <text>{n.label}</text>
-                    </g>
-                  )
-                )}
-              </g>
-              <g class="arch__packets" data-packets />
-            </svg>
+            {[false, true].map((tall) => (
+              <svg
+                class={tall ? 'arch__svg arch__svg--tall' : 'arch__svg arch__svg--wide'}
+                viewBox={tall ? `0 0 ${TW} ${a.tallH}` : `0 0 ${W} ${H}`}
+                role="img"
+                aria-label={`Request flow for ${p.title}: ${a.nodes.map((n) => n.label).join(', ')}`}
+              >
+                <defs>
+                  <marker id={`arrow-${i}-${tall ? 't' : 'w'}`} viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                    <path d="M0,0 L10,5 L0,10 z" class="arch__arrowhead" />
+                  </marker>
+                </defs>
+                <g class="arch__edges">
+                  {a.edges.map(([from, to], k) => (
+                    <line {...trim(byId[from], byId[to], tall)} style={`--k:${k}`} marker-end={`url(#arrow-${i}-${tall ? 't' : 'w'})`} data-edge={k} />
+                  ))}
+                </g>
+                <g class="arch__nodes">
+                  {a.nodes.map((n, k) => {
+                    const pt = at(n, tall);
+                    return (
+                      <g class:list={['arch__node', { 'arch__node--actor': n.actor }]} transform={`translate(${pt.x},${pt.y})`}>
+                        <g class="arch__pop" style={`--k:${k}`}>
+                          <g class="arch__icon" set:html={archIcon(n.icon, 48)} />
+                          <text y={HALF + 17}>{n.label}</text>
+                        </g>
+                      </g>
+                    );
+                  })}
+                </g>
+                <g class="arch__packets" data-packets />
+              </svg>
+            ))}
           </div>
 
           {!compact && <div class="arch__card">
@@ -150,10 +178,70 @@ function trim(a: ArchNode, b: ArchNode) {
     margin-bottom: 1.25rem;
     justify-content: safe center;
   }
-  @media (min-width: 900px) {
+  /* Phones swap the tab strip for one row: previous, the project, next. */
+  .arch__step {
+    display: none;
+  }
+  @media (max-width: 640px) {
+    .arch.has-js .arch__tabs {
+      display: none;
+    }
+    .arch.has-js .arch__step {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.9rem;
+    }
+  }
+  .arch__step p {
+    flex: 1;
+    margin: 0;
+    text-align: center;
+    line-height: 1.25;
+  }
+  .arch__step b {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text);
+  }
+  .arch__step span {
+    font-family: var(--font-mono);
+    font-size: 0.66rem;
+    color: var(--text-muted);
+  }
+  .arch__step button {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 2.9rem;
+    height: 2.9rem;
+    border-radius: 50%;
+    border: 1px solid var(--highlight);
+    background: var(--highlight);
+    color: var(--brand-deep);
+    cursor: pointer;
+  }
+  .arch__step button[data-step='-1'] :global(svg) {
+    transform: scaleX(-1);
+  }
+  /* Every project stays visible: the strip wraps instead of hiding tabs off screen. */
+  .arch__tabs {
+    flex-wrap: wrap;
+    justify-content: center;
+    overflow: visible;
+  }
+  @media (max-width: 640px) {
     .arch__tabs {
-      flex-wrap: wrap;
-      justify-content: center;
+      gap: 0.35rem;
+      margin-bottom: 0.9rem;
+    }
+    .arch__tab {
+      font-size: 0.62rem;
+      letter-spacing: 0.06em;
+      padding: 0.5rem 0.75rem;
     }
   }
   .arch__tabs::-webkit-scrollbar {
@@ -207,7 +295,7 @@ function trim(a: ArchNode, b: ArchNode) {
     display: grid;
     grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
     gap: clamp(1.25rem, 3vw, 2.5rem);
-    align-items: center;
+    align-items: start;
   }
   .arch__panel[hidden] {
     display: none;
@@ -231,11 +319,24 @@ function trim(a: ArchNode, b: ArchNode) {
     border-radius: var(--r-card);
     padding: clamp(0.5rem, 2vw, 1.25rem);
   }
-  .arch__board svg {
+  .arch__board > svg {
     display: block;
     width: 100%;
     height: auto;
     overflow: visible;
+  }
+  .arch__svg--tall {
+    display: none !important;
+  }
+  @media (max-width: 640px) {
+    .arch__svg--wide {
+      display: none !important;
+    }
+    .arch__svg--tall {
+      display: block !important;
+      max-width: 22rem;
+      margin: 1.5rem auto 0;
+    }
   }
   .arch__status {
     position: absolute;
@@ -269,61 +370,61 @@ function trim(a: ArchNode, b: ArchNode) {
   .arch__edges line {
     stroke: var(--text-muted);
     stroke-width: 1.6;
-    opacity: 0.7;
+    opacity: 0.75;
   }
   .arch__arrowhead {
     fill: var(--text-muted);
   }
-  .arch__node rect,
-  .arch__node circle {
+  .arch :global(.arch__ring) {
     fill: var(--bg);
-    stroke: var(--text-muted);
-    stroke-width: 1.5;
-  }
-  .arch__node--actor circle {
     stroke: var(--highlight);
     stroke-width: 2;
   }
+  .arch__node--actor .arch__icon {
+    color: var(--text);
+  }
   .arch__node text {
+    paint-order: stroke;
+    stroke: var(--surface);
+    stroke-width: 5px;
+    stroke-linejoin: round;
     font-family: var(--font-mono);
-    font-size: 12px;
+    font-size: 13px;
     fill: var(--text);
     text-anchor: middle;
     dominant-baseline: middle;
   }
-  .arch__node.is-hit rect,
-  .arch__node.is-hit circle {
-    stroke: var(--highlight);
+  .arch__svg--tall .arch__node text {
+    font-size: 14px;
   }
   .arch :global(.arch__pk) {
     fill: var(--highlight);
   }
 
-  /* Provisioning: services come up one by one, then the links draw in. */
-  .arch__panel.is-provisioning .arch__node {
+  /* Provisioning: each service comes up in place, then its links fade in. The
+     animation runs on an inner group, so a node never travels across the
+     board on its way to its own position. */
+  .arch__pop {
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+  .arch__panel.is-provisioning .arch__pop {
     animation: arch-up 0.45s var(--ease-out) both;
     animation-delay: calc(var(--k) * 110ms);
   }
   .arch__panel.is-provisioning .arch__edges line {
-    stroke-dasharray: 400;
-    animation: arch-draw 0.6s ease-out both;
-    animation-delay: calc(300ms + var(--k) * 110ms);
+    animation: arch-link 0.5s ease-out both;
+    animation-delay: calc(400ms + var(--k) * 110ms);
   }
   @keyframes arch-up {
     from {
       opacity: 0;
-      transform: translateY(10px);
+      transform: scale(0.6);
     }
   }
-  .arch__node {
-    transform-box: fill-box;
-  }
-  @keyframes arch-draw {
+  @keyframes arch-link {
     from {
-      stroke-dashoffset: 400;
-    }
-    to {
-      stroke-dashoffset: 0;
+      opacity: 0;
     }
   }
 
@@ -395,19 +496,31 @@ function trim(a: ArchNode, b: ArchNode) {
 
     // Packets: two per link, travelling in the order traffic flows.
     type Packet = { el: SVGCircleElement; line: SVGLineElement; offset: number };
-    const packets: Packet[][] = panels.map((panel) => {
-      const group = panel.querySelector<SVGGElement>('[data-packets]')!;
-      return [...panel.querySelectorAll<SVGLineElement>('[data-edge]')].flatMap((line, k) =>
-        [0, 0.5].map((o) => {
-          const el = document.createElementNS(NS, 'circle');
-          el.setAttribute('r', '4.5');
-          el.setAttribute('class', 'arch__pk');
-          group.appendChild(el);
-          return { el, line, offset: o + k * 0.17 };
-        })
-      );
-    });
+    // Each panel has a wide and a tall drawing; packets run in whichever is shown.
+    const packets: Packet[][] = panels.map((panel) =>
+      [...panel.querySelectorAll<SVGSVGElement>('svg.arch__svg')].flatMap((svg) => {
+        const group = svg.querySelector<SVGGElement>('[data-packets]')!;
+        return [...svg.querySelectorAll<SVGLineElement>('[data-edge]')].flatMap((line, k) =>
+          [0, 0.5].map((o) => {
+            const el = document.createElementNS(NS, 'circle');
+            el.setAttribute('r', '4.5');
+            el.setAttribute('class', 'arch__pk');
+            group.appendChild(el);
+            return { el, line, offset: o + k * 0.17 };
+          })
+        );
+      })
+    );
     let shownAt = performance.now();
+    root.classList.add('has-js');
+    const stepName = root.querySelector<HTMLElement>('[data-step-name]');
+    const stepCount = root.querySelector<HTMLElement>('[data-step-count]');
+    root.querySelectorAll<HTMLButtonElement>('[data-step]').forEach((b) =>
+      b.addEventListener('click', () => {
+        takeOver();
+        show(current + Number(b.dataset.step));
+      })
+    );
 
     const show = (i: number, focus = false) => {
       current = (i + panels.length) % panels.length;
@@ -431,6 +544,8 @@ function trim(a: ArchNode, b: ArchNode) {
         }, 1300);
       }
       shownAt = performance.now();
+      if (stepName) stepName.textContent = tabs[current].textContent!.trim();
+      if (stepCount) stepCount.textContent = `${current + 1} of ${panels.length}`;
       // Scroll only the tab strip sideways, never the page.
       const strip = tabs[current].parentElement!;
       strip.scrollTo({

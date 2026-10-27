@@ -53,7 +53,7 @@ const version = (i: number) => `v0.${i + 1}.0`;
         <li class="rel">
           <span class="rel__dot" aria-hidden="true" />
           <p class="rel__when">
-            <b>{r.year}</b>
+            {(i === 0 || releases[i - 1].year !== r.year) && <b>{r.year}</b>}
             <span class="rel__ver">{version(i)}</span> {r.when}
           </p>
           <div class="rel__what">
@@ -114,10 +114,14 @@ const version = (i: number) => `v0.${i + 1}.0`;
     margin: 0;
     padding: 0;
   }
+  /* One reading order: dates on the left of the rail, the release on the right. */
+  .history {
+    --rail: 10.5rem;
+  }
   .history__rail,
   .history__fill {
     position: absolute;
-    left: 50%;
+    left: var(--rail);
     top: 0;
     width: 2px;
     margin-left: -1px;
@@ -133,7 +137,7 @@ const version = (i: number) => `v0.${i + 1}.0`;
   .rel {
     position: relative;
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: calc(var(--rail) - 1.75rem) minmax(0, 1fr);
     gap: 3.5rem;
     margin-bottom: 2.75rem;
     transition: opacity 0.6s ease, transform 0.6s var(--ease-out);
@@ -148,7 +152,7 @@ const version = (i: number) => `v0.${i + 1}.0`;
   }
   .rel__dot {
     position: absolute;
-    left: 50%;
+    left: var(--rail);
     top: 0.4rem;
     width: 16px;
     height: 16px;
@@ -206,9 +210,6 @@ const version = (i: number) => `v0.${i + 1}.0`;
   .notes__list,
   .notes__deps {
     text-align: left;
-  }
-  .rel:nth-child(even) .notes__deps {
-    justify-content: flex-end;
   }
   .notes summary {
     display: inline-flex;
@@ -305,14 +306,6 @@ const version = (i: number) => `v0.${i + 1}.0`;
       animation: none;
     }
   }
-  /* Alternate sides, like a release train. */
-  .rel:nth-child(even) .rel__when {
-    order: 2;
-    text-align: left;
-  }
-  .rel:nth-child(even) .rel__what {
-    text-align: right;
-  }
   @media (max-width: 720px) {
     .history__rail,
     .history__fill,
@@ -324,10 +317,7 @@ const version = (i: number) => `v0.${i + 1}.0`;
       gap: 0.4rem;
       padding-left: 2.25rem;
     }
-    .rel__when,
-    .rel:nth-child(even) .rel__when,
-    .rel:nth-child(even) .rel__what {
-      order: 0;
+    .rel__when {
       text-align: left;
     }
   }

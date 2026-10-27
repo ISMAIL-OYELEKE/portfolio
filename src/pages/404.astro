@@ -1,6 +1,7 @@
 ---
 import Base from '../layouts/Base.astro';
 import SocialIcon from '../components/SocialIcon.astro';
+import RouteTrace from '../components/RouteTrace.astro';
 import { nav } from '../data/site';
 ---
 
@@ -12,7 +13,15 @@ import { nav } from '../data/site';
 >
   <section class="on-dark lost">
     <div class="shell lost__inner">
-      <p class="lost__code">404</p>
+      <RouteTrace
+        hops={[
+          { icon: 'client', label: 'You' },
+          { icon: 'cloudfront', label: 'CloudFront' },
+          { icon: 's3', label: 'S3 bucket' },
+        ]}
+        end="miss"
+        status="404 · No object at this path"
+      />
       <h1>That route does not resolve</h1>
       <p class="lede">
         The page you asked for is not here. It may have moved, or the link may have a typo in it.
@@ -44,18 +53,19 @@ import { nav } from '../data/site';
   }
   .lost__inner {
     max-width: 44rem;
+    text-align: center;
   }
-  .lost__code {
-    font-family: var(--font-mono);
-    font-size: 0.78rem;
-    letter-spacing: 0.3em;
-    color: var(--highlight);
-    margin-bottom: 1rem;
+  .lost .lede {
+    margin-inline: auto;
+  }
+  .lost .btn-row {
+    justify-content: center;
   }
   .lost__links {
     display: flex;
     flex-wrap: wrap;
     gap: 0.5rem;
+    justify-content: center;
     list-style: none;
     margin: 2rem 0 0;
     padding: 0;

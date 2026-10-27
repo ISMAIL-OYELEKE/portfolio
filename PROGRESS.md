@@ -355,6 +355,27 @@ The project instructions hold the full text. Every change must keep to them.
     test, deploy a broken image and watch it roll back, run the restore
     drill and tear it all down, all from the case study's own numbers.
 
+22. 2026-10-27: audit fixes round on `preview/redesign` (audit list in the
+    shared folder, portfolio-rebuild/audit-2026-10-27.md). Project flows now
+    draw the official AWS Architecture Icons (src/lib/archIcons.ts), with a
+    top to bottom layout on phones (tx/ty in src/data/architectures.ts) and a
+    previous/next stepper instead of the tab strip; nodes no longer fly
+    across the board while provisioning. Ismail's one-screen rule for phones:
+    every interactive part keeps its tabs, button and result on one screen
+    (Kestrel lab controls above each experiment with a "Next" button, five
+    tabs in one row; Cerbiol buttons above the steps). Hero: the sea of cloud
+    is a low band that never covers the name or buttons, a real sun by day,
+    a deeper skyline with haze and a tree line, and a wider skyline on
+    phones. Light theme turns inner page banners and the home closing block
+    into a day sky. Section headings centred site wide. Footer only claims
+    CloudFront on the live domain; Credly gets a wide tile; centred on
+    phones. Phone menu is navy with a Home link. About: portrait beside the
+    story, panels below, skills look tappable and answer under the group.
+    Release history on one side, each year shown once. Projects page uses a
+    compact case study index instead of repeating the cards. Certifications
+    groups centred. 404 and thank-you pages redesigned with a request trace.
+    Case study stage strip fits on phones and stops at the end of the study.
+
 ## Open questions
 
 
