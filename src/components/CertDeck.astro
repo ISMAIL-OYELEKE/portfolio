@@ -249,6 +249,12 @@ const cards = [
       if (!dealt) cards.forEach((c) => c.classList.remove('is-flipped'));
       setLinks();
       layout();
+      // Stacking shrinks the deck, which would leave the reader stranded at the
+      // bottom of the page. Bring the stack back into view instead.
+      if (!dealt) {
+        const top = deck.getBoundingClientRect().top + window.scrollY - window.innerHeight * 0.3;
+        window.scrollTo({ top: Math.max(0, top), behavior: reduce ? 'auto' : 'smooth' });
+      }
     });
 
     layout();

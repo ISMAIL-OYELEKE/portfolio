@@ -2,13 +2,13 @@
 import Base from '../layouts/Base.astro';
 import Portrait from '../components/Portrait.astro';
 import CloudHero from '../components/CloudHero.astro';
-import ServiceSky from '../components/ServiceSky.astro';
+import ArchStage from '../components/ArchStage.astro';
 import ReleaseHistory from '../components/ReleaseHistory.astro';
 import CertDeck from '../components/CertDeck.astro';
-import ProjectCard from '../components/ProjectCard.astro';
+import FreelanceSystems from '../components/FreelanceSystems.astro';
 import SocialIcon from '../components/SocialIcon.astro';
 import { site, stats } from '../data/site';
-import { cloudProjects, freelanceProjects } from '../data/projects';
+import { cloudProjects } from '../data/projects';
 import { certCount } from '../data/certifications';
 
 const description =
@@ -71,11 +71,11 @@ const description =
         <span class="eyebrow">Projects · Deployed to production</span>
         <h2>Pick a project. Watch its architecture light up.</h2>
         <p class="lede">
-          Every AWS service I have shipped with, in one sky. Point at a project to see what it runs
-          on, open it for the full case study, or drag the services around.
+          Choose a system and watch it provision, then follow live traffic through every service it
+          runs on. Open any one for the full case study.
         </p>
       </div>
-      <ServiceSky projects={cloudProjects} />
+      <ArchStage projects={cloudProjects} />
       <div class="btn-row btn-row--center">
         <a class="btn btn--ghost" href="/projects">
           All projects
@@ -129,13 +129,12 @@ const description =
         <span class="eyebrow">Freelance software</span>
         <h2>Systems businesses run on</h2>
         <p class="lede">
-          Beyond infrastructure, I build and maintain production software for clients in Lagos.
+          Beyond infrastructure, I build and maintain production software for clients in Lagos. Try
+          them: run the security review one passes, and ring up a sale on the other.
         </p>
       </div>
 
-      <div class="grid grid--pair">
-        {freelanceProjects.map((p) => <ProjectCard project={p} />)}
-      </div>
+      <FreelanceSystems />
 
       <div class="btn-row btn-row--center">
         <a class="btn btn--ghost" href="/freelance">

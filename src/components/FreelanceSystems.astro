@@ -1,0 +1,524 @@
+---
+/* The two freelance systems as things a visitor can poke: run the security
+   review the Cloud Dimex site passes, and ring up a sale on the Cerbiol point
+   of sale, including cutting the power halfway to watch it roll back. Every
+   check comes from the case studies; the sale is sample data and says so.
+   Without JavaScript both panels show their finished state. */
+import SocialIcon from './SocialIcon.astro';
+import { freelanceProjects } from '../data/projects';
+
+const dimex = freelanceProjects.find((p) => p.slug === 'cloud-dimex-website')!;
+const pos = freelanceProjects.find((p) => p.slug === 'cerbiol-gadgets-pos')!;
+
+const checks = [
+  'Content Security Policy with SHA-256 hashes, no unsafe-inline',
+  'Live chat runs under the policy with a per-build nonce',
+  'HSTS preload and a full set of security headers',
+  'Analytics waits for cookie consent',
+  'Form guarded by hCaptcha, a honeypot and server validation',
+  'No horizontal overflow from 360px to 1440px',
+];
+const scores = ['Accessibility', 'Best practices', 'SEO'];
+
+const steps = [
+  { label: 'Lock the handset row', detail: 'Sample device, IMEI ending 0042' },
+  { label: 'Mark that one device sold', detail: 'Tracked by IMEI, not by quantity' },
+  { label: 'Record a part payment', detail: 'Transfer, and which business account it landed in' },
+  { label: 'Open a debt for the balance', detail: 'Follow-up payments go against this invoice' },
+  { label: 'Write the audit log', detail: 'Seller is the signed-in user, never the browser' },
+];
+---
+
+<div class="fs">
+  <article class="fs__panel" data-review>
+    <header>
+      <span class="fs__ctx">{dimex.context}</span>
+      <h3>{dimex.title}</h3>
+      <p>{dimex.problem}</p>
+    </header>
+
+    <div class="fs__stage">
+      <div class="fs__bar">
+        <span>Security and quality review</span>
+        <button type="button" class="fs__run" data-run hidden>Run the review</button>
+      </div>
+      <ul class="checks">
+        {
+          checks.map((c) => (
+            <li class="is-pass">
+              <span class="tick" aria-hidden="true" />
+              {c}
+            </li>
+          ))
+        }
+      </ul>
+      <div class="gauges">
+        {
+          scores.map((s) => (
+            <figure class="gauge is-full">
+              <svg viewBox="0 0 64 64" aria-hidden="true">
+                <circle cx="32" cy="32" r="27" class="gauge__track" />
+                <circle cx="32" cy="32" r="27" class="gauge__fill" pathLength="100" />
+              </svg>
+              <b data-to="100">100</b>
+              <figcaption>{s}</figcaption>
+            </figure>
+          ))
+        }
+      </div>
+      <p class="fs__note">Lighthouse mobile, every page tested.</p>
+    </div>
+
+    <footer>
+      <a class="btn btn--primary" href={`/projects/${dimex.slug}`}>
+        Case study <SocialIcon name="arrow" size={14} />
+      </a>
+      {
+        dimex.live && (
+          <a class="btn btn--ghost" href={dimex.live} target="_blank" rel="noopener">
+            Live site <SocialIcon name="external" size={13} />
+          </a>
+        )
+      }
+    </footer>
+  </article>
+
+  <article class="fs__panel" data-sale>
+    <header>
+      <span class="fs__ctx">{pos.context}</span>
+      <h3>{pos.title}</h3>
+      <p>
+        Money only moves through one database function that does everything in a single transaction.
+        Ring up a sale, then try cutting the power halfway through.
+      </p>
+    </header>
+
+    <div class="fs__stage">
+      <div class="fs__bar">
+        <span>process_sale <em data-invoice>INV-20261027-0001</em></span>
+        <span class="fs__state" data-state>Committed</span>
+      </div>
+      <ol class="steps">
+        {
+          steps.map((s) => (
+            <li class="is-done">
+              <span class="tick" aria-hidden="true" />
+              <span>
+                <b>{s.label}</b>
+                <small>{s.detail}</small>
+              </span>
+            </li>
+          ))
+        }
+      </ol>
+      <p class="fs__verdict" data-verdict aria-live="polite">
+        One transaction: stock, payment, debt and audit log saved together.
+      </p>
+      <div class="fs__actions" data-actions hidden>
+        <button type="button" class="fs__run" data-sell>Ring up a sale</button>
+        <button type="button" class="fs__run fs__run--danger" data-cut>Cut the power mid-sale</button>
+      </div>
+      <p class="fs__note">A demo with sample data. The real system is private and runs the shop every day.</p>
+    </div>
+
+    <footer>
+      <a class="btn btn--primary" href={`/projects/${pos.slug}`}>
+        Case study <SocialIcon name="arrow" size={14} />
+      </a>
+    </footer>
+  </article>
+</div>
+
+<style>
+  .fs {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.5rem;
+  }
+  @media (max-width: 860px) {
+    .fs {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+  @media (max-width: 480px) {
+    .fs__panel {
+      padding: 1.25rem 1rem;
+    }
+    .fs__stage {
+      padding: 0.9rem 0.8rem;
+    }
+    .gauges {
+      gap: 0.5rem;
+    }
+  }
+  .fs__panel {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    padding: 1.75rem;
+    background: var(--surface);
+    border: 1px solid var(--rule);
+  }
+  .fs__ctx {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 0.4rem;
+  }
+  .fs__panel h3 {
+    font-size: 1.35rem;
+    margin-bottom: 0.5rem;
+  }
+  .fs__panel header p {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 0.95rem;
+  }
+  .fs__stage {
+    flex: 1;
+    border: 1px solid var(--rule);
+    background: var(--bg);
+    padding: 1rem 1.1rem 1.1rem;
+  }
+  .fs__bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    padding-bottom: 0.75rem;
+    margin-bottom: 0.85rem;
+    border-bottom: 1px solid var(--rule);
+  }
+  .fs__bar em {
+    font-style: normal;
+    color: var(--text);
+    margin-left: 0.4rem;
+    text-transform: none;
+  }
+  .fs__run {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--brand-ink, #0f1e33);
+    background: var(--highlight);
+    border: 1px solid var(--highlight);
+    padding: 0.5rem 0.8rem;
+    cursor: pointer;
+    transition: transform 0.15s var(--ease-out), opacity 0.2s ease;
+  }
+  .fs__run:hover {
+    transform: translateY(-1px);
+  }
+  .fs__run:disabled {
+    opacity: 0.45;
+    cursor: default;
+    transform: none;
+  }
+  .fs__run--danger {
+    background: transparent;
+    color: var(--text);
+    border-color: #c4553f;
+  }
+  .fs__state {
+    color: var(--text);
+  }
+  .fs__state.is-rolled {
+    color: #d9644c;
+  }
+  .checks,
+  .steps {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 0.6rem;
+    font-size: 0.9rem;
+  }
+  .checks li,
+  .steps li {
+    display: flex;
+    gap: 0.65rem;
+    align-items: flex-start;
+    color: var(--text-muted);
+    transition: color 0.3s ease, opacity 0.3s ease;
+  }
+  .steps b {
+    display: block;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .steps small {
+    display: block;
+    font-size: 0.8rem;
+  }
+  .tick {
+    position: relative;
+    flex: none;
+    width: 18px;
+    height: 18px;
+    margin-top: 1px;
+    border: 1.5px solid var(--rule);
+    border-radius: 50%;
+    transition: background-color 0.25s ease, border-color 0.25s ease;
+  }
+  .tick::after {
+    content: '';
+    position: absolute;
+    left: 5px;
+    top: 2px;
+    width: 4px;
+    height: 8px;
+    border: solid var(--brand-ink, #0f1e33);
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg) scale(0);
+    transition: transform 0.25s var(--ease-out);
+  }
+  .is-pass .tick,
+  .is-done .tick {
+    background: var(--highlight);
+    border-color: var(--highlight);
+  }
+  .is-pass .tick::after,
+  .is-done .tick::after {
+    transform: rotate(45deg) scale(1);
+  }
+  .is-pass,
+  .is-done {
+    color: var(--text) !important;
+  }
+  .is-running .tick {
+    border-color: var(--highlight);
+    border-top-color: transparent;
+    animation: spin 0.7s linear infinite;
+  }
+  .is-undone {
+    opacity: 0.45;
+    text-decoration: line-through;
+    text-decoration-color: #d9644c;
+  }
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  .gauges {
+    display: flex;
+    justify-content: center;
+    gap: 1.25rem;
+    margin-top: 1.1rem;
+  }
+  .gauge {
+    position: relative;
+    margin: 0;
+    width: 84px;
+    text-align: center;
+  }
+  .gauge svg {
+    width: 64px;
+    height: 64px;
+    transform: rotate(-90deg);
+  }
+  .gauge circle {
+    fill: none;
+    stroke-width: 5;
+  }
+  .gauge__track {
+    stroke: var(--rule);
+  }
+  .gauge__fill {
+    stroke: var(--highlight);
+    stroke-dasharray: 100;
+    stroke-dashoffset: 100;
+    transition: stroke-dashoffset 1.2s var(--ease-out);
+  }
+  .gauge.is-full .gauge__fill {
+    stroke-dashoffset: 0;
+  }
+  .gauge b {
+    position: absolute;
+    top: 21px;
+    left: 0;
+    right: 0;
+    font-family: var(--font-mono);
+    font-size: 0.95rem;
+  }
+  .gauge figcaption {
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-top: 0.3rem;
+  }
+  .fs__verdict {
+    margin: 1rem 0 0;
+    padding: 0.6rem 0.75rem;
+    border-left: 3px solid var(--highlight);
+    font-size: 0.9rem;
+  }
+  .fs__verdict.is-rolled {
+    border-left-color: #d9644c;
+  }
+  .fs__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 1rem;
+  }
+  .fs__actions[hidden] {
+    display: none;
+  }
+  .fs__note {
+    margin: 0.85rem 0 0;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    text-align: center;
+  }
+  .fs__panel footer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .is-running .tick {
+      animation: none;
+    }
+  }
+</style>
+
+<script>
+  const wait = (ms: number) => new Promise((r) => window.setTimeout(r, ms));
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const pace = (ms: number) => (reduce ? 0 : ms);
+
+  /* Cloud Dimex: run the review. Runs once by itself when it scrolls into view. */
+  const review = document.querySelector<HTMLElement>('[data-review]');
+  if (review) {
+    const run = review.querySelector<HTMLButtonElement>('[data-run]')!;
+    const rows = [...review.querySelectorAll<HTMLElement>('.checks li')];
+    const gauges = [...review.querySelectorAll<HTMLElement>('.gauge')];
+    let busy = false;
+    const reset = () => {
+      rows.forEach((r) => r.classList.remove('is-pass', 'is-running'));
+      gauges.forEach((g) => {
+        g.classList.remove('is-full');
+        g.querySelector('b')!.textContent = '0';
+      });
+    };
+    const go = async () => {
+      if (busy) return;
+      busy = true;
+      run.disabled = true;
+      run.textContent = 'Reviewing';
+      reset();
+      for (const r of rows) {
+        r.classList.add('is-running');
+        await wait(pace(380));
+        r.classList.replace('is-running', 'is-pass');
+      }
+      gauges.forEach((g) => g.classList.add('is-full'));
+      const start = performance.now();
+      const tick = (t: number) => {
+        const k = reduce ? 1 : Math.min(1, (t - start) / 1200);
+        const v = String(Math.round(100 * (1 - Math.pow(1 - k, 3))));
+        gauges.forEach((g) => (g.querySelector('b')!.textContent = v));
+        if (k < 1) requestAnimationFrame(tick);
+      };
+      requestAnimationFrame(tick);
+      await wait(pace(1200));
+      run.textContent = 'Run it again';
+      run.disabled = false;
+      busy = false;
+    };
+    run.hidden = false;
+    run.addEventListener('click', go);
+    reset();
+    run.textContent = 'Run the review';
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) {
+          io.disconnect();
+          go();
+        }
+      },
+      { threshold: 0.5 },
+    );
+    io.observe(review);
+  }
+
+  /* Cerbiol: ring up a sale, or cut the power halfway and watch it roll back. */
+  const sale = document.querySelector<HTMLElement>('[data-sale]');
+  if (sale) {
+    const rows = [...sale.querySelectorAll<HTMLElement>('.steps li')];
+    const state = sale.querySelector<HTMLElement>('[data-state]')!;
+    const verdict = sale.querySelector<HTMLElement>('[data-verdict]')!;
+    const invoice = sale.querySelector<HTMLElement>('[data-invoice]')!;
+    const actions = sale.querySelector<HTMLElement>('[data-actions]')!;
+    const sell = sale.querySelector<HTMLButtonElement>('[data-sell]')!;
+    const cut = sale.querySelector<HTMLButtonElement>('[data-cut]')!;
+    const d = new Date();
+    const ymd = `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}`;
+    let n = 0;
+    let busy = false;
+
+    const clear = () => {
+      rows.forEach((r) => r.classList.remove('is-done', 'is-running', 'is-undone'));
+      state.classList.remove('is-rolled');
+      verdict.classList.remove('is-rolled');
+    };
+    const ring = async (fail: boolean) => {
+      if (busy) return;
+      busy = true;
+      sell.disabled = cut.disabled = true;
+      clear();
+      n += 1;
+      invoice.textContent = `INV-${ymd}-${String(n).padStart(4, '0')}`;
+      state.textContent = 'BEGIN';
+      verdict.textContent = 'Transaction open. Nothing is saved until it commits.';
+      const stopAt = fail ? 3 : rows.length;
+      for (let i = 0; i < stopAt; i++) {
+        rows[i].classList.add('is-running');
+        await wait(pace(520));
+        rows[i].classList.replace('is-running', 'is-done');
+      }
+      if (fail) {
+        rows[stopAt].classList.add('is-running');
+        await wait(pace(420));
+        rows[stopAt].classList.remove('is-running');
+        state.textContent = 'Power lost';
+        state.classList.add('is-rolled');
+        await wait(pace(500));
+        for (let i = stopAt - 1; i >= 0; i--) {
+          rows[i].classList.replace('is-done', 'is-undone');
+          await wait(pace(160));
+        }
+        state.textContent = 'ROLLBACK';
+        verdict.classList.add('is-rolled');
+        verdict.textContent =
+          'Rolled back. The handset is still in stock, no payment or debt was recorded. A half-finished sale cannot exist.';
+      } else {
+        state.textContent = 'COMMIT';
+        verdict.textContent = 'Committed. Stock, payment, debt and audit log saved together, or not at all.';
+      }
+      sell.disabled = cut.disabled = false;
+      busy = false;
+    };
+
+    actions.hidden = false;
+    clear();
+    state.textContent = 'Ready';
+    verdict.textContent = 'Choose a sale to ring up.';
+    sell.addEventListener('click', () => ring(false));
+    cut.addEventListener('click', () => ring(true));
+  }
+</script>
