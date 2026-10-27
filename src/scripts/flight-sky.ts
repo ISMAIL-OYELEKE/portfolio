@@ -298,15 +298,16 @@ function buildCloud(theme: Theme, w: number, h: number, seed: number) {
   // 3. Soft highlights on the upper side of each big puff, and soft shadow
   //    where puffs tuck under one another.
   g.globalCompositeOperation = 'source-atop';
-  g.filter = 'blur(10px)';
+  // A wide blur and light touch, so no single puff reads as a round blob.
+  g.filter = 'blur(18px)';
   for (const p of puffs) {
     if (p.r < h * 0.08) continue;
-    g.globalAlpha = theme === 'day' ? 0.5 : 0.28;
+    g.globalAlpha = theme === 'day' ? 0.4 : 0.18;
     g.fillStyle = pal.cloudLight;
     g.beginPath();
     g.arc(p.x - p.r * 0.15, p.y - p.r * 0.3, p.r * 0.6, 0, Math.PI * 2);
     g.fill();
-    g.globalAlpha = 0.35;
+    g.globalAlpha = 0.16;
     g.fillStyle = pal.cloudShadow;
     g.beginPath();
     g.arc(p.x + p.r * 0.2, p.y + p.r * 0.75, p.r * 0.55, 0, Math.PI * 2);
@@ -373,8 +374,8 @@ export function createSky(el: HTMLCanvasElement) {
   };
   add(0, 6, 0.55, 30, 75, 40);
   add(1, 6, 0.9, 42, 105, 50);
-  add(2, 6, 1.6, 75, 130, 40);
-  add(3, 5, 2.3, 120, 150, 30);
+  add(2, 5, 1.6, 70, 130, 40);
+  add(3, 3, 2.3, 105, 150, 30);
   const sea: CloudSprite[] = Array.from({ length: 9 }, (_, i) => ({
     sprite: i % 6,
     x: i * 14 - 20,
@@ -427,7 +428,8 @@ export function createSky(el: HTMLCanvasElement) {
       ctx.globalAlpha = 1;
       const mr = Math.min(24, W * 0.045);
       const mx = W * 0.88, my = H * 0.13 + alt * H * 0.05;
-      ctx.fillStyle = '#e9edf2';
+      // A high moon is a warm cream, not paper white.
+      ctx.fillStyle = '#f3e7c4';
       ctx.beginPath();
       ctx.arc(mx, my, mr, 0, Math.PI * 2);
       ctx.fill();
@@ -490,16 +492,18 @@ export function createSky(el: HTMLCanvasElement) {
       const yy = y * vh;
       if (yy > H || yy + h < 0) continue;
       // Everything but the sea of cloud clears away from the name.
-      ctx.globalAlpha = c.layer >= 2 ? 1 - seg(p, 0.6, 0.68) : 1 - seg(p, 0.6, 0.7);
+      // The near banks are thin, so the camera passes through wisps, not a wall.
+      const thin = c.layer === 3 ? 0.55 : c.layer === 2 ? 0.8 : 1;
+      ctx.globalAlpha = thin * (c.layer >= 2 ? 1 - seg(p, 0.6, 0.68) : 1 - seg(p, 0.6, 0.7));
       if (ctx.globalAlpha <= 0) continue;
       ctx.drawImage(a.clouds[c.sprite], x * vw, yy, w, h);
     }
     ctx.globalAlpha = 1;
 
-    // Inside the cloud for a moment: the view whites out (or greys at night).
-    const fog = Math.max(0, 1 - Math.abs(p - 0.5) / 0.08);
+    // Inside the cloud for a moment: a light haze, never a full whiteout.
+    const fog = Math.max(0, 1 - Math.abs(p - 0.5) / 0.05);
     if (fog > 0) {
-      ctx.globalAlpha = fog * 0.88;
+      ctx.globalAlpha = fog * 0.3;
       ctx.fillStyle = pal.fog;
       ctx.fillRect(0, 0, W, H);
       ctx.globalAlpha = 1;
