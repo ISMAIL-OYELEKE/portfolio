@@ -29,21 +29,23 @@ type Palette = {
 
 const PALETTES: Record<Theme, Palette> = {
   day: {
-    skyTop: '#2c64a8',
-    skyLow: '#b9d3ec',
-    altTop: '#123e78',
-    altLow: '#5b93d0',
-    back: '#8fb0d2',
-    face: '#5f7b99',
-    faces: ['#6e86a3', '#8c98a8', '#5d7594', '#a0a9b4', '#7b8fa7', '#b3aea3'],
-    side: '#465f7b',
-    trees: '#3d5a46',
-    window: '#a9c3dc',
-    lit: ['#d8e6f3', '#c3d6ea'],
-    water: '#3d6c9a',
-    bridge: '#4d6178',
-    cloudShadow: '#a9bbd0',
-    cloudBody: '#e9eff6',
+    // A clear, saturated Lagos noon: deeper blues and firmer building tones,
+    // so the daytime flight reads as crisply as the night one.
+    skyTop: '#1d58a4',
+    skyLow: '#8fc0ea',
+    altTop: '#0e3a76',
+    altLow: '#4f8fd2',
+    back: '#7a9fc8',
+    face: '#567392',
+    faces: ['#5c7797', '#7f8fa4', '#4b6688', '#95a2b2', '#6a83a2', '#aa9f8e'],
+    side: '#33496a',
+    trees: '#2e5a3d',
+    window: '#d3e5f6',
+    lit: ['#ffffff', '#e4effa'],
+    water: '#2c6097',
+    bridge: '#3f536b',
+    cloudShadow: '#a2b6ce',
+    cloudBody: '#eef3f9',
     cloudLight: '#ffffff',
     fog: '#eef3f8',
   },
@@ -187,7 +189,7 @@ function buildCity(theme: Theme) {
     for (let wy = top + 10; wy < WATERLINE - 10; wy += 11) {
       if (glassBands) {
         g.fillStyle = pal.window;
-        g.globalAlpha = 0.55;
+        g.globalAlpha = 0.7;
         g.fillRect(t.x + 4, wy, t.w - 8, 5);
         g.globalAlpha = 1;
         continue;
@@ -195,7 +197,7 @@ function buildCity(theme: Theme) {
       for (let wx = t.x + 5; wx < t.x + t.w - 8; wx += 8) {
         const on = theme === 'night' ? rnd() > 0.62 : rnd() > 0.85;
         g.fillStyle = on ? pal.lit[Math.floor(rnd() * pal.lit.length)] : pal.window;
-        g.globalAlpha = theme === 'day' && !on ? 0.5 : 1;
+        g.globalAlpha = theme === 'day' && !on ? 0.62 : 1;
         g.fillRect(wx, wy, 4, 6);
       }
       g.globalAlpha = 1;
@@ -205,7 +207,7 @@ function buildCity(theme: Theme) {
   // Humid haze low over the water, and the trees along the shore.
   const haze = g.createLinearGradient(0, WATERLINE - 170, 0, WATERLINE);
   haze.addColorStop(0, 'rgba(0,0,0,0)');
-  haze.addColorStop(1, theme === 'day' ? 'rgba(206,222,238,0.55)' : 'rgba(26,47,79,0.45)');
+  haze.addColorStop(1, theme === 'day' ? 'rgba(206,222,238,0.28)' : 'rgba(26,47,79,0.45)');
   g.fillStyle = haze;
   g.fillRect(0, WATERLINE - 170, CITY_W, 170);
   g.fillStyle = pal.trees;
@@ -375,6 +377,7 @@ export function createSky(el: HTMLCanvasElement) {
   add(2, 5, 1.6, 70, 130, 40);
   add(3, 3, 2.3, 105, 150, 30);
   let dpr = 1;
+  let drawn = false;
   const resize = () => {
     dpr = Math.min(2, window.devicePixelRatio || 1);
     el.width = Math.round(el.clientWidth * dpr);
@@ -394,6 +397,11 @@ export function createSky(el: HTMLCanvasElement) {
     const d = Math.min(2, window.devicePixelRatio || 1);
     if (d !== dpr || el.width !== Math.round(el.clientWidth * d) || el.height !== Math.round(el.clientHeight * d)) resize();
     if (!el.width || !el.height) return;
+    // The first paint lets the canvas fade in over the poster image behind it.
+    if (!drawn) {
+      drawn = true;
+      requestAnimationFrame(() => el.classList.add('is-drawn'));
+    }
     const W = el.width / dpr;
     const H = el.height / dpr;
     const th = theme();
@@ -421,7 +429,8 @@ export function createSky(el: HTMLCanvasElement) {
       }
       ctx.globalAlpha = 1;
       const mr = Math.min(24, W * 0.045);
-      const mx = W * 0.88, my = H * 0.13 + alt * H * 0.05;
+      // On phones the moon climbs to the top corner, clear of the DevOps loop.
+      const mx = W * 0.88, my = W < 700 ? H * 0.1 - alt * H * 0.04 : H * 0.13 + alt * H * 0.05;
       // A high moon is a warm cream, not paper white.
       ctx.fillStyle = '#f3e7c4';
       ctx.beginPath();
@@ -434,7 +443,8 @@ export function createSky(el: HTMLCanvasElement) {
     } else {
       // The sun: a warm disc in a wide, soft halo of light.
       const sr = Math.min(34, W * 0.055);
-      const sx = W * 0.86, sy = H * 0.15 + alt * H * 0.06;
+      // On phones the sun climbs to the top corner, clear of the DevOps loop.
+      const sx = W * 0.86, sy = W < 700 ? H * 0.11 - alt * H * 0.05 : H * 0.15 + alt * H * 0.06;
       const halo = ctx.createRadialGradient(sx, sy, sr * 0.6, sx, sy, sr * 6);
       halo.addColorStop(0, 'rgba(255,236,190,0.75)');
       halo.addColorStop(0.25, 'rgba(255,226,160,0.28)');
