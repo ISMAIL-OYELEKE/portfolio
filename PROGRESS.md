@@ -375,6 +375,22 @@ The project instructions hold the full text. Every change must keep to them.
     compact case study index instead of repeating the cards. Certifications
     groups centred. 404 and thank-you pages redesigned with a request trace.
     Case study stage strip fits on phones and stops at the end of the study.
+23. Review round, 27 October (laptop and phone review). Hero: the name no
+    longer flashes before the opening line, both scroll hints sit on a navy
+    backing, a cream moon, thinner clouds with softer puffs and only a light
+    haze inside them. Home certificates: compact heading, dealt cards sized to
+    fit one screen, a tapped card grows to full size, and dealing or stacking
+    keeps the whole section in view. Footer clock ticks every minute and names
+    the visitor's country from their time zone (src/data/tzCountry.ts, from
+    the IANA zone.tab). Experience: a pinned "Show all roles" bar while a tool
+    is picked. Phone menu is light in Dark theme. Section headings sit on one
+    line with the lede balanced underneath. Design picks: Projects B (project
+    list on the left, the real AWS diagram animated step by step in the middle,
+    write-up on the right; ProjectStage.astro and ArchDiagram.astro, route data
+    generated into src/data/diagramFlows.ts, which replaces ArchStage and
+    architectures.ts); case studies show the one animated diagram instead of a
+    flow plus a static diagram; Contact B (a service health page with a real
+    light mode and a live Lagos clock).
 
 ## Open questions
 

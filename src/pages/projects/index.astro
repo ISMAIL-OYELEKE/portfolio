@@ -1,7 +1,7 @@
 ---
 import Base from '../../layouts/Base.astro';
 import PageHero from '../../components/PageHero.astro';
-import ArchStage from '../../components/ArchStage.astro';
+import ProjectStage from '../../components/ProjectStage.astro';
 import FreelanceSystems from '../../components/FreelanceSystems.astro';
 import SocialIcon from '../../components/SocialIcon.astro';
 import { cloudProjects } from '../../data/projects';
@@ -17,17 +17,13 @@ const description =
     lede="Each case study covers the problem, the architecture, the decisions I would defend in a review, and what the result actually is."
   />
 
-  <section class="on-dark section">
+  <section class="on-dark section live-arch">
     <div class="shell">
       <div class="section-head section-head--center">
         <span class="eyebrow">Live architectures</span>
-        <h2>Watch each one provision and carry traffic</h2>
-        <p class="lede">
-          Pick a system. It builds itself, then requests flow through every service it runs on, in the
-          order they really travel.
-        </p>
+        <h2>Pick a project. Watch its traffic move.</h2>
       </div>
-      <ArchStage projects={cloudProjects} />
+      <ProjectStage projects={cloudProjects} />
     </div>
   </section>
 
@@ -82,6 +78,12 @@ const description =
 </Base>
 
 <style>
+  .live-arch {
+    padding-block: clamp(2.25rem, 4.5vw, 3rem);
+  }
+  .live-arch .section-head {
+    margin-bottom: 1.5rem;
+  }
   .index {
     list-style: none;
     margin: 0 auto;

@@ -3,9 +3,9 @@ import { Image } from 'astro:assets';
 import Base from '../../layouts/Base.astro';
 import VideoEmbed from '../../components/VideoEmbed.astro';
 import SocialIcon from '../../components/SocialIcon.astro';
-import ArchStage from '../../components/ArchStage.astro';
+import ArchDiagram from '../../components/ArchDiagram.astro';
 import KestrelLab from '../../components/KestrelLab.astro';
-import { architectures } from '../../data/architectures';
+import { diagramFlows } from '../../data/diagramFlows';
 import { projects } from '../../data/projects';
 import { site } from '../../data/site';
 
@@ -121,43 +121,19 @@ const schema = {
         </section>
 
         {
-          architectures[project.slug] && (
-            <section class="live" id="flow" data-step="Flow">
-              <h2>Follow a request</h2>
+          diagramFlows[project.slug] && (
+            <section class="live" id="flow" data-step="Architecture">
+              <h2>The architecture, live</h2>
               <p>
-                The path traffic takes, live. Services come up in order, then requests flow through them
-                the way they really travel. The full diagram follows.
+                The real diagram, drawn with the official AWS icons. Each numbered step lights up in order,
+                with traffic moving along the path it really takes.
               </p>
-              <ArchStage projects={[project]} compact />
+              <ArchDiagram slug={project.slug} alt={project.diagram?.alt ?? `${project.title} architecture`} auto />
             </section>
           )
         }
 
         {project.slug === 'kestrel-loan-platform' && <div id="lab" data-step="Experiments"><KestrelLab /></div>}
-
-        {
-          project.diagram && (
-            <figure class="shot diagram">
-              <a href={`/diagrams/${project.slug}.svg`} target="_blank" rel="noopener">
-                <img
-                  src={`/diagrams/${project.slug}.svg`}
-                  alt={project.diagram.alt}
-                  width={project.diagram.width}
-                  height={project.diagram.height}
-                  loading="lazy"
-                  decoding="async"
-                />
-              </a>
-              <figcaption>
-                The architecture, drawn with the official AWS icons.{' '}
-                <a href={`/diagrams/${project.slug}.svg`} target="_blank" rel="noopener">
-                  Open it full size
-                </a>
-                .
-              </figcaption>
-            </figure>
-          )
-        }
 
         {project.video && <VideoEmbed url={project.video} title={project.title} />}
 
@@ -591,10 +567,6 @@ const schema = {
     border: 1px solid var(--rule);
     border-radius: var(--r-card);
     display: block;
-  }
-  .diagram :global(img) {
-    height: auto;
-    background: #ffffff;
   }
   .shot figcaption {
     font-size: 0.82rem;

@@ -1,0 +1,221 @@
+---
+/* A project's real architecture diagram (public/diagrams) with its traffic
+   animated on top: each numbered step lights its arrows and a packet runs
+   along them, while the caption reads that step from the diagram's legend.
+   `cropped` drops the title band and legend for the compact project stage.
+   The diagram loads only when it is first shown. Without JavaScript, or with
+   reduced motion, it is the plain diagram with step 1 in the caption. */
+import { diagramFlows } from '../data/diagramFlows';
+
+interface Props {
+  slug: string;
+  alt: string;
+  cropped?: boolean;
+  /** Start playing on its own once on screen (case study pages). */
+  auto?: boolean;
+  /** Load the drawing with the page instead of when first shown. */
+  eager?: boolean;
+}
+const { slug, alt, cropped = false, auto = false, eager = auto } = Astro.props;
+const flow = diagramFlows[slug];
+const box = cropped ? flow.crop : [0, 0, flow.w, flow.h];
+const first = flow.steps[0];
+---
+
+<figure class:list={['adg', { 'adg--cropped': cropped }]} data-adg data-auto={auto ? '' : undefined} data-flow={JSON.stringify(flow.steps)}>
+  <div class="adg__sheet">
+    <svg viewBox={box.join(' ')} role="img" aria-label={alt} preserveAspectRatio="xMidYMid meet">
+      <image data-adg-img href={eager ? `/diagrams/${slug}.svg` : undefined} width={flow.w} height={flow.h}></image>
+      <g class="adg__hl" data-adg-hl></g>
+      <g data-adg-pk></g>
+    </svg>
+  </div>
+  <figcaption class="adg__cap">
+    <span class="adg__step" data-adg-step><b>Step {first.n} of {flow.steps.length}.</b> {first.text}</span>
+    <a class="adg__full" href={`/diagrams/${slug}.svg`} target="_blank" rel="noopener" data-adg-src>Full size</a>
+  </figcaption>
+</figure>
+
+<style>
+  .adg {
+    margin: 0;
+    min-width: 0;
+  }
+  .adg__sheet {
+    background: #fff;
+    border: 1px solid var(--rule);
+    border-radius: var(--r-card);
+    padding: 0.5rem;
+    overflow: hidden;
+  }
+  .adg__sheet svg {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  .adg__hl :global(polyline) {
+    fill: none;
+    stroke: #e0a33a;
+    stroke-width: 12;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    opacity: 0.8;
+  }
+  .adg__hl :global(polyline.is-on) {
+    animation: adg-in 0.35s ease-out;
+  }
+  @keyframes adg-in {
+    from {
+      opacity: 0;
+    }
+  }
+  .adg :global(.adg__p) {
+    fill: #e0a33a;
+    stroke: #0f1e33;
+    stroke-width: 5;
+  }
+  .adg__cap {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.3rem 1rem;
+    margin-top: 0.7rem;
+    font-size: 0.88rem;
+    color: var(--text-muted);
+    min-height: 2.8em;
+  }
+  .adg__step {
+    flex: 1 1 18rem;
+  }
+  .adg__step b {
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+  }
+  .adg__full {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+</style>
+
+<script>
+  type Step = { n: number; text: string; paths: [number, number][][] };
+  const NS = 'http://www.w3.org/2000/svg';
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const STEP_MS = 1900;
+  const PAUSE_MS = 500;
+
+  const lengthOf = (p: [number, number][]) => p.slice(1).reduce((s, q, i) => s + Math.hypot(q[0] - p[i][0], q[1] - p[i][1]), 0);
+  const pointAt = (p: [number, number][], d: number): [number, number] => {
+    for (let i = 1; i < p.length; i++) {
+      const l = Math.hypot(p[i][0] - p[i - 1][0], p[i][1] - p[i - 1][1]);
+      if (d <= l) {
+        const k = l ? d / l : 0;
+        return [p[i - 1][0] + (p[i][0] - p[i - 1][0]) * k, p[i - 1][1] + (p[i][1] - p[i - 1][1]) * k];
+      }
+      d -= l;
+    }
+    return p[p.length - 1];
+  };
+
+  document.querySelectorAll<HTMLElement>('[data-adg]').forEach((root) => {
+    const steps: Step[] = JSON.parse(root.dataset.flow || '[]');
+    const img = root.querySelector<SVGImageElement>('[data-adg-img]')!;
+    const hl = root.querySelector<SVGGElement>('[data-adg-hl]')!;
+    const pkG = root.querySelector<SVGGElement>('[data-adg-pk]')!;
+    const cap = root.querySelector<HTMLElement>('[data-adg-step]')!;
+    const src = root.querySelector<HTMLAnchorElement>('[data-adg-src]')!.getAttribute('href')!;
+    let visible = false;
+    let playing = false;
+    let step = 0;
+    let t0 = 0;
+    let raf = 0;
+    let packets: { c: SVGCircleElement; p: [number, number][]; L: number }[] = [];
+
+    const load = () => {
+      if (!img.getAttribute('href')) img.setAttribute('href', src);
+    };
+    const show = (i: number) => {
+      step = i;
+      const s = steps[i];
+      hl.innerHTML = '';
+      pkG.innerHTML = '';
+      packets = s.paths.map((p) => {
+        const line = document.createElementNS(NS, 'polyline');
+        line.setAttribute('points', p.map((q) => q.join(',')).join(' '));
+        line.setAttribute('class', 'is-on');
+        hl.appendChild(line);
+        const c = document.createElementNS(NS, 'circle');
+        c.setAttribute('r', '20');
+        c.setAttribute('class', 'adg__p');
+        c.setAttribute('cx', String(p[0][0]));
+        c.setAttribute('cy', String(p[0][1]));
+        pkG.appendChild(c);
+        return { c, p, L: lengthOf(p) };
+      });
+      cap.innerHTML = `<b>Step ${s.n} of ${steps.length}.</b> `;
+      cap.append(s.text);
+    };
+    const frame = (now: number) => {
+      if (!playing) return;
+      const e = now - t0;
+      const k = Math.min(1, e / STEP_MS);
+      const ease = k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
+      packets.forEach(({ c, p, L }) => {
+        const [x, y] = pointAt(p, L * ease);
+        c.setAttribute('cx', String(x));
+        c.setAttribute('cy', String(y));
+        c.style.opacity = k < 1 ? '1' : '0';
+      });
+      if (e >= STEP_MS + PAUSE_MS) {
+        if (step === steps.length - 1) root.dispatchEvent(new CustomEvent('adg:cycle', { bubbles: true }));
+        // The listener may have stopped this diagram to move on to the next one.
+        if (!playing) return;
+        show((step + 1) % steps.length);
+        t0 = now;
+      }
+      raf = requestAnimationFrame(frame);
+    };
+    const play = () => {
+      load();
+      if (reduce || playing || !steps.length) return;
+      playing = true;
+      t0 = performance.now();
+      raf = requestAnimationFrame(frame);
+    };
+    const stop = () => {
+      playing = false;
+      cancelAnimationFrame(raf);
+    };
+
+    // The project stage tells each diagram when it is the one on show.
+    root.addEventListener('adg:play', () => {
+      show(0);
+      if (visible) play();
+      else load();
+      root.dataset.on = '';
+    });
+    root.addEventListener('adg:stop', () => {
+      stop();
+      delete root.dataset.on;
+    });
+    if (root.dataset.auto !== undefined) root.dataset.on = '';
+
+    new IntersectionObserver(
+      ([entry]) => {
+        visible = entry.isIntersecting;
+        if (visible && root.dataset.on !== undefined) play();
+        else if (!visible) stop();
+      },
+      { rootMargin: '200px 0px' },
+    ).observe(root);
+
+    if (steps.length) show(0);
+  });
+</script>
