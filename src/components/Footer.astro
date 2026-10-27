@@ -8,6 +8,12 @@ const year = new Date().getFullYear();
 ---
 
 <footer class="footer">
+  <div class="shell">
+    <p class="footer__you" data-visitor>
+      This page reached you through Route 53, CloudFront and S3, deployed by GitHub Actions. I built
+      that too.
+    </p>
+  </div>
   <div class="shell footer__grid">
     <div>
       <img src={logo.src} alt={site.name} width="150" height="120" class="footer__logo" />
@@ -65,6 +71,20 @@ const year = new Date().getFullYear();
     color: var(--paper);
     padding-top: clamp(3rem, 6vw, 4.5rem);
     border-top: 1px solid var(--brand-line);
+  }
+
+  .footer__you {
+    max-width: 46rem;
+    margin: 0 auto 2.75rem;
+    padding-bottom: 2.5rem;
+    border-bottom: 1px solid var(--brand-line);
+    text-align: center;
+    font-size: clamp(1rem, 1.8vw, 1.15rem);
+    color: #c3cede;
+  }
+  .footer__you :global(b) {
+    color: var(--highlight);
+    font-weight: 500;
   }
 
   .footer__grid {
@@ -194,3 +214,25 @@ const year = new Date().getFullYear();
     }
   }
 </style>
+
+<script>
+  // Greets the visitor by their own city and time, read from the browser's
+  // time zone, and says how long this page took to reach them. Nothing is
+  // sent anywhere; it is all worked out on their device.
+  const line = document.querySelector<HTMLElement>('[data-visitor]');
+  if (line) {
+    try {
+      const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+      const place = tz.includes('/') ? (tz.split('/').pop() || '').replace(/_/g, ' ') : '';
+      const time = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+      const nav = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming | undefined;
+      const ms = nav && nav.responseEnd ? Math.round(nav.responseEnd) : 0;
+      const b = (s: string) => `<b>${s.replace(/[<>&]/g, '')}</b>`;
+      line.innerHTML =
+        (place ? `You are reading this in ${b(place)} at ${b(time)}. ` : '') +
+        `This page reached you through Route 53, CloudFront and S3${ms ? ` in ${b(`${ms} ms`)}` : ''}, deployed by GitHub Actions. I built that too.`;
+    } catch {
+      /* keep the plain sentence */
+    }
+  }
+</script>

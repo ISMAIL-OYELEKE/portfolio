@@ -15,8 +15,8 @@ import { join, relative } from 'node:path';
 import { createHash } from 'node:crypto';
 
 // The only inline script the Content-Security-Policy allows, by hash. If the
-// no-js snippet in Base.astro changes, update this and docs/deployment.md.
-const ALLOWED_INLINE_SCRIPT = 'sha256-bRrXOZfzkSHqxbwz5Za8TNTsnrMa7Kvk+eW1MqoTxsQ=';
+// theme and no-js snippet in Base.astro changes, update this and docs/deployment.md.
+const ALLOWED_INLINE_SCRIPT = 'sha256-MGQfFiVtmMxbAZMfUvlMQNu8zMiPvyw54OTJ2axKIPk=';
 
 const DIST = 'dist';
 const problems = [];

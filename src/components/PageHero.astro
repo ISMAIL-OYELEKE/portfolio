@@ -5,25 +5,114 @@ interface Props {
   lede?: string;
 }
 const { eyebrow, title, lede } = Astro.props;
+
+// Flat cloud silhouettes that drift slowly behind the title, carrying the
+// home page's sky onto every inner page. Pure CSS, no blur and no glow.
+const cloud = (fill: string) =>
+  `<svg viewBox="-40 -60 480 220" aria-hidden="true"><g fill="${fill}"><rect x="30" y="96" width="340" height="50" rx="25"/><circle cx="62" cy="112" r="38"/><circle cx="131" cy="80" r="56"/><circle cx="200" cy="66" r="72"/><circle cx="269" cy="84" r="52"/><circle cx="338" cy="112" r="36"/></g></svg>`;
 ---
 
 <section class="on-dark page-hero">
-  <div class="shell" data-enter>
+  <div class="page-hero__sky" aria-hidden="true">
+    <span class="page-hero__cloud c1" set:html={cloud('#16294a')} />
+    <span class="page-hero__cloud c2" set:html={cloud('#1a2f52')} />
+    <span class="page-hero__cloud c3" set:html={cloud('#14243f')} />
+  </div>
+  <div class="shell page-hero__inner" data-enter>
     <span class="eyebrow">{eyebrow}</span>
     <h1>{title}</h1>
     {lede && <p class="lede page-hero__lede">{lede}</p>}
-    <span class="rule-tick"></span>
+    <span class="page-hero__route" aria-hidden="true"><i></i></span>
   </div>
 </section>
 
 <style>
   .page-hero {
-    padding-block: clamp(3rem, 7vw, 5.5rem);
+    position: relative;
+    overflow: hidden;
+    padding-block: clamp(3.5rem, 8vw, 6.5rem);
+    text-align: center;
   }
-  .page-hero__lede {
-    max-width: 50rem;
+  .page-hero__inner {
+    position: relative;
   }
   .page-hero h1 {
-    margin-bottom: 0.5em;
+    font-size: clamp(2.2rem, 5.6vw, 4rem);
+    max-width: 22ch;
+    margin: 0 auto 0.5em;
+  }
+  .page-hero__lede {
+    max-width: 46rem;
+    margin-inline: auto;
+  }
+
+  .page-hero__sky {
+    position: absolute;
+    inset: 0;
+  }
+  .page-hero__cloud {
+    position: absolute;
+    display: block;
+    animation: page-hero-drift 60s linear infinite alternate;
+  }
+  .page-hero__cloud :global(svg) {
+    display: block;
+    width: 100%;
+    height: auto;
+    overflow: visible;
+  }
+  .c1 {
+    width: 38vw;
+    left: -8vw;
+    bottom: -4rem;
+  }
+  .c2 {
+    width: 30vw;
+    right: -6vw;
+    top: 0.5rem;
+    animation-duration: 75s;
+    animation-direction: alternate-reverse;
+  }
+  .c3 {
+    width: 22vw;
+    right: 22vw;
+    bottom: -3rem;
+    animation-duration: 90s;
+  }
+  @keyframes page-hero-drift {
+    from {
+      transform: translateX(-3vw);
+    }
+    to {
+      transform: translateX(6vw);
+    }
+  }
+
+  /* A short route with a packet that travels it once, under the title. */
+  .page-hero__route {
+    display: block;
+    position: relative;
+    width: 7rem;
+    height: 2px;
+    margin: 1.6rem auto 0;
+    background: var(--brand-line);
+  }
+  .page-hero__route i {
+    position: absolute;
+    top: -3px;
+    left: 0;
+    width: 8px;
+    height: 8px;
+    background: var(--highlight);
+    border-radius: 1px;
+    animation: page-hero-packet 1.4s var(--ease-out) 0.4s both;
+  }
+  @keyframes page-hero-packet {
+    from {
+      left: 0;
+    }
+    to {
+      left: calc(100% - 8px);
+    }
   }
 </style>

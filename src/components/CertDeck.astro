@@ -1,0 +1,257 @@
+---
+/* All certifications and badges as one deck of cards. They start stacked;
+   "Deal the deck" lays them out, and each card flips to show the issuer,
+   the dates and the verify link. Without JavaScript the cards are simply a
+   grid, already dealt, with the back details visible on the front. */
+import { Image } from 'astro:assets';
+import { headlineCerts, badgeGroups } from '../data/certifications';
+
+const cards = [
+  ...headlineCerts.map((c) => ({ ...c, major: true })),
+  ...badgeGroups.flatMap((g) => g.badges.map((c) => ({ ...c, major: false }))),
+];
+---
+
+<div class="deck-wrap">
+  <div class="deck" data-deck>
+    {
+      cards.map((c, i) => (
+        <div class:list={['dcard', { 'dcard--major': c.major }]} tabindex="0" role="button" aria-label={`${c.name}. Flip for details`}>
+          <div class="dcard__in">
+            <div class="dcard__face dcard__front">
+              <span class="dcard__issuer">{c.issuer}</span>
+              {c.image && (
+                <Image
+                  class:list={['dcard__art', { 'dcard__art--wide': c.imageShape === 'certificate' }]}
+                  src={c.image}
+                  alt={`${c.name} badge`}
+                  width={c.imageShape === 'certificate' ? 140 : 84}
+                  densities={[1, 2]}
+                  format="webp"
+                  loading="lazy"
+                />
+              )}
+              <span class="dcard__name">{c.name}</span>
+            </div>
+            <div class="dcard__face dcard__back">
+              <span class="dcard__kind">
+                {c.major ? 'Certification' : 'Badge'} · {String(i + 1).padStart(2, '0')} of {cards.length}
+              </span>
+              <span class="dcard__who">{c.issuer}</span>
+              <span class="dcard__dates">
+                {c.issued && <span>Issued {c.issued}</span>}
+                {c.expires && <span>Valid to {c.expires}</span>}
+              </span>
+              <a href={c.verify} target="_blank" rel="noopener" tabindex="-1">Verify</a>
+            </div>
+          </div>
+        </div>
+      ))
+    }
+  </div>
+  <button type="button" class="btn btn--primary deck-btn" data-deal hidden>Deal the deck</button>
+</div>
+
+<style>
+  .deck-wrap {
+    text-align: center;
+  }
+  .deck {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+    gap: 14px;
+    text-align: left;
+  }
+  .deck.is-live {
+    display: block;
+    position: relative;
+    height: 320px;
+    transition: height 0.7s var(--ease-out);
+  }
+  .dcard {
+    height: 236px;
+    perspective: 900px;
+    cursor: pointer;
+    outline-offset: 4px;
+  }
+  .deck.is-live .dcard {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 170px;
+    transform-origin: top left;
+    transition: transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  .dcard__in {
+    position: relative;
+    height: 100%;
+    transform-style: preserve-3d;
+    transition: transform 0.6s var(--ease-out);
+  }
+  .dcard.is-flipped .dcard__in {
+    transform: rotateY(180deg);
+  }
+  .dcard__face {
+    position: absolute;
+    inset: 0;
+    backface-visibility: hidden;
+    border-radius: var(--r-card);
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+  .dcard__front {
+    background: var(--brand-deep);
+    color: var(--paper);
+    border: 1px solid var(--brand-line);
+  }
+  .dcard--major .dcard__front {
+    border-color: var(--highlight);
+  }
+  .dcard__issuer,
+  .dcard__kind {
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--highlight);
+  }
+  .dcard__art {
+    width: 84px;
+    height: 84px;
+    object-fit: contain;
+    margin: auto;
+  }
+  .dcard__art--wide {
+    width: 140px;
+    height: 84px;
+  }
+  .dcard__name {
+    font-size: 0.82rem;
+    font-weight: 600;
+    line-height: 1.3;
+    margin-top: auto;
+  }
+  .dcard__back {
+    background: var(--highlight);
+    color: var(--brand-deep);
+    transform: rotateY(180deg);
+    justify-content: space-between;
+  }
+  .dcard__back .dcard__kind {
+    color: var(--brand-deep);
+  }
+  .dcard__who {
+    font-family: var(--font-display);
+    font-size: 1.25rem;
+    font-weight: 700;
+    line-height: 1.15;
+  }
+  .dcard__dates {
+    display: flex;
+    flex-direction: column;
+    font-size: 0.78rem;
+  }
+  .dcard__back a {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--brand-deep);
+  }
+  /* Without the script there is no flipping: show the back as a footer. */
+  .deck:not(.is-live) .dcard {
+    height: auto;
+  }
+  .deck:not(.is-live) .dcard__face {
+    position: relative;
+    transform: none;
+  }
+  .deck:not(.is-live) .dcard__front {
+    min-height: 236px;
+  }
+  .deck:not(.is-live) .dcard__back {
+    display: none;
+  }
+  .deck-btn {
+    margin-top: 1.6rem;
+  }
+</style>
+
+<script>
+  const deck = document.querySelector<HTMLElement>('[data-deck]');
+  const button = document.querySelector<HTMLButtonElement>('[data-deal]');
+  if (deck && button) {
+    const cards = [...deck.querySelectorAll<HTMLElement>('.dcard')];
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let dealt = false;
+
+    deck.classList.add('is-live');
+    button.hidden = false;
+
+    const layout = () => {
+      const w = deck.clientWidth, cw = 170, ch = 236, gap = 14;
+      if (!dealt) {
+        deck.style.height = '300px';
+        cards.forEach((c, i) => {
+          c.style.zIndex = String(cards.length - i);
+          c.style.transitionDelay = '0ms';
+          c.style.transform = `translate(${w / 2 - cw / 2 + ((i % 5) - 2) * 3}px, ${30 - i * 0.6}px) rotate(${((i % 7) - 3) * 2.2}deg)`;
+        });
+        return;
+      }
+      const cols = Math.max(2, Math.floor((w + gap) / (cw + gap)));
+      const scale = Math.min(1, (w - (cols - 1) * gap) / (cols * cw));
+      const sw = cw * scale, sh = ch * scale;
+      const ox = (w - (cols * sw + (cols - 1) * gap)) / 2;
+      cards.forEach((c, i) => {
+        const r = Math.floor(i / cols), k = i % cols;
+        c.style.zIndex = '1';
+        c.style.transitionDelay = reduce ? '0ms' : `${i * 25}ms`;
+        c.style.transform = `translate(${ox + k * (sw + gap)}px, ${r * (sh + gap)}px) scale(${scale})`;
+      });
+      deck.style.height = `${Math.ceil(cards.length / cols) * (sh + gap)}px`;
+    };
+
+    const setLinks = () =>
+      cards.forEach((c) => {
+        const link = c.querySelector('a');
+        if (link) link.tabIndex = dealt && c.classList.contains('is-flipped') ? 0 : -1;
+      });
+
+    cards.forEach((c) => {
+      const flip = () => {
+        if (!dealt) {
+          dealt = true;
+          button.textContent = 'Stack them back';
+          layout();
+          return;
+        }
+        c.classList.toggle('is-flipped');
+        setLinks();
+      };
+      c.addEventListener('click', (e) => {
+        if ((e.target as Element).closest('a')) return;
+        flip();
+      });
+      c.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          flip();
+        }
+      });
+    });
+
+    button.addEventListener('click', () => {
+      dealt = !dealt;
+      button.textContent = dealt ? 'Stack them back' : 'Deal the deck';
+      if (!dealt) cards.forEach((c) => c.classList.remove('is-flipped'));
+      setLinks();
+      layout();
+    });
+
+    layout();
+    window.addEventListener('resize', layout);
+  }
+</script>

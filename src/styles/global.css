@@ -49,6 +49,21 @@
   --r-pill: 999px;
 }
 
+/* Dark theme: the whole page moves onto navy. Light sections become a
+   deeper ink so the alternation between bands still reads. Set on <html>
+   by the inline script in Base.astro (Light, Dark or System). */
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --bg: var(--brand-ink);
+  --bg-sunken: #071121;
+  --surface: #13253f;
+  --text: var(--paper);
+  --text-muted: #a9b6c8;
+  --rule: var(--brand-line);
+  --accent: var(--highlight);
+  --accent-line: var(--highlight);
+}
+
 /* Dark navy surface, applied per-section rather than globally,
    so the page alternates the way the reference does. */
 .on-dark {
@@ -90,7 +105,7 @@ html {
 
 body {
   margin: 0;
-  background-color: var(--paper);
+  background-color: var(--bg);
   color: var(--text);
   font-family: var(--font-body);
   font-size: 1rem;

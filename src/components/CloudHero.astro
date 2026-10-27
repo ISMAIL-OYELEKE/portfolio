@@ -1,0 +1,531 @@
+---
+/* The home page opening: a night skyline in Lagos, a commit rising off a
+   rooftop, a climb through the clouds, then the DevOps loop and the name.
+   The scroll drives it. Without JavaScript, or with reduced motion, the
+   section shows its final frame (loop, name and buttons) and nothing moves. */
+import { site } from '../data/site';
+import SocialIcon from './SocialIcon.astro';
+
+const loopPath =
+  'M300,150 C370,50 545,50 545,150 C545,250 370,250 300,150 C230,50 55,50 55,150 C55,250 230,250 300,150 Z';
+---
+
+<section class="on-dark flight" data-flight aria-label="Introduction">
+  <div class="flight__scene">
+    <div class="flight__city" data-city aria-hidden="true">
+      <svg viewBox="0 0 1440 400" preserveAspectRatio="xMidYMax slice"></svg>
+    </div>
+    <div class="flight__commit" data-commit aria-hidden="true"></div>
+
+    <div class="flight__intro" data-intro aria-hidden="true">
+      <span class="eyebrow">{site.locality}, {site.country}</span>
+      <p class="flight__title">Every system starts<br />on the <em>ground.</em></p>
+      <p class="flight__note">This one ends up in the cloud. Scroll to take it there.</p>
+    </div>
+
+    <div class="flight__clouds" data-clouds aria-hidden="true"></div>
+
+    <div class="flight__alt" data-alt aria-hidden="true">
+      Altitude<b data-alt-value>0 m</b>
+    </div>
+
+    <div class="flight__stage" data-stage>
+      <div class="flight__loopwrap">
+        <svg
+          class="flight__loop"
+          data-loop
+          viewBox="0 0 600 300"
+          role="img"
+          aria-label="The DevOps loop: plan, code, build, test, release, deploy, operate, monitor"
+        >
+          <path class="flight__track" d={loopPath}></path>
+          <path class="flight__ink" data-ink d={loopPath}></path>
+          <text class="flight__big" x="150" y="150">Dev</text>
+          <text class="flight__big" x="450" y="150">Ops</text>
+          <g data-labels></g>
+          <g data-packets></g>
+        </svg>
+      </div>
+      <h1 class="flight__name" data-name>{site.name}</h1>
+      <p class="flight__role" data-reveal>
+        <b>Cloud and DevOps Engineer</b> · AWS Certified Solutions Architect
+      </p>
+      <div class="flight__ctas" data-reveal>
+        <a class="btn btn--primary" href="/contact">
+          Hire me
+          <SocialIcon name="arrow" size={15} />
+        </a>
+        <a class="btn btn--ghost" href="/projects">See what I've shipped</a>
+      </div>
+    </div>
+
+    <div class="flight__cue" data-cue aria-hidden="true">Scroll to lift off<i></i></div>
+  </div>
+</section>
+
+<style>
+  .flight {
+    --mast: 73px;
+    position: relative;
+    background: var(--brand-deep);
+  }
+  .flight__scene {
+    position: relative;
+    height: calc(100svh - var(--mast));
+    min-height: 560px;
+    overflow: hidden;
+  }
+  /* The scroll-driven version, switched on by the script. */
+  .flight.is-flying {
+    height: 340vh;
+  }
+  .flight.is-flying .flight__scene {
+    position: sticky;
+    top: var(--mast);
+  }
+  @media (max-width: 640px) {
+    .flight.is-flying {
+      height: 300vh;
+    }
+  }
+
+  /* Pieces that only exist in the flight are hidden in the still version. */
+  .flight__city,
+  .flight__commit,
+  .flight__intro,
+  .flight__clouds,
+  .flight__alt,
+  .flight__cue {
+    display: none;
+  }
+  .is-flying :is(.flight__city, .flight__commit, .flight__intro, .flight__clouds, .flight__alt, .flight__cue) {
+    display: block;
+  }
+
+  .flight__city {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 46%;
+    will-change: transform;
+  }
+  .flight__city svg {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .flight__intro {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 16%;
+    text-align: center;
+    padding-inline: var(--gutter);
+  }
+  .flight__title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: clamp(2.6rem, 8vw, 6.4rem);
+    line-height: 0.98;
+    letter-spacing: -0.025em;
+    margin: 0.4rem auto 0;
+    max-width: none;
+    color: var(--paper);
+  }
+  .flight__title em {
+    font-style: normal;
+    color: var(--highlight);
+  }
+  .flight__note {
+    color: #a9b6c8;
+    margin: 1.1rem auto 0;
+    max-width: 32rem;
+  }
+
+  .flight__commit {
+    position: absolute;
+    left: 50%;
+    width: 12px;
+    height: 12px;
+    margin-left: -6px;
+    background: var(--highlight);
+    border-radius: 2px;
+    opacity: 0;
+  }
+
+  .flight__clouds :global(.cloud) {
+    position: absolute;
+    top: 0;
+    will-change: transform, opacity;
+  }
+  .flight__clouds :global(.cloud svg) {
+    display: block;
+    width: 100%;
+    height: auto;
+    overflow: visible;
+  }
+
+  .flight__alt {
+    position: absolute;
+    right: var(--gutter);
+    top: 50%;
+    transform: translateY(-50%);
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #a9b6c8;
+    text-align: right;
+  }
+  .flight__alt b {
+    display: block;
+    color: var(--paper);
+    font-size: 1.1rem;
+    font-weight: 500;
+    letter-spacing: 0;
+    text-transform: none;
+  }
+  @media (max-width: 640px) {
+    .flight__alt {
+      top: auto;
+      bottom: 5.5rem;
+      transform: none;
+    }
+  }
+
+  .flight__cue {
+    position: absolute;
+    left: 50%;
+    bottom: 1.5rem;
+    transform: translateX(-50%);
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: #a9b6c8;
+    text-align: center;
+    white-space: nowrap;
+  }
+  .flight__cue i {
+    display: block;
+    width: 2px;
+    height: 34px;
+    margin: 0.6rem auto 0;
+    background: var(--brand-line);
+    position: relative;
+    overflow: hidden;
+  }
+  .flight__cue i::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 12px;
+    background: var(--highlight);
+    animation: cue-drip 1.6s infinite;
+  }
+  @keyframes cue-drip {
+    from {
+      top: -12px;
+    }
+    to {
+      top: 34px;
+    }
+  }
+
+  .flight__stage {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem var(--gutter);
+    text-align: center;
+  }
+  .is-flying .flight__stage {
+    pointer-events: none;
+  }
+  .is-flying .flight__stage.is-live {
+    pointer-events: auto;
+  }
+  .flight__loopwrap {
+    width: min(600px, 92vw);
+    perspective: 900px;
+  }
+  .flight__loop {
+    width: 100%;
+    height: auto;
+    overflow: visible;
+  }
+  .flight__track {
+    fill: none;
+    stroke: var(--brand-line);
+    stroke-width: 3;
+    stroke-dasharray: 2 8;
+    stroke-linecap: round;
+  }
+  .flight__ink {
+    fill: none;
+    stroke: #6a9ad6;
+    stroke-width: 3.5;
+    stroke-linecap: round;
+  }
+  .flight__big {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 34px;
+    fill: var(--paper);
+    text-anchor: middle;
+    dominant-baseline: middle;
+  }
+  .flight__loop :global(.lbl) {
+    font-family: var(--font-mono);
+    font-weight: 500;
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    fill: #a9b6c8;
+    text-anchor: middle;
+    dominant-baseline: middle;
+    transition: fill 0.2s ease;
+  }
+  .flight__loop :global(.lbl.is-hot) {
+    fill: var(--highlight);
+  }
+  .flight__loop :global(.pk) {
+    fill: var(--highlight);
+  }
+
+  .flight__name {
+    font-size: clamp(2.8rem, 9vw, 7.2rem);
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -0.03em;
+    margin: 0.5rem 0 0;
+    white-space: nowrap;
+    color: var(--paper);
+  }
+  .flight__name :global(span) {
+    display: inline-block;
+    will-change: transform, opacity;
+  }
+  .flight__role {
+    margin: 1rem auto 0;
+    font-family: var(--font-mono);
+    font-size: clamp(0.68rem, 1.4vw, 0.85rem);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #a9b6c8;
+    max-width: none;
+  }
+  .flight__role b {
+    color: var(--highlight);
+    font-weight: 500;
+  }
+  .flight__ctas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.85rem;
+    justify-content: center;
+    margin-top: 1.6rem;
+  }
+
+  @media (max-width: 640px) {
+    .flight__name {
+      font-size: clamp(2.3rem, 11vw, 3rem);
+    }
+    .flight__loop :global(.lbl) {
+      font-size: 15px;
+    }
+  }
+</style>
+
+<script>
+  const section = document.querySelector<HTMLElement>('[data-flight]');
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  if (section) {
+    const NS = 'http://www.w3.org/2000/svg';
+    const q = <T extends Element>(sel: string) => section.querySelector<T>(sel)!;
+    const clamp = (v: number, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+    const seg = (p: number, a: number, b: number) => clamp((p - a) / (b - a));
+    const ease = (t: number) => 1 - Math.pow(1 - t, 3);
+    let seed = 7;
+    const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+
+    /* ---- the DevOps loop: labels and packets ---- */
+    const ink = q<SVGPathElement>('[data-ink]');
+    const L = ink.getTotalLength();
+    const labelsG = q<SVGGElement>('[data-labels]');
+    const stages: [string, number, number][] = [
+      ['RELEASE', 0.11, 450], ['DEPLOY', 0.2, 450], ['OPERATE', 0.3, 450], ['MONITOR', 0.39, 450],
+      ['PLAN', 0.61, 150], ['CODE', 0.7, 150], ['BUILD', 0.8, 150], ['TEST', 0.89, 150],
+    ];
+    const labels = stages.map(([t, f, cx]) => {
+      const pt = ink.getPointAtLength(f * L);
+      const dx = pt.x - cx, dy = pt.y - 150, m = Math.hypot(dx, dy) || 1;
+      const el = document.createElementNS(NS, 'text');
+      el.setAttribute('class', 'lbl');
+      el.setAttribute('x', String(pt.x + (dx / m) * 30));
+      el.setAttribute('y', String(pt.y + (dy / m) * 24));
+      el.textContent = t;
+      labelsG.appendChild(el);
+      return { el, f };
+    });
+    const packetsG = q<SVGGElement>('[data-packets]');
+    const packets = [0, 0.33, 0.66].map((o) => {
+      const c = document.createElementNS(NS, 'circle');
+      c.setAttribute('class', 'pk');
+      c.setAttribute('r', '6');
+      packetsG.appendChild(c);
+      return { c, o };
+    });
+
+    const spin = (t: number, on: boolean) => {
+      const pos = packets.map((k) => (t * 0.12 + k.o) % 1);
+      packets.forEach((k, i) => {
+        const pt = ink.getPointAtLength(pos[i] * L);
+        k.c.setAttribute('cx', String(pt.x));
+        k.c.setAttribute('cy', String(pt.y));
+        k.c.style.opacity = on ? '1' : '0';
+      });
+      labels.forEach(({ el, f }) => {
+        const near = pos.some((pf) => Math.min(Math.abs(pf - f), 1 - Math.abs(pf - f)) < 0.04);
+        el.classList.toggle('is-hot', on && near);
+      });
+    };
+
+    /* Still version: the loop and name are simply there; packets still
+       travel unless the visitor asked for less motion. */
+    if (reduce) {
+      spin(0, true);
+    } else {
+      section.classList.add('is-flying');
+
+      /* ---- skyline ---- */
+      const city = q<SVGSVGElement>('[data-city] svg');
+      let x = 0, svg = '';
+      while (x < 1440) {
+        const w = 40 + rnd() * 70, h = 70 + rnd() * 230;
+        svg += `<rect x="${x}" y="${400 - h}" width="${w}" height="${h}" fill="#16273f"/>`;
+        for (let wy = 400 - h + 18; wy < 390; wy += 22)
+          for (let wx = x + 10; wx < x + w - 12; wx += 16)
+            if (rnd() > 0.72) svg += `<rect x="${wx}" y="${wy}" width="6" height="8" fill="${rnd() > 0.85 ? '#E0A33A' : '#2a4263'}"/>`;
+        x += w + 4 + rnd() * 10;
+      }
+      city.innerHTML = svg + '<rect x="0" y="390" width="1440" height="10" fill="#1f3757"/>';
+
+      /* ---- clouds: flat, layered, no blur ---- */
+      const cloudsEl = q<HTMLElement>('[data-clouds]');
+      const cloudSVG = (fill: string) => {
+        const bumps = 5 + Math.floor(rnd() * 3);
+        let s = `<svg viewBox="-40 -60 480 220"><g fill="${fill}"><rect x="30" y="96" width="340" height="50" rx="25"/>`;
+        for (let i = 0; i < bumps; i++) {
+          const edge = i === 0 || i === bumps - 1;
+          const cx = 62 + i * (276 / (bumps - 1)), r = edge ? 34 + rnd() * 8 : 44 + rnd() * 34;
+          s += `<circle cx="${cx}" cy="${edge ? 112 : 112 - r * 0.5}" r="${r}"/>`;
+        }
+        return s + '</g></svg>';
+      };
+      const fills = ['#1a2d48', '#22385a', '#2c4568', '#c9d2dc'];
+      type Cloud = { el: HTMLElement; li: number; speed: number; y: number; side: number; drift: number };
+      const clouds: Cloud[] = [];
+      ([[0, 7, 0.7, 0.32], [1, 6, 1.1, 0.42], [2, 5, 1.6, 0.6], [3, 6, 2.4, 0.95]] as const).forEach(([li, n, speed, size]) => {
+        for (let i = 0; i < n; i++) {
+          const el = document.createElement('div');
+          el.className = 'cloud';
+          el.innerHTML = cloudSVG(fills[li]);
+          const wv = size * (60 + rnd() * 40);
+          el.style.width = `${wv}vw`;
+          el.style.left = `${(i / (n - 1)) * 110 - 5 - wv / 2}vw`;
+          cloudsEl.appendChild(el);
+          clouds.push({ el, li, speed, y: 120 + rnd() * 70 + li * 20, side: i % 2 ? 1 : -1, drift: (rnd() - 0.5) * 0.02 });
+        }
+      });
+
+      /* ---- name, letter by letter ---- */
+      const nameEl = q<HTMLElement>('[data-name]');
+      const text = nameEl.textContent || '';
+      nameEl.setAttribute('aria-label', text);
+      nameEl.textContent = '';
+      const letters = [...text].map((ch) => {
+        const s = document.createElement('span');
+        s.setAttribute('aria-hidden', 'true');
+        s.textContent = ch === ' ' ? ' ' : ch;
+        nameEl.appendChild(s);
+        return { s, dx: (rnd() - 0.5) * 600, dy: (rnd() - 0.5) * 400 - 100, r: (rnd() - 0.5) * 120 };
+      });
+
+      const cityEl = q<HTMLElement>('[data-city]');
+      const intro = q<HTMLElement>('[data-intro]');
+      const commit = q<HTMLElement>('[data-commit]');
+      const loop = q<SVGSVGElement>('[data-loop]');
+      const stage = q<HTMLElement>('[data-stage]');
+      const cue = q<HTMLElement>('[data-cue]');
+      const alt = q<HTMLElement>('[data-alt]');
+      const altValue = q<HTMLElement>('[data-alt-value]');
+      const reveals = [...section.querySelectorAll<HTMLElement>('[data-reveal]')];
+      ink.style.strokeDasharray = String(L);
+
+      const render = (p: number, t: number) => {
+        const vh = section.querySelector<HTMLElement>('.flight__scene')!.clientHeight;
+        cityEl.style.transform = `translateY(${ease(seg(p, 0, 0.4)) * vh * 0.9}px)`;
+        intro.style.opacity = String(1 - seg(p, 0.04, 0.16));
+        intro.style.transform = `translateY(${seg(p, 0, 0.2) * -60}px)`;
+        cue.style.opacity = String(1 - seg(p, 0, 0.06));
+
+        const cr = seg(p, 0.02, 0.42);
+        commit.style.top = `${vh * 0.86 - ease(cr) * vh * 0.42}px`;
+        commit.style.opacity = p < 0.02 ? '0' : String(1 - seg(p, 0.44, 0.5));
+        commit.style.transform = `rotate(${cr * 360}deg)`;
+
+        clouds.forEach((c) => {
+          let xo = c.drift * t;
+          if (c.li === 3) xo += c.side * ease(seg(p, 0.44, 0.62)) * 70;
+          if (c.li === 2) xo += c.side * ease(seg(p, 0.48, 0.66)) * 40;
+          c.el.style.transform = `translate(${xo}vw, ${c.y - p * c.speed * 160}vh)`;
+          if (c.li >= 2) c.el.style.opacity = String((c.li === 3 ? 0.96 : 1) * (1 - seg(p, 0.56, 0.66)));
+        });
+
+        altValue.textContent = `${Math.round(ease(seg(p, 0, 0.6)) * 10000).toLocaleString('en-GB')} m`;
+        alt.style.opacity = String(p < 0.02 ? 0.5 : 1 - seg(p, 0.62, 0.7));
+
+        const la = seg(p, 0.5, 0.68);
+        stage.style.opacity = la > 0 ? '1' : '0';
+        stage.classList.toggle('is-live', p > 0.85);
+        loop.style.opacity = String(seg(p, 0.5, 0.56));
+        loop.style.transform = `rotateY(${(1 - ease(la)) * 540}deg) scale(${0.6 + 0.4 * ease(la)})`;
+        ink.style.strokeDashoffset = String(L * (1 - ease(seg(p, 0.54, 0.72))));
+
+        letters.forEach((l, i) => {
+          const k = ease(seg(p, 0.68 + i * 0.008, 0.8 + i * 0.008));
+          l.s.style.opacity = String(k);
+          l.s.style.transform = `translate(${l.dx * (1 - k)}px, ${l.dy * (1 - k)}px) rotate(${l.r * (1 - k)}deg)`;
+        });
+        reveals.forEach((el, i) => {
+          const k = seg(p, 0.86 + i * 0.04, 0.94 + i * 0.04);
+          el.style.opacity = String(k);
+          el.style.transform = `translateY(${(1 - k) * 16}px)`;
+        });
+        return p > 0.7;
+      };
+
+      const sceneEl = section.querySelector<HTMLElement>('.flight__scene')!;
+      const tick = (now: number) => {
+        const r = section.getBoundingClientRect();
+        // Skip the work while the hero is scrolled out of sight.
+        if (r.bottom > 0) {
+          const top = parseFloat(getComputedStyle(sceneEl).top) || 0;
+          const p = clamp((top - r.top) / (section.offsetHeight - sceneEl.clientHeight));
+          const t = now / 1000;
+          spin(t, render(p, t));
+        }
+        requestAnimationFrame(tick);
+      };
+      requestAnimationFrame(tick);
+    }
+  }
+</script>
