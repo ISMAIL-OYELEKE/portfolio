@@ -49,7 +49,10 @@ const cards = [
       ))
     }
   </div>
-  <button type="button" class="btn btn--primary deck-btn" data-deal hidden>Deal the deck</button>
+  <div class="deck-actions">
+    <button type="button" class="btn btn--primary" data-deal hidden>Deal the deck</button>
+    <slot />
+  </div>
 </div>
 
 <style>
@@ -174,8 +177,17 @@ const cards = [
   .deck:not(.is-live) .dcard__back {
     display: none;
   }
-  .deck-btn {
-    margin-top: 1.6rem;
+  .deck-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.85rem;
+    justify-content: center;
+    margin-top: 1.4rem;
+  }
+  /* A dealt card that is flipped comes forward at full size, so its details
+     stay readable even when the dealt grid is small enough to fit one screen. */
+  .deck.is-live .dcard.is-flipped {
+    z-index: 50 !important;
   }
 </style>
 
@@ -190,10 +202,20 @@ const cards = [
     deck.classList.add('is-live');
     button.hidden = false;
 
+    const section = deck.closest('section');
+    const mast = () => document.querySelector('[data-masthead]')?.getBoundingClientRect().height ?? 73;
+    // Bring the whole section (heading, cards and buttons) into one screen.
+    const frame = () => {
+      if (!section) return;
+      const top = section.getBoundingClientRect().top + window.scrollY - mast();
+      window.scrollTo({ top: Math.max(0, top), behavior: reduce ? 'auto' : 'smooth' });
+    };
+    let placed: { x: number; y: number; s: number }[] = [];
+
     const layout = () => {
-      const w = deck.clientWidth, cw = 170, ch = 236, gap = 14;
+      const w = deck.clientWidth, cw = 170, ch = 236;
       if (!dealt) {
-        deck.style.height = '300px';
+        deck.style.height = '290px';
         cards.forEach((c, i) => {
           c.style.zIndex = String(cards.length - i);
           c.style.transitionDelay = '0ms';
@@ -201,17 +223,43 @@ const cards = [
         });
         return;
       }
-      const cols = Math.max(2, Math.floor((w + gap) / (cw + gap)));
-      const scale = Math.min(1, (w - (cols - 1) * gap) / (cols * cw));
+      // Room left on screen for the cards once the heading and buttons are counted.
+      const gap = w < 640 ? 8 : 12;
+      const other = section ? section.offsetHeight - deck.offsetHeight : 320;
+      const avail = Math.max(240, window.innerHeight - mast() - other);
+      // Pick the column count that gives the biggest cards that still fit.
+      let best = { cols: 2, scale: 0 };
+      for (let cols = 2; cols <= 12; cols++) {
+        const rows = Math.ceil(cards.length / cols);
+        const s = Math.min(1, (w - (cols - 1) * gap) / (cols * cw), (avail - (rows - 1) * gap) / (rows * ch));
+        if (s > best.scale) best = { cols, scale: s };
+      }
+      const { cols } = best;
+      const scale = Math.max(0.36, best.scale);
       const sw = cw * scale, sh = ch * scale;
       const ox = (w - (cols * sw + (cols - 1) * gap)) / 2;
+      placed = cards.map((_, i) => ({ x: ox + (i % cols) * (sw + gap), y: Math.floor(i / cols) * (sh + gap), s: scale }));
       cards.forEach((c, i) => {
-        const r = Math.floor(i / cols), k = i % cols;
         c.style.zIndex = '1';
-        c.style.transitionDelay = reduce ? '0ms' : `${i * 25}ms`;
-        c.style.transform = `translate(${ox + k * (sw + gap)}px, ${r * (sh + gap)}px) scale(${scale})`;
+        c.style.transitionDelay = reduce ? '0ms' : `${i * 20}ms`;
+        place(c, i);
       });
-      deck.style.height = `${Math.ceil(cards.length / cols) * (sh + gap)}px`;
+      deck.style.height = `${Math.ceil(cards.length / cols) * (sh + gap) - gap}px`;
+    };
+
+    // A flipped card grows to full size, kept inside the deck's box.
+    const place = (c: HTMLElement, i: number) => {
+      const p = placed[i];
+      if (!p) return;
+      if (c.classList.contains('is-flipped') && p.s < 1) {
+        const w = deck.clientWidth, h = deck.offsetHeight;
+        const x = Math.min(Math.max(0, p.x - (170 - 170 * p.s) / 2), w - 170);
+        const y = Math.min(Math.max(0, p.y - (236 - 236 * p.s) / 2), Math.max(0, h - 236));
+        c.style.transitionDelay = '0ms';
+        c.style.transform = `translate(${x}px, ${y}px) scale(1)`;
+      } else {
+        c.style.transform = `translate(${p.x}px, ${p.y}px) scale(${p.s})`;
+      }
     };
 
     const setLinks = () =>
@@ -226,9 +274,18 @@ const cards = [
           dealt = true;
           button.textContent = 'Stack them back';
           layout();
+          frame();
           return;
         }
-        c.classList.toggle('is-flipped');
+        const open = !c.classList.contains('is-flipped');
+        cards.forEach((o, j) => {
+          if (o !== c && o.classList.contains('is-flipped')) {
+            o.classList.remove('is-flipped');
+            place(o, j);
+          }
+        });
+        c.classList.toggle('is-flipped', open);
+        place(c, cards.indexOf(c));
         setLinks();
       };
       c.addEventListener('click', (e) => {
@@ -249,12 +306,9 @@ const cards = [
       if (!dealt) cards.forEach((c) => c.classList.remove('is-flipped'));
       setLinks();
       layout();
-      // Stacking shrinks the deck, which would leave the reader stranded at the
-      // bottom of the page. Bring the stack back into view instead.
-      if (!dealt) {
-        const top = deck.getBoundingClientRect().top + window.scrollY - window.innerHeight * 0.3;
-        window.scrollTo({ top: Math.max(0, top), behavior: reduce ? 'auto' : 'smooth' });
-      }
+      // Dealing or stacking changes the deck's height; keep the whole section,
+      // from the count down to the buttons, on screen either way.
+      frame();
     });
 
     layout();
