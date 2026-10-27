@@ -235,18 +235,23 @@ hr {
 }
 
 .lede {
+  text-wrap: balance;
   font-size: clamp(1.03rem, 1.6vw, 1.18rem);
   color: var(--text-muted);
 }
 
 /* Section headings sit centred on every page, like the home page. */
+/* Wide enough for the heading to sit on one line on a laptop; the lede below
+   balances into even lines, so the block never tapers into a triangle. */
 .section-head {
-  max-width: 44rem;
+  max-width: 66rem;
   margin: 0 auto clamp(2rem, 4vw, 3rem);
   text-align: center;
 }
 .section-head .lede {
   margin-inline: auto;
+  max-width: 44rem;
+  text-wrap: balance;
 }
 .shell > .btn-row {
   justify-content: center;

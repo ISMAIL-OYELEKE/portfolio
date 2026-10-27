@@ -246,6 +246,24 @@ const isCurrent = (href: string) => path === href || (href !== '/' && path.start
       animation: none;
     }
   }
+  /* In Dark theme the page is navy too, so the open menu turns light to stand
+     apart from it. In Light theme it stays navy over the light page. */
+  :global(:root[data-theme='dark']) .masthead__panel {
+    background: var(--paper);
+  }
+  :global(:root[data-theme='dark']) .masthead__panel a {
+    color: var(--brand-ink);
+    border-bottom-color: #d5dae1;
+  }
+  :global(:root[data-theme='dark']) .masthead__panel a:hover,
+  :global(:root[data-theme='dark']) .masthead__panel a[aria-current='page'] {
+    color: #1d5ba6;
+    background: rgb(15 30 51 / 0.05);
+  }
+  :global(:root[data-theme='dark']) .masthead__panel a.masthead__panel-cv {
+    color: var(--brand-ink);
+    border-color: var(--highlight);
+  }
 
   @media (max-width: 1040px) {
     .masthead__nav,
