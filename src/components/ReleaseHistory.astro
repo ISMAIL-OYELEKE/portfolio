@@ -12,6 +12,9 @@ const releases = [
     tag: r.company,
     title: r.title,
     body: r.did[0],
+    notes: r.did.slice(1),
+    shipped: r.shipped ?? [],
+    tools: r.tools,
   })),
   {
     iso: '2024-09',
@@ -20,6 +23,9 @@ const releases = [
     tag: `Education · ${education.school.split(' (')[0]}`,
     title: education.degree + ', First Class',
     body: `${education.result}. Final year research: ${education.research.charAt(0).toLowerCase()}${education.research.slice(1)}`,
+    notes: [] as string[],
+    shipped: [] as string[],
+    tools: [] as string[],
   },
   {
     iso: '2025-10',
@@ -28,8 +34,14 @@ const releases = [
     tag: `Community · ${community.founded.role}`,
     title: `Started ${community.founded.name}`,
     body: community.founded.detail,
+    notes: [] as string[],
+    shipped: [] as string[],
+    tools: [] as string[],
   },
 ].sort((a, b) => a.iso.localeCompare(b.iso));
+
+// Each step in the career gets a version tag, like a release train heading to v1.0.
+const version = (i: number) => `v0.${i + 1}.0`;
 ---
 
 <div class="history" data-history>
@@ -37,24 +49,51 @@ const releases = [
   <span class="history__fill" data-history-fill aria-hidden="true"></span>
   <ol>
     {
-      releases.map((r) => (
+      releases.map((r, i) => (
         <li class="rel">
           <span class="rel__dot" aria-hidden="true" />
           <p class="rel__when">
             <b>{r.year}</b>
-            {r.when}
+            <span class="rel__ver">{version(i)}</span> {r.when}
           </p>
           <div class="rel__what">
             <span class="rel__tag">{r.tag}</span>
             <h3>{r.title}</h3>
             <p>{r.body}</p>
+            {(r.notes.length > 0 || r.shipped.length > 0) && (
+              <details class="notes">
+                <summary>
+                  Release notes <span aria-hidden="true">({r.notes.length + r.shipped.length} changes)</span>
+                </summary>
+                <ul class="notes__list">
+                  {r.shipped.map((s) => (
+                    <li>
+                      <code class="notes__kind notes__kind--feat">feat</code> {s}
+                    </li>
+                  ))}
+                  {r.notes.map((n) => (
+                    <li>
+                      <code class="notes__kind">chore</code> {n}
+                    </li>
+                  ))}
+                </ul>
+                {r.tools.length > 0 && (
+                  <p class="notes__deps">
+                    <span>dependencies</span>
+                    {r.tools.map((t) => (
+                      <code>{t}</code>
+                    ))}
+                  </p>
+                )}
+              </details>
+            )}
           </div>
         </li>
       ))
     }
     <li class="rel rel--next">
       <span class="rel__dot" aria-hidden="true"></span>
-      <p class="rel__when"><b>Next</b>Open to work</p>
+      <p class="rel__when"><b>Next</b><span class="rel__ver">v1.0.0</span> Open to work</p>
       <div class="rel__what">
         <span class="rel__tag">Next release</span>
         <h3>Your team</h3>
@@ -156,6 +195,115 @@ const releases = [
     margin: 0;
     color: var(--text-muted);
     font-size: 0.95rem;
+  }
+  .rel__ver {
+    font-weight: 600;
+    color: var(--accent);
+  }
+  .notes {
+    margin-top: 0.75rem;
+  }
+  .notes__list,
+  .notes__deps {
+    text-align: left;
+  }
+  .rel:nth-child(even) .notes__deps {
+    justify-content: flex-end;
+  }
+  .notes summary {
+    display: inline-flex;
+    gap: 0.4rem;
+    cursor: pointer;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text);
+    border: 1px solid var(--rule);
+    padding: 0.4rem 0.7rem;
+    list-style: none;
+    transition: border-color 0.2s ease, background-color 0.2s ease;
+  }
+  .notes summary::-webkit-details-marker {
+    display: none;
+  }
+  .notes summary::before {
+    content: '+';
+    color: var(--accent);
+    font-weight: 700;
+  }
+  .notes[open] summary::before {
+    content: '−';
+  }
+  .notes summary:hover {
+    border-color: var(--accent);
+  }
+  .notes summary span {
+    color: var(--text-muted);
+  }
+  .notes__list {
+    list-style: none;
+    margin: 0.8rem 0 0;
+    padding: 0.8rem 0 0 0.9rem;
+    border-left: 2px solid var(--rule);
+    display: grid;
+    gap: 0.55rem;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+  }
+  .notes__list li {
+    animation: note-in 0.45s var(--ease-out) both;
+  }
+  .notes__list li:nth-child(2) { animation-delay: 0.08s; }
+  .notes__list li:nth-child(3) { animation-delay: 0.16s; }
+  .notes__list li:nth-child(4) { animation-delay: 0.24s; }
+  .notes__list li:nth-child(5) { animation-delay: 0.32s; }
+  .notes__list li:nth-child(6) { animation-delay: 0.4s; }
+  .notes__list li:nth-child(7) { animation-delay: 0.48s; }
+  @keyframes note-in {
+    from {
+      opacity: 0;
+      transform: translateX(-8px);
+    }
+  }
+  .notes__kind {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    padding: 0.1rem 0.35rem;
+    margin-right: 0.3rem;
+    border: 1px solid var(--rule);
+    color: var(--text-muted);
+  }
+  .notes__kind--feat {
+    color: var(--accent);
+    border-color: var(--accent-line);
+  }
+  .notes__deps {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    align-items: center;
+    margin-top: 0.8rem !important;
+  }
+  .notes__deps span {
+    font-family: var(--font-mono);
+    font-size: 0.66rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-right: 0.2rem;
+  }
+  .notes__deps code {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    padding: 0.15rem 0.45rem;
+    background: var(--bg-sunken);
+    color: var(--text);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .notes__list li {
+      animation: none;
+    }
   }
   /* Alternate sides, like a release train. */
   .rel:nth-child(even) .rel__when {

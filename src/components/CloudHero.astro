@@ -1,8 +1,8 @@
 ---
-/* The home page opening: a night skyline in Lagos, a commit rising off a
-   rooftop, a climb through the clouds, then the DevOps loop and the name.
-   The scroll drives it. Without JavaScript, or with reduced motion, the
-   section shows its final frame (loop, name and buttons) and nothing moves. */
+/* The home page opening: the Lagos skyline on the lagoon, a commit rising
+   off a rooftop, a climb through the clouds, then the DevOps loop and the
+   name above a sea of cloud. Day in Light theme, night in Dark. The scroll
+   drives it. With reduced motion the section shows its final frame. */
 import { site } from '../data/site';
 import SocialIcon from './SocialIcon.astro';
 
@@ -12,9 +12,7 @@ const loopPath =
 
 <section class="on-dark flight" data-flight aria-label="Introduction">
   <div class="flight__scene">
-    <div class="flight__city" data-city aria-hidden="true">
-      <svg viewBox="0 0 1440 400" preserveAspectRatio="xMidYMax slice"></svg>
-    </div>
+    <canvas class="flight__sky" data-flight-sky aria-hidden="true"></canvas>
     <div class="flight__commit" data-commit aria-hidden="true"></div>
 
     <div class="flight__intro" data-intro aria-hidden="true">
@@ -22,8 +20,6 @@ const loopPath =
       <p class="flight__title">Every system starts<br />on the <em>ground.</em></p>
       <p class="flight__note">This one ends up in the cloud. Scroll to take it there.</p>
     </div>
-
-    <div class="flight__clouds" data-clouds aria-hidden="true"></div>
 
     <div class="flight__alt" data-alt aria-hidden="true">
       Altitude<b data-alt-value>0 m</b>
@@ -89,32 +85,23 @@ const loopPath =
     }
   }
 
+  .flight__sky {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
   /* Pieces that only exist in the flight are hidden in the still version. */
-  .flight__city,
   .flight__commit,
   .flight__intro,
-  .flight__clouds,
   .flight__alt,
   .flight__cue {
     display: none;
   }
-  .is-flying :is(.flight__city, .flight__commit, .flight__intro, .flight__clouds, .flight__alt, .flight__cue) {
+  .is-flying :is(.flight__commit, .flight__intro, .flight__alt, .flight__cue) {
     display: block;
-  }
-
-  .flight__city {
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    height: 46%;
-    will-change: transform;
-  }
-  .flight__city svg {
-    position: absolute;
-    bottom: 0;
-    width: 100%;
-    height: 100%;
   }
 
   .flight__intro {
@@ -154,18 +141,6 @@ const loopPath =
     background: var(--highlight);
     border-radius: 2px;
     opacity: 0;
-  }
-
-  .flight__clouds :global(.cloud) {
-    position: absolute;
-    top: 0;
-    will-change: transform, opacity;
-  }
-  .flight__clouds :global(.cloud svg) {
-    display: block;
-    width: 100%;
-    height: auto;
-    overflow: visible;
   }
 
   .flight__alt {
@@ -341,9 +316,33 @@ const loopPath =
       font-size: 15px;
     }
   }
+
+  /* Daytime flight (Light theme): a blue sky, so the line work goes white. */
+  :global(:root[data-theme='light']) .flight__ink {
+    stroke: var(--paper);
+  }
+  :global(:root[data-theme='light']) .flight__track {
+    stroke: rgb(255 255 255 / 0.35);
+  }
+  :global(:root[data-theme='light']) .flight__loop :global(.lbl),
+  :global(:root[data-theme='light']) .flight__note,
+  :global(:root[data-theme='light']) .flight__role,
+  :global(:root[data-theme='light']) .flight__alt,
+  :global(:root[data-theme='light']) .flight__cue {
+    color: #e6eef8;
+    fill: #e6eef8;
+  }
+  :global(:root[data-theme='light']) .flight__loop :global(.lbl.is-hot),
+  :global(:root[data-theme='light']) .flight__role b,
+  :global(:root[data-theme='light']) .flight__intro .eyebrow,
+  :global(:root[data-theme='light']) .flight__title em {
+    color: #ffd27a;
+  }
 </style>
 
 <script>
+  import { createSky } from '../scripts/flight-sky';
+
   const section = document.querySelector<HTMLElement>('[data-flight]');
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -398,53 +397,17 @@ const loopPath =
       });
     };
 
-    /* Still version: the loop and name are simply there; packets still
-       travel unless the visitor asked for less motion. */
+    const sky = createSky(q<HTMLCanvasElement>("[data-flight-sky]"));
+
+    /* Still version: the final frame, redrawn when the theme changes. */
     if (reduce) {
       spin(0, true);
+      const still = () => sky.draw(1, 0);
+      still();
+      document.addEventListener('themechange', still);
+      window.addEventListener('resize', still);
     } else {
       section.classList.add('is-flying');
-
-      /* ---- skyline ---- */
-      const city = q<SVGSVGElement>('[data-city] svg');
-      let x = 0, svg = '';
-      while (x < 1440) {
-        const w = 40 + rnd() * 70, h = 70 + rnd() * 230;
-        svg += `<rect x="${x}" y="${400 - h}" width="${w}" height="${h}" fill="#16273f"/>`;
-        for (let wy = 400 - h + 18; wy < 390; wy += 22)
-          for (let wx = x + 10; wx < x + w - 12; wx += 16)
-            if (rnd() > 0.72) svg += `<rect x="${wx}" y="${wy}" width="6" height="8" fill="${rnd() > 0.85 ? '#E0A33A' : '#2a4263'}"/>`;
-        x += w + 4 + rnd() * 10;
-      }
-      city.innerHTML = svg + '<rect x="0" y="390" width="1440" height="10" fill="#1f3757"/>';
-
-      /* ---- clouds: flat, layered, no blur ---- */
-      const cloudsEl = q<HTMLElement>('[data-clouds]');
-      const cloudSVG = (fill: string) => {
-        const bumps = 5 + Math.floor(rnd() * 3);
-        let s = `<svg viewBox="-40 -60 480 220"><g fill="${fill}"><rect x="30" y="96" width="340" height="50" rx="25"/>`;
-        for (let i = 0; i < bumps; i++) {
-          const edge = i === 0 || i === bumps - 1;
-          const cx = 62 + i * (276 / (bumps - 1)), r = edge ? 34 + rnd() * 8 : 44 + rnd() * 34;
-          s += `<circle cx="${cx}" cy="${edge ? 112 : 112 - r * 0.5}" r="${r}"/>`;
-        }
-        return s + '</g></svg>';
-      };
-      const fills = ['#1a2d48', '#22385a', '#2c4568', '#c9d2dc'];
-      type Cloud = { el: HTMLElement; li: number; speed: number; y: number; side: number; drift: number };
-      const clouds: Cloud[] = [];
-      ([[0, 7, 0.7, 0.32], [1, 6, 1.1, 0.42], [2, 5, 1.6, 0.6], [3, 6, 2.4, 0.95]] as const).forEach(([li, n, speed, size]) => {
-        for (let i = 0; i < n; i++) {
-          const el = document.createElement('div');
-          el.className = 'cloud';
-          el.innerHTML = cloudSVG(fills[li]);
-          const wv = size * (60 + rnd() * 40);
-          el.style.width = `${wv}vw`;
-          el.style.left = `${(i / (n - 1)) * 110 - 5 - wv / 2}vw`;
-          cloudsEl.appendChild(el);
-          clouds.push({ el, li, speed, y: 120 + rnd() * 70 + li * 20, side: i % 2 ? 1 : -1, drift: (rnd() - 0.5) * 0.02 });
-        }
-      });
 
       /* ---- name, letter by letter ---- */
       const nameEl = q<HTMLElement>('[data-name]');
@@ -459,7 +422,6 @@ const loopPath =
         return { s, dx: (rnd() - 0.5) * 600, dy: (rnd() - 0.5) * 400 - 100, r: (rnd() - 0.5) * 120 };
       });
 
-      const cityEl = q<HTMLElement>('[data-city]');
       const intro = q<HTMLElement>('[data-intro]');
       const commit = q<HTMLElement>('[data-commit]');
       const loop = q<SVGSVGElement>('[data-loop]');
@@ -472,7 +434,7 @@ const loopPath =
 
       const render = (p: number, t: number) => {
         const vh = section.querySelector<HTMLElement>('.flight__scene')!.clientHeight;
-        cityEl.style.transform = `translateY(${ease(seg(p, 0, 0.4)) * vh * 0.9}px)`;
+        sky.draw(p, t);
         intro.style.opacity = String(1 - seg(p, 0.04, 0.16));
         intro.style.transform = `translateY(${seg(p, 0, 0.2) * -60}px)`;
         cue.style.opacity = String(1 - seg(p, 0, 0.06));
@@ -481,14 +443,6 @@ const loopPath =
         commit.style.top = `${vh * 0.86 - ease(cr) * vh * 0.42}px`;
         commit.style.opacity = p < 0.02 ? '0' : String(1 - seg(p, 0.44, 0.5));
         commit.style.transform = `rotate(${cr * 360}deg)`;
-
-        clouds.forEach((c) => {
-          let xo = c.drift * t;
-          if (c.li === 3) xo += c.side * ease(seg(p, 0.44, 0.62)) * 70;
-          if (c.li === 2) xo += c.side * ease(seg(p, 0.48, 0.66)) * 40;
-          c.el.style.transform = `translate(${xo}vw, ${c.y - p * c.speed * 160}vh)`;
-          if (c.li >= 2) c.el.style.opacity = String((c.li === 3 ? 0.96 : 1) * (1 - seg(p, 0.56, 0.66)));
-        });
 
         altValue.textContent = `${Math.round(ease(seg(p, 0, 0.6)) * 10000).toLocaleString('en-GB')} m`;
         alt.style.opacity = String(p < 0.02 ? 0.5 : 1 - seg(p, 0.62, 0.7));

@@ -322,6 +322,20 @@ The project instructions hold the full text. Every change must keep to them.
     the one inline script, with its new hash in the CSP, qa.mjs and
     docs/deployment.md. Reduced motion shows the final frame with no flight.
 
+    Round 2 (after Ismail's feedback the same day, "creativity 20 to 40"):
+    the flight is now drawn on a canvas (`src/scripts/flight-sky.ts`): a
+    Lagos skyline with lit towers, the lagoon and Third Mainland Bridge,
+    shaded cumulus clouds and a sea of clouds, with a day palette for light
+    theme and a night one for dark. The service sky is replaced by
+    `ArchStage`: project tabs directly above a live architecture diagram
+    (`src/data/architectures.ts`) that provisions and carries traffic, and
+    auto-advances while on screen, so no scrolling between list and board.
+    Experience releases get version tags and expandable release notes.
+    Freelance on home is two live demos (`FreelanceSystems`): the Cloud Dimex
+    security review and a Cerbiol sale that can be rolled back by cutting the
+    power. "Stack them back" on the deck no longer drops the reader at the
+    page end. Next: interactive inner pages and case studies.
+
 ## Open questions
 
 

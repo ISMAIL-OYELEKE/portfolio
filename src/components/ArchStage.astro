@@ -1,0 +1,491 @@
+---
+/* Projects as live architecture. Tabs sit right above the diagram, so
+   picking a project and watching its architecture are never a scroll apart.
+   Each switch "provisions" the diagram: services come up one by one, then
+   traffic flows along the real request path. The tabs advance on their own
+   until the visitor takes over. Without JavaScript the first project shows,
+   and every case study is still a link. */
+import type { Project } from '../data/projects';
+import { architectures, type ArchNode } from '../data/architectures';
+import SocialIcon from './SocialIcon.astro';
+
+interface Props {
+  projects: Project[];
+}
+const items = Astro.props.projects.filter((p) => architectures[p.slug]);
+
+const W = 800;
+const H = 400;
+const boxW = (n: ArchNode) => n.label.length * 7.4 + 30;
+const BOX_H = 36;
+
+// Trim an edge so it starts and ends at the edge of each box, not its centre.
+function trim(a: ArchNode, b: ArchNode) {
+  const dx = b.x - a.x;
+  const dy = b.y - a.y;
+  const cut = (n: ArchNode) => {
+    const hw = n.actor ? 22 : boxW(n) / 2 + 4;
+    const hh = n.actor ? 22 : BOX_H / 2 + 4;
+    const tx = dx === 0 ? Infinity : hw / Math.abs(dx);
+    const ty = dy === 0 ? Infinity : hh / Math.abs(dy);
+    return Math.min(tx, ty);
+  };
+  const ta = cut(a);
+  const tb = 1 - cut(b);
+  return { x1: a.x + dx * ta, y1: a.y + dy * ta, x2: a.x + dx * tb, y2: a.y + dy * tb };
+}
+---
+
+<div class="arch" data-arch>
+  <div class="arch__tabs" role="tablist" aria-label="Projects">
+    {
+      items.map((p, i) => (
+        <button
+          type="button"
+          role="tab"
+          class="arch__tab"
+          id={`arch-tab-${i}`}
+          aria-selected={i === 0 ? 'true' : 'false'}
+          aria-controls={`arch-panel-${i}`}
+          tabindex={i === 0 ? 0 : -1}
+          data-tab={i}
+        >
+          {architectures[p.slug].short}
+          <span class="arch__timer" aria-hidden="true" />
+        </button>
+      ))
+    }
+  </div>
+
+  {
+    items.map((p, i) => {
+      const a = architectures[p.slug];
+      const byId = Object.fromEntries(a.nodes.map((n) => [n.id, n]));
+      return (
+        <div class="arch__panel" role="tabpanel" id={`arch-panel-${i}`} aria-labelledby={`arch-tab-${i}`} hidden={i !== 0} data-panel={i}>
+          <div class="arch__board">
+            <span class="arch__status" data-status>
+              <i aria-hidden="true" />
+              <span>Healthy</span>
+            </span>
+            <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`Request flow for ${p.title}: ${a.nodes.map((n) => n.label).join(', ')}`}>
+              <defs>
+                <marker id={`arrow-${i}`} viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                  <path d="M0,0 L10,5 L0,10 z" class="arch__arrowhead" />
+                </marker>
+              </defs>
+              <g class="arch__edges">
+                {a.edges.map(([from, to], k) => {
+                  const l = trim(byId[from], byId[to]);
+                  return <line {...l} style={`--k:${k}`} marker-end={`url(#arrow-${i})`} data-edge={k} />;
+                })}
+              </g>
+              <g class="arch__nodes">
+                {a.nodes.map((n, k) =>
+                  n.actor ? (
+                    <g class="arch__node arch__node--actor" style={`--k:${k}`} transform={`translate(${n.x},${n.y})`}>
+                      <circle r="20" />
+                      <text y="38">{n.label}</text>
+                    </g>
+                  ) : (
+                    <g class="arch__node" style={`--k:${k}`} transform={`translate(${n.x},${n.y})`}>
+                      <rect x={-boxW(n) / 2} y={-BOX_H / 2} width={boxW(n)} height={BOX_H} rx="3" />
+                      <text>{n.label}</text>
+                    </g>
+                  )
+                )}
+              </g>
+              <g class="arch__packets" data-packets />
+            </svg>
+          </div>
+
+          <div class="arch__card">
+            <p class="arch__meta">
+              {p.date} · {p.context}
+            </p>
+            <h3 class="arch__title">{p.title}</h3>
+            <p class="arch__summary">{p.summary}</p>
+            {p.result?.[0] && (
+              <p class="arch__outcome">
+                <span>Outcome</span>
+                {p.result[0]}
+              </p>
+            )}
+            <div class="arch__links">
+              <a class="btn btn--primary" href={`/projects/${p.slug}`}>
+                Case study
+                <SocialIcon name="arrow" size={15} />
+              </a>
+              {p.repo && (
+                <a class="btn btn--ghost" href={p.repo} target="_blank" rel="noopener">
+                  <SocialIcon name="github" size={15} />
+                  Code
+                </a>
+              )}
+              {p.video && (
+                <a class="btn btn--ghost" href={p.video} target="_blank" rel="noopener">
+                  <SocialIcon name="youtube" size={15} />
+                  Video
+                </a>
+              )}
+            </div>
+          </div>
+        </div>
+      );
+    })
+  }
+</div>
+
+<style>
+  .arch__tabs {
+    position: relative;
+    display: flex;
+    gap: 0.5rem;
+    overflow-x: auto;
+    scrollbar-width: none;
+    padding-bottom: 0.25rem;
+    margin-bottom: 1.25rem;
+    justify-content: safe center;
+  }
+  @media (min-width: 900px) {
+    .arch__tabs {
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+  }
+  .arch__tabs::-webkit-scrollbar {
+    display: none;
+  }
+  .arch__tab {
+    position: relative;
+    flex: 0 0 auto;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    background: transparent;
+    border: 1px solid var(--rule);
+    border-radius: var(--r-pill);
+    padding: 0.7rem 1.1rem;
+    cursor: pointer;
+    overflow: hidden;
+    transition: color 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
+  }
+  .arch__tab:hover {
+    color: var(--text);
+    border-color: var(--accent-line);
+  }
+  .arch__tab[aria-selected='true'] {
+    background: var(--highlight);
+    border-color: var(--highlight);
+    color: var(--brand-deep);
+  }
+  /* A thin bar fills under the active tab while it waits to advance. */
+  .arch__timer {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    height: 3px;
+    width: 0;
+    background: var(--brand-deep);
+    opacity: 0.4;
+  }
+  .arch.is-auto .arch__tab[aria-selected='true'] .arch__timer {
+    animation: arch-timer var(--arch-dwell, 8s) linear forwards;
+  }
+  @keyframes arch-timer {
+    to {
+      width: 100%;
+    }
+  }
+
+  .arch__panel {
+    display: grid;
+    grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+    gap: clamp(1.25rem, 3vw, 2.5rem);
+    align-items: center;
+  }
+  .arch__panel[hidden] {
+    display: none;
+  }
+  @media (max-width: 900px) {
+    .arch__panel {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+
+  .arch__board {
+    position: relative;
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: var(--r-card);
+    padding: clamp(0.5rem, 2vw, 1.25rem);
+  }
+  .arch__board svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    overflow: visible;
+  }
+  .arch__status {
+    position: absolute;
+    top: 0.75rem;
+    left: 0.9rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-family: var(--font-mono);
+    font-size: 0.66rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+  .arch__status i {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #6a9ad6;
+  }
+  .arch__status.is-provisioning i {
+    background: var(--highlight);
+    animation: arch-blink 0.5s steps(2) infinite;
+  }
+  @keyframes arch-blink {
+    50% {
+      opacity: 0.2;
+    }
+  }
+
+  .arch__edges line {
+    stroke: var(--text-muted);
+    stroke-width: 1.6;
+    opacity: 0.7;
+  }
+  .arch__arrowhead {
+    fill: var(--text-muted);
+  }
+  .arch__node rect,
+  .arch__node circle {
+    fill: var(--bg);
+    stroke: var(--text-muted);
+    stroke-width: 1.5;
+  }
+  .arch__node--actor circle {
+    stroke: var(--highlight);
+    stroke-width: 2;
+  }
+  .arch__node text {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    fill: var(--text);
+    text-anchor: middle;
+    dominant-baseline: middle;
+  }
+  .arch__node.is-hit rect,
+  .arch__node.is-hit circle {
+    stroke: var(--highlight);
+  }
+  .arch :global(.arch__pk) {
+    fill: var(--highlight);
+  }
+
+  /* Provisioning: services come up one by one, then the links draw in. */
+  .arch__panel.is-provisioning .arch__node {
+    animation: arch-up 0.45s var(--ease-out) both;
+    animation-delay: calc(var(--k) * 110ms);
+  }
+  .arch__panel.is-provisioning .arch__edges line {
+    stroke-dasharray: 400;
+    animation: arch-draw 0.6s ease-out both;
+    animation-delay: calc(300ms + var(--k) * 110ms);
+  }
+  @keyframes arch-up {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+  }
+  .arch__node {
+    transform-box: fill-box;
+  }
+  @keyframes arch-draw {
+    from {
+      stroke-dashoffset: 400;
+    }
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+
+  .arch__meta {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 0.6rem;
+  }
+  .arch__title {
+    font-size: clamp(1.4rem, 2.6vw, 1.9rem);
+    margin-bottom: 0.6rem;
+  }
+  .arch__summary {
+    color: var(--text-muted);
+  }
+  .arch__outcome {
+    border-left: 2px solid var(--highlight);
+    padding-left: 0.9rem;
+    font-size: 0.95rem;
+  }
+  .arch__outcome span {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 0.64rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 0.25rem;
+  }
+  .arch__links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-top: 1.25rem;
+  }
+  @media (max-width: 900px) {
+    .arch__card {
+      text-align: center;
+    }
+    .arch__card p {
+      margin-inline: auto;
+    }
+    .arch__outcome {
+      border-left: 0;
+      padding-left: 0;
+      border-top: 2px solid var(--highlight);
+      padding-top: 0.7rem;
+    }
+    .arch__links {
+      justify-content: center;
+    }
+  }
+</style>
+
+<script>
+  const root = document.querySelector<HTMLElement>('[data-arch]');
+  if (root) {
+    const NS = 'http://www.w3.org/2000/svg';
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const tabs = [...root.querySelectorAll<HTMLButtonElement>('[data-tab]')];
+    const panels = [...root.querySelectorAll<HTMLElement>('[data-panel]')];
+    const DWELL = 8000;
+    let current = 0;
+    let auto = !reduce;
+    let timer = 0;
+
+    // Packets: two per link, travelling in the order traffic flows.
+    type Packet = { el: SVGCircleElement; line: SVGLineElement; offset: number };
+    const packets: Packet[][] = panels.map((panel) => {
+      const group = panel.querySelector<SVGGElement>('[data-packets]')!;
+      return [...panel.querySelectorAll<SVGLineElement>('[data-edge]')].flatMap((line, k) =>
+        [0, 0.5].map((o) => {
+          const el = document.createElementNS(NS, 'circle');
+          el.setAttribute('r', '4.5');
+          el.setAttribute('class', 'arch__pk');
+          group.appendChild(el);
+          return { el, line, offset: o + k * 0.17 };
+        })
+      );
+    });
+    let shownAt = performance.now();
+
+    const show = (i: number, focus = false) => {
+      current = (i + panels.length) % panels.length;
+      tabs.forEach((t, k) => {
+        const on = k === current;
+        t.setAttribute('aria-selected', String(on));
+        t.tabIndex = on ? 0 : -1;
+      });
+      panels.forEach((p, k) => (p.hidden = k !== current));
+      const panel = panels[current];
+      const status = panel.querySelector<HTMLElement>('[data-status]');
+      if (!reduce) {
+        panel.classList.remove('is-provisioning');
+        void panel.offsetWidth;
+        panel.classList.add('is-provisioning');
+        status?.classList.add('is-provisioning');
+        if (status) status.lastElementChild!.textContent = 'Provisioning';
+        window.setTimeout(() => {
+          status?.classList.remove('is-provisioning');
+          if (status) status.lastElementChild!.textContent = 'Healthy';
+        }, 1300);
+      }
+      shownAt = performance.now();
+      // Scroll only the tab strip sideways, never the page.
+      const strip = tabs[current].parentElement!;
+      strip.scrollTo({
+        left: tabs[current].offsetLeft - strip.clientWidth / 2 + tabs[current].offsetWidth / 2,
+        behavior: reduce ? 'auto' : 'smooth',
+      });
+      if (focus) tabs[current].focus();
+      schedule();
+    };
+
+    const schedule = () => {
+      window.clearTimeout(timer);
+      root.classList.toggle('is-auto', auto);
+      root.style.setProperty('--arch-dwell', `${DWELL}ms`);
+      if (auto) timer = window.setTimeout(() => show(current + 1), DWELL);
+    };
+
+    const takeOver = () => {
+      auto = false;
+      schedule();
+    };
+
+    tabs.forEach((t, i) =>
+      t.addEventListener('click', () => {
+        takeOver();
+        show(i);
+      })
+    );
+    root.querySelector('[role="tablist"]')!.addEventListener('keydown', (e) => {
+      const key = (e as KeyboardEvent).key;
+      if (key !== 'ArrowRight' && key !== 'ArrowLeft') return;
+      e.preventDefault();
+      takeOver();
+      show(current + (key === 'ArrowRight' ? 1 : -1), true);
+    });
+    root.addEventListener('pointerdown', takeOver);
+
+    // Only auto-advance while the section is on screen.
+    if (auto && 'IntersectionObserver' in window) {
+      new IntersectionObserver(([e]) => {
+        if (!auto) return;
+        if (e.isIntersecting) show(current);
+        else window.clearTimeout(timer);
+      }, { threshold: 0.35 }).observe(root);
+    }
+
+    const tick = (now: number) => {
+      const list = packets[current];
+      const since = (now - shownAt) / 1000;
+      const live = reduce || since > 1.1;
+      for (const p of list) {
+        if (!live) {
+          p.el.style.opacity = '0';
+          continue;
+        }
+        const f = (((now / 1000) * 0.55 + p.offset) % 1 + 1) % 1;
+        const x1 = +p.line.getAttribute('x1')!, y1 = +p.line.getAttribute('y1')!;
+        const x2 = +p.line.getAttribute('x2')!, y2 = +p.line.getAttribute('y2')!;
+        p.el.setAttribute('cx', String(x1 + (x2 - x1) * f));
+        p.el.setAttribute('cy', String(y1 + (y2 - y1) * f));
+        p.el.style.opacity = String(Math.min(1, Math.sin(f * Math.PI) * 2));
+      }
+      if (!reduce) requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  }
+</script>
