@@ -217,9 +217,10 @@ const first = flow.steps[0];
     // The project stage tells each diagram when it is the one on show.
     root.addEventListener('adg:play', () => {
       show(0);
-      if (visible) play();
-      else load();
       root.dataset.on = '';
+      // Off screen, it waits: the drawing loads once it scrolls near, so it
+      // never competes with the home page's opening for bandwidth.
+      if (visible) play();
     });
     root.addEventListener('adg:stop', () => {
       stop();

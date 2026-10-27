@@ -416,6 +416,16 @@ The project instructions hold the full text. Every change must keep to them.
     between items. On the home page it follows the section you are reading
     (sections carry data-nav-section with the page they preview); elsewhere
     it marks the page you are on. Without JavaScript the amber underline stays.
+27. Opening, reworked. The poster images from item 25 are gone (their hand
+    over to the live sky looked like a glitch). The hero now paints the sky's
+    own colours from the first frame, the flight's scroll length is set by CSS
+    before the script arrives, and the three first-screen fonts are preloaded.
+    "Every system starts on the ground." types out letter by letter in pure
+    CSS with an amber caret, while the skyline rises into place once the
+    canvas is ready. A reload of the home page always starts at the hero
+    (manual scroll restoration). Diagrams load only when they scroll near, so
+    nothing competes with the opening. Phones show the current page (or home
+    section) as a small tab under the top bar, circled by the same cloud.
 
 ## Open questions
 
