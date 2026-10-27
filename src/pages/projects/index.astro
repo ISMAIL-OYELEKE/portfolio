@@ -3,8 +3,10 @@ import { isWide } from '../../lib/grid';
 import Base from '../../layouts/Base.astro';
 import PageHero from '../../components/PageHero.astro';
 import ProjectCard from '../../components/ProjectCard.astro';
+import ArchStage from '../../components/ArchStage.astro';
+import FreelanceSystems from '../../components/FreelanceSystems.astro';
 import SocialIcon from '../../components/SocialIcon.astro';
-import { cloudProjects, freelanceProjects } from '../../data/projects';
+import { cloudProjects } from '../../data/projects';
 
 const description =
   'AWS projects with the decisions behind them: a serverless staff portal, an Amazon Connect contact centre, a multi-AZ web architecture and a Lex chatbot.';
@@ -16,6 +18,20 @@ const description =
     title="What I built, and why it was built that way"
     lede="Each case study covers the problem, the architecture, the decisions I would defend in a review, and what the result actually is."
   />
+
+  <section class="on-dark section">
+    <div class="shell">
+      <div class="section-head section-head--center">
+        <span class="eyebrow">Live architectures</span>
+        <h2>Watch each one provision and carry traffic</h2>
+        <p class="lede">
+          Pick a system. It builds itself, then requests flow through every service it runs on, in the
+          order they really travel.
+        </p>
+      </div>
+      <ArchStage projects={cloudProjects} />
+    </div>
+  </section>
 
   <section class="section">
     <div class="shell">
@@ -31,7 +47,7 @@ const description =
     </div>
   </section>
 
-  <section class="on-dark section">
+  <section class="section section--sunken">
     <div class="shell">
       <div class="section-head">
         <span class="eyebrow">Freelance software</span>
@@ -43,9 +59,7 @@ const description =
         <span class="rule-tick"></span>
       </div>
 
-      <div class="grid grid--pair">
-        {freelanceProjects.map((p) => <ProjectCard project={p} />)}
-      </div>
+      <FreelanceSystems />
 
       <div class="btn-row">
         <a class="btn btn--ghost" href="/freelance">

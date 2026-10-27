@@ -31,7 +31,10 @@ const schema = {
         <dl class="details">
           <div>
             <dt>Email</dt>
-            <dd><a href={`mailto:${site.email}`}>{site.email}</a></dd>
+            <dd>
+              <a href={`mailto:${site.email}`}>{site.email}</a>
+              <button type="button" class="copy" data-copy={site.email} hidden>Copy</button>
+            </dd>
           </div>
           <div>
             <dt>Phone and WhatsApp</dt>
@@ -74,7 +77,42 @@ const schema = {
   </section>
 </Base>
 
+<script>
+  document.querySelectorAll<HTMLButtonElement>('[data-copy]').forEach((btn) => {
+    if (!navigator.clipboard) return;
+    btn.hidden = false;
+    btn.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(btn.dataset.copy!);
+        btn.textContent = 'Copied';
+      } catch {
+        btn.textContent = 'Press Ctrl+C';
+      }
+      window.setTimeout(() => (btn.textContent = 'Copy'), 1800);
+    });
+  });
+</script>
+
 <style>
+  .copy {
+    margin-left: 0.6rem;
+    font-family: var(--font-mono);
+    font-size: 0.66rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text);
+    background: transparent;
+    border: 1px solid var(--rule);
+    padding: 0.2rem 0.5rem;
+    cursor: pointer;
+    vertical-align: middle;
+  }
+  .copy:hover {
+    border-color: var(--highlight);
+  }
+  .copy[hidden] {
+    display: none;
+  }
   .contact {
     padding-block: clamp(2.75rem, 7vw, 5rem);
   }

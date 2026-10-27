@@ -1,0 +1,810 @@
+---
+/* The Kestrel build as five experiments a reader can run: ship a change
+   through the approval gate, replay the payday load test, deploy a broken
+   image and watch it roll back, run the restore drill, and tear it all down.
+   Every number comes from the case study. Replays are sped up, and say so.
+   Without JavaScript each panel shows its finished result as text. */
+const tabs = [
+  { id: 'ship', label: 'Ship a change' },
+  { id: 'load', label: 'Payday load test' },
+  { id: 'break', label: 'Break it' },
+  { id: 'restore', label: 'Restore drill' },
+  { id: 'down', label: 'Tear it down' },
+];
+const prStages = ['Lint', 'Unit and database tests', 'terraform fmt and validate', 'Checkov security scan', 'Plan posted on the PR'];
+const devStages = ['ECR scan gate and cost tags', 'Deploy to dev'];
+const prodStages = ['ECR scan gate and cost tags', 'Deploy the same image to prod'];
+const modules = ['network', 'database', 'api', 'messaging', 'worker', 'kms', 'observability', 'security', 'governance'];
+---
+
+<section class="lab" data-lab aria-labelledby="lab-title">
+  <div class="lab__head">
+    <span class="eyebrow">Run it yourself</span>
+    <h2 id="lab-title">Five experiments from the build</h2>
+    <p>The real results, replayed. Each one is sped up so it fits in a few seconds.</p>
+  </div>
+
+  <div class="lab__tabs" role="tablist" aria-label="Experiments">
+    {
+      tabs.map((t, i) => (
+        <button
+          type="button"
+          role="tab"
+          id={`lab-tab-${t.id}`}
+          aria-controls={`lab-${t.id}`}
+          aria-selected={i === 0 ? 'true' : 'false'}
+          tabindex={i === 0 ? 0 : -1}
+          data-lab-tab={t.id}
+        >
+          <span>{String(i + 1).padStart(2, '0')}</span>
+          {t.label}
+        </button>
+      ))
+    }
+  </div>
+
+  <!-- 1. Ship -->
+  <div class="lab__panel" role="tabpanel" id="lab-ship" aria-labelledby="lab-tab-ship" data-lab-panel="ship">
+    <div class="pipe2" data-ship>
+      <p class="pipe2__lane">Pull request</p>
+      <ol>{prStages.map((s) => <li class="is-done">{s}</li>)}</ol>
+      <p class="pipe2__lane">After merge</p>
+      <ol>{devStages.map((s) => <li class="is-done">{s}</li>)}</ol>
+      <p class="pipe2__gate" data-gate>
+        <span>Waiting for a human to approve prod</span>
+        <button type="button" class="lab__btn" data-approve hidden>Approve prod deploy</button>
+      </p>
+      <ol>{prodStages.map((s) => <li class="is-done">{s}</li>)}</ol>
+    </div>
+    <p class="lab__out" data-ship-out aria-live="polite">
+      Prod gets the same tested image, only after a human approves it. GitHub signs in to AWS with OIDC, so no access keys exist.
+    </p>
+    <button type="button" class="lab__btn" data-merge hidden>Merge a pull request</button>
+  </div>
+
+  <!-- 2. Load -->
+  <div class="lab__panel" role="tabpanel" id="lab-load" aria-labelledby="lab-tab-load" data-lab-panel="load" hidden>
+    <div class="load" data-load>
+      <div class="load__stats">
+        <div><b data-l-req>19,602</b><span>requests</span></div>
+        <div><b data-l-fail>0</b><span>failed</span></div>
+        <div><b data-l-rps>50</b><span>requests a second, peak</span></div>
+        <div><b data-l-p95>58 ms</b><span>p95, target 1 s</span></div>
+      </div>
+      <div class="load__tasks">
+        <span class="load__label">ECS tasks <b data-l-count>2 to 5 to 2</b></span>
+        <div class="load__boxes" data-l-boxes>
+          {Array.from({ length: 5 }, (_, i) => <span class:list={['task', { 'is-on': i < 2 }]} />)}
+        </div>
+      </div>
+      <div class="load__meter"><span data-l-meter /></div>
+      <p class="load__clock" data-l-clock>8 minutes of k6 against prod, no alarm fired.</p>
+    </div>
+    <p class="lab__out" data-load-out aria-live="polite">
+      A payday peak of 50 requests a second, 25 times a normal day. Auto scaling went from 2 to 5 tasks and back down.
+    </p>
+    <button type="button" class="lab__btn" data-run-load hidden>Start the payday test</button>
+  </div>
+
+  <!-- 3. Break -->
+  <div class="lab__panel" role="tabpanel" id="lab-break" aria-labelledby="lab-tab-break" data-lab-panel="break" hidden>
+    <div class="brk" data-brk>
+      <div class="brk__row">
+        <span class="brk__label">Serving</span>
+        <span class="task is-on">v1</span><span class="task is-on">v1</span>
+        <span class="brk__served">Customers served <b data-b-served>all of them</b></span>
+      </div>
+      <div class="brk__row" data-b-new>
+        <span class="brk__label">New deploy</span>
+        <span class="task task--bad">v2</span><span class="task task--bad">v2</span>
+        <span class="brk__state" data-b-state>Health checks failed. Circuit breaker rolled back to v1.</span>
+      </div>
+    </div>
+    <p class="lab__out" data-break-out aria-live="polite">
+      A deliberately broken image was deployed, and the ECS deployment circuit breaker rolled back to the working version by itself while customers kept being served.
+    </p>
+    <button type="button" class="lab__btn lab__btn--danger" data-run-break hidden>Deploy a broken image</button>
+  </div>
+
+  <!-- 4. Restore -->
+  <div class="lab__panel" role="tabpanel" id="lab-restore" aria-labelledby="lab-tab-restore" data-lab-panel="restore" hidden>
+    <div class="rst">
+      <div class="rst__row">
+        <span class="rst__name">Back to stable <small>target 2 hours</small></span>
+        <span class="rst__track"><span class="rst__bar" data-r-time style="width:17.5%"></span><span class="rst__target" style="left:100%"></span></span>
+        <b data-r-time-text>21 min</b>
+      </div>
+      <div class="rst__row">
+        <span class="rst__name">Data you could lose <small>target 15 minutes</small></span>
+        <span class="rst__track"><span class="rst__bar" data-r-rpo style="width:33%"></span><span class="rst__target" style="left:100%"></span></span>
+        <b data-r-rpo-text>under 5 min</b>
+      </div>
+    </div>
+    <p class="lab__out" data-restore-out aria-live="polite">
+      Restore drill on prod: stable 21 minutes after the restore was requested, and the newest restorable point was under 5 minutes old.
+    </p>
+    <button type="button" class="lab__btn" data-run-restore hidden>Start the restore drill</button>
+  </div>
+
+  <!-- 5. Tear down -->
+  <div class="lab__panel" role="tabpanel" id="lab-down" aria-labelledby="lab-tab-down" data-lab-panel="down" hidden>
+    <div class="down">
+      <div>
+        <p class="down__label">Terraform modules</p>
+        <ul class="down__mods" data-d-mods>{modules.map((m) => <li class="is-gone">{m}</li>)}</ul>
+      </div>
+      <div>
+        <p class="down__label">The whole bill: <b>USD 9.20</b></p>
+        <div class="down__bill" aria-hidden="true">
+          <span style="flex:6.98"></span>
+          <span style="flex:2.22"></span>
+        </div>
+        <p class="down__key"><i></i>AWS Config, USD 6.98 <i></i>Everything else, USD 2.22</p>
+        <p class="down__label">Spend on 18 October</p>
+        <p class="down__zero" data-d-zero>USD 0.00</p>
+      </div>
+    </div>
+    <p class="lab__out" data-down-out aria-live="polite">
+      Torn down with terraform destroy on 17 October 2026. AWS Config was 76% of the bill, because it bills for every recorded change while infrastructure is created and destroyed.
+    </p>
+    <button type="button" class="lab__btn lab__btn--danger" data-run-down hidden>terraform destroy</button>
+  </div>
+</section>
+
+<style>
+  .lab {
+    margin: 3rem 0;
+    padding: clamp(1.25rem, 3vw, 2rem);
+    border: 1px solid var(--rule);
+    border-top: 3px solid var(--highlight);
+    background: var(--surface);
+  }
+  .lab__head {
+    text-align: center;
+    margin-bottom: 1.25rem;
+  }
+  .lab__head h2 {
+    margin: 0.35rem 0;
+  }
+  .lab__head p {
+    margin: 0;
+    color: var(--text-muted);
+  }
+  .lab__tabs {
+    display: flex;
+    gap: 0.4rem;
+    overflow-x: auto;
+    scrollbar-width: none;
+    margin-bottom: 1.25rem;
+    justify-content: safe center;
+  }
+  @media (min-width: 720px) {
+    .lab__tabs {
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+  }
+  .lab__tabs::-webkit-scrollbar {
+    display: none;
+  }
+  .lab__tabs button {
+    flex: none;
+    display: inline-flex;
+    gap: 0.45rem;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text);
+    background: transparent;
+    border: 1px solid var(--rule);
+    padding: 0.55rem 0.8rem;
+    cursor: pointer;
+  }
+  .lab__tabs button span {
+    color: var(--accent);
+  }
+  .lab__tabs button[aria-selected='true'] {
+    background: var(--highlight);
+    border-color: var(--highlight);
+    color: var(--brand-ink);
+  }
+  .lab__tabs button[aria-selected='true'] span {
+    color: var(--brand-ink);
+  }
+  .lab__panel {
+    animation: lab-in 0.35s var(--ease-out);
+  }
+  @keyframes lab-in {
+    from {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+  }
+  .lab__out {
+    margin: 1.1rem 0 0;
+    padding: 0.7rem 0.9rem;
+    border-left: 3px solid var(--highlight);
+    background: var(--bg);
+    font-size: 0.93rem;
+  }
+  .lab__out.is-bad {
+    border-left-color: #d9644c;
+  }
+  .lab__btn {
+    display: block;
+    margin: 1rem auto 0;
+    font-family: var(--font-mono);
+    font-size: 0.74rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--brand-ink);
+    background: var(--highlight);
+    border: 1px solid var(--highlight);
+    padding: 0.65rem 1rem;
+    cursor: pointer;
+  }
+  .lab__btn:disabled {
+    opacity: 0.45;
+    cursor: default;
+  }
+  .lab__btn--danger {
+    background: transparent;
+    color: var(--text);
+    border-color: #d9644c;
+  }
+  .lab__btn[hidden] {
+    display: none;
+  }
+
+  /* Ship */
+  .pipe2__lane {
+    font-family: var(--font-mono);
+    font-size: 0.66rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin: 0.6rem 0 0.4rem;
+  }
+  .pipe2 ol {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+  .pipe2 li,
+  .pipe2__gate {
+    font-size: 0.82rem;
+    padding: 0.45rem 0.7rem;
+    border: 1px solid var(--rule);
+    background: var(--bg);
+    color: var(--text-muted);
+    transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+  }
+  .pipe2 li.is-run {
+    border-color: var(--highlight);
+    color: var(--text);
+  }
+  .pipe2 li.is-done {
+    border-color: var(--highlight);
+    background: color-mix(in srgb, var(--highlight) 18%, var(--bg));
+    color: var(--text);
+  }
+  .pipe2 li.is-done::before {
+    content: '✓ ';
+    color: var(--accent);
+    font-weight: 700;
+  }
+  .pipe2__gate {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.6rem;
+    margin: 0.6rem 0;
+    border-style: dashed;
+  }
+  .pipe2__gate.is-waiting {
+    border-color: var(--highlight);
+    color: var(--text);
+  }
+  .pipe2__gate .lab__btn {
+    margin: 0;
+  }
+
+  /* Load */
+  .load__stats {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.75rem;
+    text-align: center;
+  }
+  .load__stats b {
+    display: block;
+    font-family: var(--font-display);
+    font-size: clamp(1.4rem, 3.2vw, 2.2rem);
+    line-height: 1.1;
+  }
+  .load__stats span,
+  .load__label,
+  .load__clock {
+    font-family: var(--font-mono);
+    font-size: 0.66rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+  .load__tasks {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    margin: 1.25rem 0 0.75rem;
+  }
+  .load__label b {
+    color: var(--text);
+  }
+  .load__boxes {
+    display: flex;
+    gap: 0.4rem;
+  }
+  .task {
+    display: inline-grid;
+    place-items: center;
+    min-width: 34px;
+    height: 34px;
+    padding: 0 0.3rem;
+    border: 1.5px dashed var(--rule);
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    transition: background-color 0.3s ease, border-color 0.3s ease, transform 0.3s var(--ease-out);
+  }
+  .task.is-on {
+    border-style: solid;
+    border-color: var(--highlight);
+    background: var(--highlight);
+    color: var(--brand-ink);
+  }
+  .task.is-pop {
+    transform: scale(1.15);
+  }
+  .task--bad {
+    border-style: solid;
+    border-color: #d9644c;
+    color: #d9644c;
+  }
+  .task--bad.is-dead {
+    opacity: 0.3;
+    text-decoration: line-through;
+  }
+  .load__meter {
+    height: 8px;
+    background: var(--bg-sunken);
+  }
+  .load__meter span {
+    display: block;
+    height: 100%;
+    width: 100%;
+    background: var(--highlight);
+    transition: width 0.2s linear;
+  }
+  .load__clock {
+    text-align: center;
+    margin: 0.6rem 0 0;
+  }
+  @media (max-width: 640px) {
+    .load__stats {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  /* Break */
+  .brk {
+    display: grid;
+    gap: 0.9rem;
+  }
+  .brk__row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 0.6rem;
+    padding: 0.75rem;
+    border: 1px solid var(--rule);
+    background: var(--bg);
+  }
+  .brk__label {
+    font-family: var(--font-mono);
+    font-size: 0.66rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    min-width: 6.5rem;
+  }
+  .brk__served,
+  .brk__state {
+    margin-left: auto;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+  }
+  .brk__served b {
+    color: var(--text);
+    font-family: var(--font-mono);
+  }
+  .brk__row.is-hidden {
+    opacity: 0.25;
+  }
+
+  /* Restore */
+  .rst {
+    display: grid;
+    gap: 1rem;
+  }
+  .rst__row {
+    display: grid;
+    grid-template-columns: 12rem minmax(0, 1fr) 6rem;
+    gap: 0.9rem;
+    align-items: center;
+  }
+  .rst__name {
+    font-size: 0.9rem;
+  }
+  .rst__name small {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 0.66rem;
+    color: var(--text-muted);
+  }
+  .rst__track {
+    position: relative;
+    height: 14px;
+    background: var(--bg-sunken);
+  }
+  .rst__bar {
+    position: absolute;
+    inset: 0 auto 0 0;
+    background: var(--highlight);
+    transition: width 0.15s linear;
+  }
+  .rst__target {
+    position: absolute;
+    top: -4px;
+    bottom: -4px;
+    width: 2px;
+    margin-left: -2px;
+    background: #d9644c;
+  }
+  .rst__row b {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    text-align: right;
+  }
+  @media (max-width: 640px) {
+    .rst__row {
+      grid-template-columns: minmax(0, 1fr) auto;
+    }
+    .rst__track {
+      grid-column: 1 / -1;
+      grid-row: 2;
+    }
+  }
+
+  /* Tear down */
+  .down {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.5rem;
+  }
+  @media (max-width: 640px) {
+    .down {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+  .down__label {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin: 0 0 0.5rem;
+  }
+  .down__label b {
+    color: var(--text);
+  }
+  .down__mods {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+  }
+  .down__mods li {
+    font-family: var(--font-mono);
+    font-size: 0.76rem;
+    padding: 0.35rem 0.6rem;
+    border: 1px solid var(--highlight);
+    background: var(--bg);
+    transition: opacity 0.3s ease, border-color 0.3s ease;
+  }
+  .down__mods li.is-gone {
+    opacity: 0.35;
+    border-color: var(--rule);
+    text-decoration: line-through;
+  }
+  .down__bill {
+    display: flex;
+    height: 1.1rem;
+    margin-bottom: 0.5rem;
+  }
+  .down__bill span:first-child,
+  .down__key i:first-child {
+    background: var(--highlight);
+  }
+  .down__bill span:last-child,
+  .down__key i:last-of-type {
+    background: var(--rule);
+  }
+  .down__key {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin: 0 0 1rem;
+  }
+  .down__key i {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    margin: 0 0.35rem 0 0;
+  }
+  .down__key i:last-of-type {
+    margin-left: 0.9rem;
+  }
+  .down__zero {
+    font-family: var(--font-display);
+    font-size: 2rem;
+    margin: 0;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .lab__panel {
+      animation: none;
+    }
+  }
+</style>
+
+<script>
+  const lab = document.querySelector<HTMLElement>('[data-lab]');
+  if (lab) {
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const wait = (ms: number) => new Promise((r) => window.setTimeout(r, reduce ? 0 : ms));
+    const $ = <T extends HTMLElement>(s: string) => lab.querySelector<T>(s)!;
+    const $$ = <T extends HTMLElement>(s: string) => [...lab.querySelectorAll<T>(s)];
+    const fmt = (n: number) => Math.round(n).toLocaleString('en-GB');
+
+    /* Tabs */
+    const tabs = $$<HTMLButtonElement>('[data-lab-tab]');
+    const panels = $$<HTMLElement>('[data-lab-panel]');
+    const select = (i: number, focus = false) => {
+      tabs.forEach((t, k) => {
+        t.setAttribute('aria-selected', String(k === i));
+        t.tabIndex = k === i ? 0 : -1;
+      });
+      panels.forEach((p, k) => (p.hidden = k !== i));
+      if (focus) tabs[i].focus();
+    };
+    tabs.forEach((t, i) => {
+      t.addEventListener('click', () => select(i));
+      t.addEventListener('keydown', (e) => {
+        const d = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
+        if (d) {
+          e.preventDefault();
+          select((i + d + tabs.length) % tabs.length, true);
+        }
+      });
+    });
+
+    /* 1. Ship a change */
+    {
+      const lists = $$<HTMLOListElement>('[data-ship] ol');
+      const gate = $('[data-gate]');
+      const approve = $<HTMLButtonElement>('[data-approve]');
+      const merge = $<HTMLButtonElement>('[data-merge]');
+      const out = $('[data-ship-out]');
+      const reset = () => {
+        lab.querySelectorAll('[data-ship] li').forEach((li) => li.classList.remove('is-done', 'is-run'));
+        gate.classList.remove('is-waiting');
+        approve.hidden = true;
+      };
+      const run = async (list: HTMLOListElement) => {
+        for (const li of list.children as HTMLCollectionOf<HTMLElement>) {
+          li.classList.add('is-run');
+          await wait(450);
+          li.classList.replace('is-run', 'is-done');
+        }
+      };
+      reset();
+      out.textContent = 'Merge a pull request to send a change down the real pipeline.';
+      merge.hidden = false;
+      merge.addEventListener('click', async () => {
+        merge.disabled = true;
+        reset();
+        out.textContent = 'Pull request checks running.';
+        await run(lists[0]);
+        out.textContent = 'Merged. Deploying to dev.';
+        await run(lists[1]);
+        gate.classList.add('is-waiting');
+        approve.hidden = false;
+        approve.disabled = false;
+        out.textContent = 'Dev is healthy. Prod waits for a person. Your call.';
+        approve.focus({ preventScroll: true });
+      });
+      approve.addEventListener('click', async () => {
+        approve.disabled = true;
+        gate.classList.remove('is-waiting');
+        out.textContent = 'Approved. Same image, now going to prod.';
+        await run(lists[2]);
+        out.textContent = 'In prod. The image you approved is the one that was tested in dev, and no access key was used anywhere: GitHub signs in to AWS with OIDC.';
+        merge.disabled = false;
+        merge.textContent = 'Merge another';
+      });
+    }
+
+    /* 2. Payday load test: 8 minutes replayed in 8 seconds. */
+    {
+      const req = $('[data-l-req]'), fail = $('[data-l-fail]'), rps = $('[data-l-rps]'), p95 = $('[data-l-p95]');
+      const boxes = $$<HTMLElement>('[data-l-boxes] .task');
+      const count = $('[data-l-count]'), meter = $('[data-l-meter]'), clock = $('[data-l-clock]');
+      const btn = $<HTMLButtonElement>('[data-run-load]'), out = $('[data-load-out]');
+      const setTasks = (n: number) =>
+        boxes.forEach((b, i) => {
+          const on = i < n;
+          if (on && !b.classList.contains('is-on')) {
+            b.classList.add('is-pop');
+            window.setTimeout(() => b.classList.remove('is-pop'), 300);
+          }
+          b.classList.toggle('is-on', on);
+        });
+      const idle = () => {
+        req.textContent = '0';
+        fail.textContent = '0';
+        rps.textContent = '2';
+        p95.textContent = '...';
+        count.textContent = '2';
+        meter.style.width = '4%';
+        clock.textContent = 'A normal day: about 2 requests a second.';
+        setTasks(2);
+      };
+      idle();
+      out.textContent = 'Press start to send a payday rush at prod.';
+      btn.hidden = false;
+      btn.addEventListener('click', () => {
+        btn.disabled = true;
+        out.textContent = 'k6 is ramping up against prod.';
+        const total = 8000;
+        const start = performance.now();
+        // Load shape for the replay only: up, hold, down. Totals are the real ones.
+        const shape = (k: number) => (k < 0.15 ? k / 0.15 : k > 0.85 ? (1 - k) / 0.15 : 1);
+        const tick = (t: number) => {
+          const k = reduce ? 1 : Math.min(1, (t - start) / total);
+          const r = 2 + 48 * shape(k);
+          req.textContent = fmt(19602 * k);
+          rps.textContent = fmt(k === 1 ? 50 : r);
+          meter.style.width = `${(r / 50) * 100}%`;
+          const tasks = k < 0.1 ? 2 : k < 0.2 ? 3 : k < 0.3 ? 4 : k < 0.9 ? 5 : k < 0.95 ? 3 : 2;
+          setTasks(tasks);
+          count.textContent = String(tasks);
+          clock.textContent = `Minute ${Math.min(8, Math.floor(k * 8) + 1)} of 8`;
+          if (k < 1) return requestAnimationFrame(tick);
+          rps.textContent = '50';
+          p95.textContent = '58 ms';
+          count.textContent = '2 to 5 to 2';
+          clock.textContent = '8 minutes of k6 against prod, no alarm fired.';
+          out.textContent = '19,602 requests, 0 failed, p95 58 ms against a 1 second target. Auto scaling went from 2 to 5 tasks and back down.';
+          btn.disabled = false;
+          btn.textContent = 'Run it again';
+        };
+        requestAnimationFrame(tick);
+      });
+    }
+
+    /* 3. Break it: the circuit breaker rolls back by itself. */
+    {
+      const row = $('[data-b-new]');
+      const bad = $$<HTMLElement>('[data-b-new] .task');
+      const state = $('[data-b-state]'), served = $('[data-b-served]');
+      const btn = $<HTMLButtonElement>('[data-run-break]'), out = $('[data-break-out]');
+      let n = 0;
+      let timer = 0;
+      const idle = () => {
+        row.classList.add('is-hidden');
+        bad.forEach((b) => b.classList.remove('is-dead'));
+        state.textContent = 'Nothing deploying.';
+      };
+      idle();
+      served.textContent = '0';
+      out.textContent = 'Two healthy v1 tasks are serving customers. Try shipping a broken one.';
+      btn.hidden = false;
+      btn.addEventListener('click', async () => {
+        btn.disabled = true;
+        out.classList.remove('is-bad');
+        idle();
+        window.clearInterval(timer);
+        timer = window.setInterval(() => (served.textContent = fmt((n += 7))), 120);
+        row.classList.remove('is-hidden');
+        state.textContent = 'v2 starting.';
+        await wait(900);
+        for (const label of ['Health check 1 failed', 'Health check 2 failed', 'Health check 3 failed']) {
+          state.textContent = label;
+          out.classList.add('is-bad');
+          out.textContent = 'v2 is failing its health checks. v1 is still taking every request.';
+          await wait(650);
+        }
+        state.textContent = 'Circuit breaker tripped';
+        await wait(700);
+        bad.forEach((b) => b.classList.add('is-dead'));
+        state.textContent = 'Rolled back to v1';
+        out.classList.remove('is-bad');
+        out.textContent = 'The ECS deployment circuit breaker rolled back to the working version by itself, while customers kept being served.';
+        await wait(2000);
+        window.clearInterval(timer);
+        btn.disabled = false;
+        btn.textContent = 'Break it again';
+      });
+    }
+
+    /* 4. Restore drill */
+    {
+      const bar = $('[data-r-time]'), text = $('[data-r-time-text]');
+      const rpo = $('[data-r-rpo]'), rpoText = $('[data-r-rpo-text]');
+      const btn = $<HTMLButtonElement>('[data-run-restore]'), out = $('[data-restore-out]');
+      bar.style.width = '0%';
+      rpo.style.width = '0%';
+      text.textContent = '0 min';
+      rpoText.textContent = '...';
+      out.textContent = 'Pretend the prod database is gone. Start the restore.';
+      btn.hidden = false;
+      btn.addEventListener('click', () => {
+        btn.disabled = true;
+        const start = performance.now();
+        const tick = (t: number) => {
+          const k = reduce ? 1 : Math.min(1, (t - start) / 3000);
+          bar.style.width = `${(21 / 120) * 100 * k}%`;
+          text.textContent = `${Math.round(21 * k)} min`;
+          if (k < 1) return requestAnimationFrame(tick);
+          rpo.style.width = `${(5 / 15) * 100}%`;
+          rpoText.textContent = 'under 5 min';
+          out.textContent = 'Stable 21 minutes after the restore was requested, against a 2 hour target. The newest restorable point was under 5 minutes old, against 15.';
+          btn.disabled = false;
+          btn.textContent = 'Run the drill again';
+        };
+        requestAnimationFrame(tick);
+      });
+    }
+
+    /* 5. Tear it down */
+    {
+      const mods = $$<HTMLElement>('[data-d-mods] li');
+      const zero = $('[data-d-zero]');
+      const btn = $<HTMLButtonElement>('[data-run-down]'), out = $('[data-down-out]');
+      mods.forEach((m) => m.classList.remove('is-gone'));
+      zero.textContent = 'still running';
+      out.textContent = 'Nine modules, live in AWS. The build is done. Destroy it?';
+      btn.hidden = false;
+      btn.addEventListener('click', async () => {
+        btn.disabled = true;
+        mods.forEach((m) => m.classList.remove('is-gone'));
+        for (const m of [...mods].reverse()) {
+          await wait(260);
+          m.classList.add('is-gone');
+        }
+        zero.textContent = 'USD 0.00';
+        out.textContent = 'Destroyed on 17 October 2026. Spend on 18 October: USD 0.00. The whole build cost USD 9.20, and AWS Config was 76% of it.';
+        await wait(1500);
+        btn.disabled = false;
+        btn.textContent = 'Rebuild and destroy again';
+      });
+    }
+  }
+</script>

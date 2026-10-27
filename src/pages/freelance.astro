@@ -1,24 +1,25 @@
 ---
-import { isWide } from '../lib/grid';
 import Base from '../layouts/Base.astro';
 import PageHero from '../components/PageHero.astro';
-import ProjectCard from '../components/ProjectCard.astro';
+import FreelanceSystems from '../components/FreelanceSystems.astro';
 import SocialIcon from '../components/SocialIcon.astro';
-import { freelanceProjects } from '../data/projects';
 
 const description =
   'Freelance software engineering: a production point of sale system for a Lagos gadget retailer, and a thirteen-page marketing site for an AWS consultancy.';
 
 const offer = [
   {
+    key: 'business-system',
     title: 'Business systems',
     body: 'Inventory, point of sale, invoicing and staff accounts, built on Postgres with the money paths wrapped in transactions and an audit trail.',
   },
   {
+    key: 'marketing-site',
     title: 'Marketing sites that pass review',
     body: 'Static builds with a real Content Security Policy, consent-gated analytics, a validated contact form and accessibility checked rather than assumed.',
   },
   {
+    key: 'cloud-hosting',
     title: 'Cloud hosting and deployment',
     body: 'The infrastructure under it: S3 and CloudFront or Vercel, DNS and certificates, and a pipeline that deploys from a merge instead of a drag and drop.',
   },
@@ -34,9 +35,7 @@ const offer = [
 
   <section class="section">
     <div class="shell">
-      <div class="grid grid--pair">
-        {freelanceProjects.map((p, i, all) => <ProjectCard project={p} wide={isWide(i, all.length)} />)}
-      </div>
+      <FreelanceSystems />
     </div>
   </section>
 
@@ -45,22 +44,30 @@ const offer = [
       <div class="section-head">
         <span class="eyebrow">What I take on</span>
         <h2>Work I am available for</h2>
+        <p class="lede">Pick what your project needs, and I will have the brief ready on the contact form.</p>
         <span class="rule-tick"></span>
       </div>
 
-      <dl class="offer">
+      <dl class="offer" data-offer>
         {
           offer.map((o) => (
-            <div class="offer__item lift reveal">
-              <dt>{o.title}</dt>
+            <div class="offer__item lift reveal" data-key={o.key} data-title={o.title}>
+              <dt>
+                {o.title}
+                <button type="button" class="offer__pick" aria-pressed="false" hidden>
+                  <span class="visually-hidden">Add {o.title} to the brief</span>
+                </button>
+              </dt>
               <dd>{o.body}</dd>
             </div>
           ))
         }
       </dl>
 
+      <p class="offer__brief" data-brief aria-live="polite"></p>
+
       <div class="btn-row">
-        <a class="btn btn--primary" href="/contact">
+        <a class="btn btn--primary" href="/contact" data-brief-link>
           Discuss a project
           <SocialIcon name="arrow" size={15} />
         </a>
@@ -69,7 +76,101 @@ const offer = [
   </section>
 </Base>
 
+<script>
+  /* Build a brief: picked services travel to the contact form in the URL. */
+  const offer = document.querySelector<HTMLElement>('[data-offer]');
+  const link = document.querySelector<HTMLAnchorElement>('[data-brief-link]');
+  const brief = document.querySelector<HTMLElement>('[data-brief]');
+  if (offer && link && brief) {
+    const items = [...offer.querySelectorAll<HTMLElement>('[data-key]')];
+    const base = link.getAttribute('href')!;
+    const update = () => {
+      const picked = items.filter((i) => i.classList.contains('is-picked'));
+      brief.textContent = picked.length
+        ? `Your brief: ${picked.map((i) => i.dataset.title).join(', ')}.`
+        : 'Tap any of the three to add it to your brief.';
+      link.href = picked.length ? `${base}?need=${picked.map((i) => i.dataset.key).join(',')}` : base;
+      link.firstChild!.textContent = picked.length ? 'Send this brief ' : 'Discuss a project ';
+    };
+    items.forEach((item) => {
+      const btn = item.querySelector<HTMLButtonElement>('.offer__pick')!;
+      btn.hidden = false;
+      const toggle = () => {
+        const on = !item.classList.contains('is-picked');
+        item.classList.toggle('is-picked', on);
+        btn.setAttribute('aria-pressed', String(on));
+        update();
+      };
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        toggle();
+      });
+      item.addEventListener('click', toggle);
+      item.style.cursor = 'pointer';
+    });
+    update();
+  }
+</script>
+
 <style>
+  .offer__item {
+    transition: background-color 0.25s ease, box-shadow 0.25s ease;
+  }
+  .offer__item.is-picked {
+    box-shadow: inset 0 3px 0 var(--highlight);
+  }
+  .offer dt {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+  }
+  .offer__pick {
+    position: relative;
+    flex: none;
+    width: 28px;
+    height: 28px;
+    border: 1.5px solid var(--rule);
+    background: transparent;
+    cursor: pointer;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+  }
+  .offer__pick::before,
+  .offer__pick::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 12px;
+    height: 2px;
+    margin: -1px 0 0 -6px;
+    background: var(--text);
+    transition: transform 0.25s var(--ease-out);
+  }
+  .offer__pick::after {
+    transform: rotate(90deg);
+  }
+  .offer__pick[aria-pressed='true'] {
+    background: var(--highlight);
+    border-color: var(--highlight);
+  }
+  .offer__pick[aria-pressed='true']::before,
+  .offer__pick[aria-pressed='true']::after {
+    background: var(--brand-ink);
+  }
+  .offer__pick[aria-pressed='true']::after {
+    transform: rotate(0deg);
+  }
+  .offer__pick[hidden] {
+    display: none;
+  }
+  .offer__brief {
+    margin: 1.25rem 0 0;
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    min-height: 1.3em;
+  }
   .offer {
     display: grid;
     gap: 1px;

@@ -26,7 +26,7 @@ const description = `All ${certCount} of Ismail Oyeleke's certifications and bad
       <ul class="headline">
         {
           headlineCerts.map((c) => (
-            <li class="headline__item lift reveal">
+            <li class="headline__item lift reveal" data-tilt>
               {c.image && (
                 <Image
                   class="headline__badge"
@@ -44,6 +44,14 @@ const description = `All ${certCount} of Ismail Oyeleke's certifications and bad
                 {c.issued && <span>Issued {c.issued}</span>}
                 {c.expires && <span>Valid to {c.expires}</span>}
               </p>
+              {c.issued && c.expires && /\D/.test(c.issued) && (
+                <div class="ttl" data-issued={c.issued} data-expires={c.expires} hidden>
+                  <span class="ttl__bar">
+                    <span />
+                  </span>
+                  <span class="ttl__text" />
+                </div>
+              )}
               <a class="text-link" href={c.verify} target="_blank" rel="noopener">
                 Verify with issuer
                 <SocialIcon name="external" size={13} />
@@ -64,9 +72,22 @@ const description = `All ${certCount} of Ismail Oyeleke's certifications and bad
         <span class="rule-tick"></span>
       </div>
 
+      <div class="filter" role="group" aria-label="Filter badges by issuer" data-filter hidden>
+        <button type="button" class="chip" aria-pressed="true" data-issuer="">
+          All <span>{badgeGroups.reduce((n, g) => n + g.badges.length, 0)}</span>
+        </button>
+        {
+          badgeGroups.map((g) => (
+            <button type="button" class="chip" aria-pressed="false" data-issuer={g.issuer}>
+              {g.issuer} <span>{g.badges.length}</span>
+            </button>
+          ))
+        }
+      </div>
+
       {
         badgeGroups.map((group) => (
-          <section class="group">
+          <section class="group" data-group={group.issuer}>
             <h3 class="group__title">{group.issuer}</h3>
             <ul class="badges">
               {group.badges.map((b) => (
@@ -107,7 +128,145 @@ const description = `All ${certCount} of Ismail Oyeleke's certifications and bad
   </section>
 </Base>
 
+<script>
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const months = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'];
+  const parse = (s: string) => {
+    const [m, y] = s.toLowerCase().split(' ');
+    return Number(y) * 12 + months.indexOf(m);
+  };
+
+  /* Validity as a time to live: how much of each certification's life is left. */
+  document.querySelectorAll<HTMLElement>('.ttl').forEach((el) => {
+    const from = parse(el.dataset.issued!), to = parse(el.dataset.expires!);
+    const d = new Date();
+    const now = d.getFullYear() * 12 + d.getMonth();
+    if (Number.isNaN(from) || Number.isNaN(to) || to <= from) return;
+    const left = Math.max(0, to - now);
+    const used = Math.min(1, Math.max(0, (now - from) / (to - from)));
+    el.hidden = false;
+    el.querySelector<HTMLElement>('.ttl__text')!.textContent =
+      left > 0 ? `TTL: about ${left} months of validity left` : 'Due for renewal';
+    const bar = el.querySelector<HTMLElement>('.ttl__bar span')!;
+    bar.style.width = `${(1 - used) * 100}%`;
+  });
+
+  /* A gentle tilt toward the pointer on the four that count. */
+  if (!reduce && window.matchMedia('(pointer: fine)').matches) {
+    document.querySelectorAll<HTMLElement>('[data-tilt]').forEach((card) => {
+      card.addEventListener('pointermove', (e) => {
+        const r = card.getBoundingClientRect();
+        const x = (e.clientX - r.left) / r.width - 0.5;
+        const y = (e.clientY - r.top) / r.height - 0.5;
+        card.style.transform = `perspective(700px) rotateX(${(-y * 7).toFixed(2)}deg) rotateY(${(x * 7).toFixed(2)}deg)`;
+      });
+      card.addEventListener('pointerleave', () => (card.style.transform = ''));
+    });
+  }
+
+  /* Filter the badge wall by issuer. */
+  const filter = document.querySelector<HTMLElement>('[data-filter]');
+  if (filter) {
+    filter.hidden = false;
+    const chips = [...filter.querySelectorAll<HTMLButtonElement>('[data-issuer]')];
+    const groups = [...document.querySelectorAll<HTMLElement>('[data-group]')];
+    chips.forEach((c) =>
+      c.addEventListener('click', () => {
+        const pick = c.dataset.issuer;
+        chips.forEach((x) => x.setAttribute('aria-pressed', String(x === c)));
+        groups.forEach((g) => {
+          const show = !pick || g.dataset.group === pick;
+          g.hidden = !show;
+          if (show && !reduce) {
+            g.classList.remove('is-in');
+            void g.offsetWidth;
+            g.classList.add('is-in');
+          }
+        });
+      }),
+    );
+  }
+</script>
+
 <style>
+  [data-tilt] {
+    transition:
+      transform 0.25s var(--ease-out),
+      translate 0.25s var(--ease-out),
+      border-color 0.25s ease,
+      box-shadow 0.25s ease;
+  }
+  .ttl {
+    margin: 0.2rem 0 0.9rem;
+  }
+  .ttl[hidden] {
+    display: none;
+  }
+  .ttl__bar {
+    display: block;
+    height: 4px;
+    background: var(--rule);
+    margin-bottom: 0.4rem;
+  }
+  .ttl__bar span {
+    display: block;
+    height: 100%;
+    width: 0;
+    background: var(--highlight);
+    transition: width 1.2s var(--ease-out);
+  }
+  .ttl__text {
+    display: block;
+    line-height: 1.4;
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+  }
+  .filter {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.4rem;
+    margin-bottom: 2rem;
+  }
+  .filter[hidden] {
+    display: none;
+  }
+  .chip {
+    font-family: var(--font-mono);
+    font-size: 0.74rem;
+    padding: 0.45rem 0.75rem;
+    color: var(--text);
+    background: transparent;
+    border: 1px solid var(--rule);
+    cursor: pointer;
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+  }
+  .chip span {
+    color: var(--text-muted);
+    margin-left: 0.25rem;
+  }
+  .chip:hover {
+    border-color: var(--highlight);
+  }
+  .chip[aria-pressed='true'] {
+    background: var(--highlight);
+    border-color: var(--highlight);
+    color: var(--brand-ink);
+  }
+  .chip[aria-pressed='true'] span {
+    color: var(--brand-ink);
+  }
+  .group.is-in {
+    animation: group-in 0.45s var(--ease-out);
+  }
+  @keyframes group-in {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+  }
   .headline {
     list-style: none;
     margin: 0;

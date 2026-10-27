@@ -11,8 +11,11 @@ import SocialIcon from './SocialIcon.astro';
 
 interface Props {
   projects: Project[];
+  /** One diagram on its own, with no tabs or project card (case study pages). */
+  compact?: boolean;
 }
 const items = Astro.props.projects.filter((p) => architectures[p.slug]);
+const compact = Astro.props.compact ?? false;
 
 const W = 800;
 const H = 400;
@@ -36,8 +39,8 @@ function trim(a: ArchNode, b: ArchNode) {
 }
 ---
 
-<div class="arch" data-arch>
-  <div class="arch__tabs" role="tablist" aria-label="Projects">
+<div class:list={['arch', { 'arch--compact': compact }]} data-arch>
+  <div class="arch__tabs" role="tablist" aria-label="Projects" hidden={compact}>
     {
       items.map((p, i) => (
         <button
@@ -99,7 +102,7 @@ function trim(a: ArchNode, b: ArchNode) {
             </svg>
           </div>
 
-          <div class="arch__card">
+          {!compact && <div class="arch__card">
             <p class="arch__meta">
               {p.date} · {p.context}
             </p>
@@ -129,7 +132,7 @@ function trim(a: ArchNode, b: ArchNode) {
                 </a>
               )}
             </div>
-          </div>
+          </div>}
         </div>
       );
     })
@@ -207,6 +210,12 @@ function trim(a: ArchNode, b: ArchNode) {
     align-items: center;
   }
   .arch__panel[hidden] {
+    display: none;
+  }
+  .arch--compact .arch__panel {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .arch__tabs[hidden] {
     display: none;
   }
   @media (max-width: 900px) {
@@ -381,7 +390,7 @@ function trim(a: ArchNode, b: ArchNode) {
     const panels = [...root.querySelectorAll<HTMLElement>('[data-panel]')];
     const DWELL = 8000;
     let current = 0;
-    let auto = !reduce;
+    let auto = !reduce && panels.length > 1;
     let timer = 0;
 
     // Packets: two per link, travelling in the order traffic flows.
@@ -460,6 +469,16 @@ function trim(a: ArchNode, b: ArchNode) {
     root.addEventListener('pointerdown', takeOver);
 
     // Only auto-advance while the section is on screen.
+    // A single diagram provisions once, when it first scrolls into view.
+    if (panels.length === 1 && !reduce && 'IntersectionObserver' in window) {
+      const once = new IntersectionObserver(([e]) => {
+        if (!e.isIntersecting) return;
+        once.disconnect();
+        show(0);
+      }, { threshold: 0.35 });
+      once.observe(root);
+    }
+
     if (auto && 'IntersectionObserver' in window) {
       new IntersectionObserver(([e]) => {
         if (!auto) return;

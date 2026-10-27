@@ -3,6 +3,9 @@ import { Image } from 'astro:assets';
 import Base from '../../layouts/Base.astro';
 import VideoEmbed from '../../components/VideoEmbed.astro';
 import SocialIcon from '../../components/SocialIcon.astro';
+import ArchStage from '../../components/ArchStage.astro';
+import KestrelLab from '../../components/KestrelLab.astro';
+import { architectures } from '../../data/architectures';
 import { projects } from '../../data/projects';
 import { site } from '../../data/site';
 
@@ -107,12 +110,28 @@ const schema = {
       </div>
     </header>
 
+    <nav class="stages" data-stages aria-label="On this page" hidden></nav>
     <div class="section">
       <div class="shell case-body">
-        <section>
+        <section id="problem" data-step="Problem">
           <h2>The problem</h2>
           <p>{project.problem}</p>
         </section>
+
+        {
+          architectures[project.slug] && (
+            <section class="live" id="flow" data-step="Flow">
+              <h2>Follow a request</h2>
+              <p>
+                The path traffic takes, live. Services come up in order, then requests flow through them
+                the way they really travel. The full diagram follows.
+              </p>
+              <ArchStage projects={[project]} compact />
+            </section>
+          )
+        }
+
+        {project.slug === 'kestrel-loan-platform' && <div id="lab" data-step="Experiments"><KestrelLab /></div>}
 
         {
           project.diagram && (
@@ -167,8 +186,8 @@ const schema = {
         }
 
         {
-          project.build.map((block) => (
-            <section>
+          project.build.map((block, i) => (
+            <section id={`build-${i}`} data-step={i === 0 ? 'Build' : undefined}>
               <h2>{block.heading}</h2>
               <ul class="bullets">
                 {block.points.map((p) => (
@@ -181,7 +200,7 @@ const schema = {
 
         {
           project.decisions && (
-            <section>
+            <section id="decisions" data-step="Decisions">
               <h2>Decisions</h2>
               <dl class="decisions">
                 {project.decisions.map((d) => (
@@ -197,7 +216,7 @@ const schema = {
 
         {
           project.lessons && (
-            <section>
+            <section id="lessons" data-step="Lessons">
               <h2>What went wrong, and what fixed it</h2>
               <ul class="bullets">
                 {project.lessons.map((l) => (
@@ -210,7 +229,7 @@ const schema = {
 
         {
           project.result && (
-            <section>
+            <section id="result" data-step="Result">
               <h2>The result</h2>
               <ul class="bullets">
                 {project.result.map((r) => (
@@ -258,7 +277,135 @@ const schema = {
   </article>
 </Base>
 
+<script>
+  /* The case study as a pipeline: each part is a stage that goes green once
+     read, and a click jumps to it. */
+  const nav = document.querySelector<HTMLElement>('[data-stages]');
+  const steps = [...document.querySelectorAll<HTMLElement>('[data-step]')];
+  if (nav && steps.length > 2) {
+    const ol = document.createElement('ol');
+    const links = steps.map((s) => {
+      const li = document.createElement('li');
+      const a = document.createElement('a');
+      a.href = `#${s.id}`;
+      a.textContent = s.dataset.step!;
+      li.append(a);
+      ol.append(li);
+      return li;
+    });
+    nav.append(ol);
+    nav.hidden = false;
+    let last = -2;
+    const update = () => {
+      const line = window.innerHeight * 0.35;
+      let active = -1;
+      steps.forEach((s, i) => {
+        if (s.getBoundingClientRect().top < line) active = i;
+      });
+      if (active === last) return;
+      last = active;
+      links.forEach((li, i) => {
+        li.classList.toggle('is-done', i < active);
+        li.classList.toggle('is-active', i === active);
+      });
+      // On narrow screens keep the current stage in view in the strip.
+      const cur = links[Math.max(0, active)];
+      ol.scrollTo({ left: cur.offsetLeft - ol.clientWidth / 2 + cur.offsetWidth / 2 });
+    };
+    update();
+    window.addEventListener('scroll', update, { passive: true });
+  }
+</script>
+
 <style>
+  .stages {
+    position: sticky;
+    top: 72px;
+    z-index: 20;
+    background: color-mix(in srgb, var(--bg) 92%, transparent);
+    backdrop-filter: blur(6px);
+    border-bottom: 1px solid var(--rule);
+  }
+  .stages[hidden] {
+    display: none;
+  }
+  .stages :global(ol) {
+    list-style: none;
+    margin: 0 auto;
+    padding: 0.7rem 1rem;
+    display: flex;
+    justify-content: safe center;
+    gap: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+    max-width: 60rem;
+  }
+  .stages :global(ol) {
+    position: relative;
+  }
+  .stages :global(li) {
+    position: relative;
+    flex: none;
+    display: flex;
+    align-items: center;
+  }
+  .stages :global(li + li)::before {
+    content: '';
+    width: 1.6rem;
+    height: 2px;
+    background: var(--rule);
+    margin: 0 0.4rem;
+    transition: background-color 0.3s ease;
+  }
+  .stages :global(li.is-done + li)::before,
+  .stages :global(li.is-done + li.is-active)::before {
+    background: var(--highlight);
+  }
+  .stages :global(a) {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .stages :global(a)::before {
+    content: '';
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    border: 2px solid var(--rule);
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+  }
+  .stages :global(li.is-done a),
+  .stages :global(li.is-active a) {
+    color: var(--text);
+  }
+  .stages :global(li.is-done a)::before {
+    background: var(--highlight);
+    border-color: var(--highlight);
+  }
+  .stages :global(li.is-active a)::before {
+    border-color: var(--highlight);
+    animation: stage-pulse 1.4s ease-in-out infinite;
+  }
+  @keyframes stage-pulse {
+    50% {
+      background: var(--highlight);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .stages :global(li.is-active a)::before {
+      animation: none;
+    }
+  }
+  .case-body > [id] {
+    scroll-margin-top: 140px;
+  }
   .case-hero {
     padding-block: clamp(2.5rem, 6vw, 4.5rem);
   }

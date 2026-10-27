@@ -334,7 +334,26 @@ The project instructions hold the full text. Every change must keep to them.
     Freelance on home is two live demos (`FreelanceSystems`): the Cloud Dimex
     security review and a Cerbiol sale that can be rolled back by cutting the
     power. "Stack them back" on the deck no longer drops the reader at the
-    page end. Next: interactive inner pages and case studies.
+    page end.
+
+    Inner pages, same round: Experience has a tool router (pick a tool, the
+    roles that used it stay lit), a rail that fills as you read and months
+    per role counting up. About has the five principles as switches that say
+    what breaks when one is off, skills you can tap to see the case studies
+    and roles that use them, and "Your request, traced" (`RequestTrace`):
+    the visitor's own page load from the Navigation Timing API, plus the
+    CloudFront edge from the x-amz-cf-pop header on the live site. Projects
+    opens with the live architecture tabs and the freelance demos.
+    Freelance lets visitors build a brief that pre-fills the contact form
+    (`?need=`). Contact shows the form as a pipeline that goes green field
+    by field, and a copy button for the email; it also fixes the error icon
+    that showed under valid fields after leaving them. Writing plays the
+    walkthroughs as channels beside one screen. Certifications get a
+    validity TTL bar, a pointer tilt and an issuer filter. Case studies get
+    a sticky stage tracker, a live request flow, and Kestrel gets
+    `KestrelLab`: ship through the approval gate, replay the payday load
+    test, deploy a broken image and watch it roll back, run the restore
+    drill and tear it all down, all from the case study's own numbers.
 
 ## Open questions
 
