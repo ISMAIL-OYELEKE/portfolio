@@ -34,9 +34,7 @@ const description =
               </p>
             )
           }
-          <h2>
-            {site.headline} <span class="hello__sub">{site.headlineSub}</span>
-          </h2>
+          <h2>{site.headlineSub}</h2>
           <p class="lede">{site.subheadline}</p>
           <div class="btn-row">
             <a class="btn btn--primary" href={site.cv} download>
@@ -230,14 +228,6 @@ const description =
   .hello h2 {
     font-size: clamp(1.7rem, 3.4vw, 2.6rem);
     line-height: 1.1;
-  }
-  .hello__sub {
-    display: block;
-    margin-top: 0.35em;
-    font-size: 0.62em;
-    line-height: 1.25;
-    font-weight: 500;
-    color: var(--accent);
   }
   @media (max-width: 760px) {
     .hello__grid {

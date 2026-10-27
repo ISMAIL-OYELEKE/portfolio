@@ -58,6 +58,10 @@ const description =
 
   <section class="section">
     <div class="shell about__grid">
+      <div class="about__portrait">
+        <Portrait alt={`${site.name} in Lagos`} width={320} />
+      </div>
+
       <div class="about__story">
         {story.map((para) => <p>{para}</p>)}
 
@@ -73,9 +77,7 @@ const description =
         </div>
       </div>
 
-      <aside class="about__aside">
-        <Portrait alt={`${site.name} in Lagos`} width={320} />
-
+      <div class="about__panels">
         <div class="panel">
           <h2 class="panel__heading">Education</h2>
           <p class="panel__strong">{education.degree}</p>
@@ -101,7 +103,7 @@ const description =
             Member of {community.memberships.join(', ')}.
           </p>
         </div>
-      </aside>
+      </div>
     </div>
   </section>
 
@@ -136,7 +138,7 @@ const description =
 
       <p class="health" data-health hidden>
         <span class="health__dot" aria-hidden="true"></span>
-        <span data-health-text>All four policies on. System healthy.</span>
+        <span data-health-text>Every policy on. System healthy.</span>
         <span class="health__hint">Switch one off and see what breaks.</span>
       </p>
 
@@ -167,6 +169,8 @@ const description =
         <span class="rule-tick"></span>
       </div>
 
+      <p class="skills__hint" data-skills-hint hidden>Tap any skill to see the projects and roles where I used it.</p>
+
       <div class="skills">
         {
           skillGroups.map((g) => (
@@ -196,9 +200,7 @@ const description =
         }
       </div>
 
-      <div class="used" data-used-panel hidden aria-live="polite">
-        <p class="used__hint">Tap any skill to see where I have used it.</p>
-      </div>
+      <div class="used" data-used-panel hidden aria-live="polite"></div>
 
       <p class="note">
         Outside work: chess and running clubs. Based in {site.locality}, {site.country}, and open to{' '}
@@ -251,15 +253,18 @@ const description =
   const panel = document.querySelector<HTMLElement>('[data-used-panel]');
   const skills = [...document.querySelectorAll<HTMLElement>('[data-skill]')];
   if (panel && skills.length) {
-    panel.hidden = false;
+    document.querySelector<HTMLElement>('[data-skills-hint]')!.hidden = false;
     let current: HTMLElement | null = null;
     const show = (el: HTMLElement) => {
       current?.classList.remove('is-picked');
       if (current === el) {
         current = null;
-        panel.innerHTML = '<p class="used__hint">Tap any skill to see where I have used it.</p>';
+        panel.hidden = true;
         return;
       }
+      // The answer opens right under the group you tapped in, not at the end of the page.
+      el.closest('.skills__group')!.append(panel);
+      panel.hidden = false;
       current = el;
       el.classList.add('is-picked');
       const list = JSON.parse(el.dataset.used || '[]') as { t: string; href: string }[];
@@ -281,7 +286,7 @@ const description =
         });
         panel.append(ul);
       }
-      if (panel.getBoundingClientRect().top > window.innerHeight) panel.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      if (panel.getBoundingClientRect().bottom > window.innerHeight - 80) panel.scrollIntoView({ block: 'center', behavior: 'smooth' });
     };
     skills.forEach((el) => {
       el.tabIndex = 0;
@@ -298,21 +303,32 @@ const description =
 </script>
 
 <style>
+  /* Portrait beside the story, then education and community side by side
+     underneath, so neither column runs on alone past the other. */
   .about__grid {
     display: grid;
-    gap: clamp(2rem, 5vw, 4rem);
-    grid-template-columns: minmax(0, 1.4fr) minmax(0, 0.6fr);
-    align-items: start;
+    gap: clamp(2rem, 5vw, 3.5rem) clamp(2rem, 5vw, 4rem);
+    grid-template-columns: minmax(0, 0.75fr) minmax(0, 1.25fr);
+    align-items: center;
+    max-width: 66rem;
+    margin-inline: auto;
+  }
+  .about__portrait {
+    display: flex;
+    justify-content: center;
+  }
+  .about__panels {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.5rem;
+    align-items: stretch;
   }
 
   .about__story p {
     font-size: 1.04rem;
   }
 
-  .about__aside {
-    display: grid;
-    gap: 1.5rem;
-  }
 
   .panel {
     border: 1px solid var(--rule);
@@ -499,8 +515,25 @@ const description =
       box-shadow: 0 0 0 10px rgba(63, 163, 107, 0);
     }
   }
+  .skills__hint {
+    text-align: center;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin: -0.75rem auto 1.5rem;
+  }
+  .skills__hint[hidden] {
+    display: none;
+  }
+  /* Skills read as buttons: a dotted underline and a small arrow on hover. */
   .tag[data-skill] {
     cursor: pointer;
+    text-decoration: underline dotted var(--accent);
+    text-underline-offset: 3px;
+  }
+  .tag[data-skill]:hover,
+  .tag[data-skill]:focus-visible {
+    border-color: var(--accent);
   }
   .tag.is-picked {
     background: var(--highlight);
@@ -508,7 +541,7 @@ const description =
     color: var(--brand-ink);
   }
   .used {
-    margin-top: 1.75rem;
+    margin-top: 1rem;
     padding: 1.1rem 1.3rem;
     border: 1px solid var(--rule);
     border-left: 3px solid var(--highlight);
@@ -518,7 +551,6 @@ const description =
   .used[hidden] {
     display: none;
   }
-  .used :global(.used__hint),
   .used :global(.used__title) {
     margin: 0;
     font-family: var(--font-mono);
@@ -638,12 +670,12 @@ const description =
   }
 
   @media (max-width: 900px) {
-    .about__grid {
+    .about__grid,
+    .about__panels {
       grid-template-columns: 1fr;
     }
-    /* Stacked on phones and tablets: centre the portrait under the buttons. */
-    .about__aside > :global(.portrait) {
-      justify-self: center;
+    .about__story .btn-row {
+      justify-content: center;
     }
     .numbered__item {
       grid-template-columns: 3rem minmax(0, 1fr);

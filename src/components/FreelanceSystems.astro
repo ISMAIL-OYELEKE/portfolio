@@ -98,6 +98,13 @@ const steps = [
         <span>process_sale <em data-invoice>INV-20261027-0001</em></span>
         <span class="fs__state" data-state>Committed</span>
       </div>
+      <p class="fs__verdict fs__verdict--top" data-verdict aria-live="polite">
+        One transaction: stock, payment, debt and audit log saved together.
+      </p>
+      <div class="fs__actions" data-actions hidden>
+        <button type="button" class="fs__run" data-sell>Ring up a sale</button>
+        <button type="button" class="fs__run fs__run--danger" data-cut>Cut the power mid-sale</button>
+      </div>
       <ol class="steps">
         {
           steps.map((s) => (
@@ -111,13 +118,6 @@ const steps = [
           ))
         }
       </ol>
-      <p class="fs__verdict" data-verdict aria-live="polite">
-        One transaction: stock, payment, debt and audit log saved together.
-      </p>
-      <div class="fs__actions" data-actions hidden>
-        <button type="button" class="fs__run" data-sell>Ring up a sale</button>
-        <button type="button" class="fs__run fs__run--danger" data-cut>Cut the power mid-sale</button>
-      </div>
       <p class="fs__note">A demo with sample data. The real system is private and runs the shop every day.</p>
     </div>
 
@@ -341,6 +341,10 @@ const steps = [
     stroke-dashoffset: 100;
     transition: stroke-dashoffset 1.2s var(--ease-out);
   }
+  .gauge b:empty::before {
+    content: '...';
+    color: var(--text-muted);
+  }
   .gauge.is-full .gauge__fill {
     stroke-dashoffset: 0;
   }
@@ -366,6 +370,13 @@ const steps = [
     border-left: 3px solid var(--highlight);
     font-size: 0.9rem;
   }
+  .fs__verdict--top {
+    margin: 0;
+  }
+  .fs__actions + .steps,
+  .fs__verdict--top + .fs__actions[hidden] + .steps {
+    margin-top: 1rem;
+  }
   .fs__verdict.is-rolled {
     border-left-color: #d9644c;
   }
@@ -373,7 +384,10 @@ const steps = [
     display: flex;
     flex-wrap: wrap;
     gap: 0.5rem;
-    margin-top: 1rem;
+    margin-top: 0.75rem;
+  }
+  .fs__actions .fs__run {
+    flex: 1 1 10rem;
   }
   .fs__actions[hidden] {
     display: none;
@@ -412,7 +426,7 @@ const steps = [
       rows.forEach((r) => r.classList.remove('is-pass', 'is-running'));
       gauges.forEach((g) => {
         g.classList.remove('is-full');
-        g.querySelector('b')!.textContent = '0';
+        g.querySelector('b')!.textContent = '';
       });
     };
     const go = async () => {
@@ -430,7 +444,7 @@ const steps = [
       const start = performance.now();
       const tick = (t: number) => {
         const k = reduce ? 1 : Math.min(1, (t - start) / 1200);
-        const v = String(Math.round(100 * (1 - Math.pow(1 - k, 3))));
+        const v = String(Math.max(1, Math.round(100 * (1 - Math.pow(1 - k, 3)))));
         gauges.forEach((g) => (g.querySelector('b')!.textContent = v));
         if (k < 1) requestAnimationFrame(tick);
       };

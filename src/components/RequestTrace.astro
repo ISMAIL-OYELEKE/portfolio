@@ -67,7 +67,7 @@
   .trace__rows :global(.trace__lane) {
     position: relative;
     height: 12px;
-    background: var(--bg-sunken);
+    background: color-mix(in srgb, var(--rule) 55%, transparent);
   }
   .trace__rows :global(.trace__bar) {
     position: absolute;
@@ -112,10 +112,29 @@
   .trace__again:hover {
     border-color: var(--accent);
   }
+  /* Phones: the phase name on its own line, so the bar gets the full width. */
   @media (max-width: 640px) {
+    .trace__rows {
+      gap: 0.9rem;
+    }
     .trace__rows :global(li) {
-      grid-template-columns: 7.5rem minmax(0, 1fr) 3.6rem;
-      gap: 0.5rem;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 0.3rem 0.6rem;
+    }
+    .trace__rows :global(.trace__name) {
+      grid-column: 1;
+    }
+    .trace__rows :global(.trace__name small) {
+      display: inline;
+      margin-left: 0.4rem;
+    }
+    .trace__rows :global(.trace__ms) {
+      grid-column: 2;
+      grid-row: 1;
+    }
+    .trace__rows :global(.trace__lane) {
+      grid-column: 1 / -1;
+      height: 14px;
     }
   }
   @media (prefers-reduced-motion: reduce) {

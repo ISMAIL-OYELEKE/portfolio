@@ -15,7 +15,9 @@ type Palette = {
   altLow: string;
   back: string;
   face: string;
+  faces: string[];
   side: string;
+  trees: string;
   window: string;
   lit: string[];
   water: string;
@@ -34,7 +36,9 @@ const PALETTES: Record<Theme, Palette> = {
     altLow: '#5b93d0',
     back: '#8fb0d2',
     face: '#5f7b99',
+    faces: ['#6e86a3', '#8c98a8', '#5d7594', '#a0a9b4', '#7b8fa7', '#b3aea3'],
     side: '#465f7b',
+    trees: '#3d5a46',
     window: '#a9c3dc',
     lit: ['#d8e6f3', '#c3d6ea'],
     water: '#3d6c9a',
@@ -51,7 +55,9 @@ const PALETTES: Record<Theme, Palette> = {
     altLow: '#0f1e33',
     back: '#13233b',
     face: '#16273f',
+    faces: ['#16273f', '#1a2c46', '#132239', '#1d304b'],
     side: '#0f1c2f',
+    trees: '#0a1424',
     window: '#1c2f4c',
     lit: ['#f2c26b', '#f2c26b', '#e0a33a', '#dfe8f5'],
     water: '#08152a',
@@ -97,15 +103,22 @@ function buildCity(theme: Theme) {
   g.scale(scale, scale);
   const beacons: Beacon[] = [];
 
-  // Distant skyline, hazy and flat.
-  g.fillStyle = pal.back;
-  for (let x = -20; x < CITY_W; ) {
-    const w = 30 + rnd() * 60;
-    const h = 50 + rnd() * 140;
-    g.fillRect(x, WATERLINE - h, w, h);
-    if (rnd() > 0.7) g.fillRect(x + w * 0.4, WATERLINE - h - 18, 3, 18);
-    x += w - 4;
+  // Two distant layers, hazier the further away they are, so the city has depth.
+  for (const [colour, minH, spread, alpha] of [
+    [pal.back, 60, 150, 0.75],
+    [mix(pal.back, pal.side, 0.45), 40, 120, 1],
+  ] as [string, number, number, number][]) {
+    g.fillStyle = colour;
+    g.globalAlpha = alpha;
+    for (let x = -20; x < CITY_W; ) {
+      const w = 26 + rnd() * 56;
+      const h = minH + rnd() * spread;
+      g.fillRect(x, WATERLINE - h, w, h);
+      if (rnd() > 0.72) g.fillRect(x + w * 0.4, WATERLINE - h - 18, 3, 18);
+      x += w - 6 + rnd() * 10;
+    }
   }
+  g.globalAlpha = 1;
 
   // Landmark towers at fixed spots, then the rest of the city around them.
   const landmarks = new Map<number, number>([
@@ -127,21 +140,26 @@ function buildCity(theme: Theme) {
       }
     }
     towers.push({ x, w, h });
-    x += w + 3 + rnd() * 14;
+    x += w + 2 + rnd() * 8;
   }
 
   for (const t of towers) {
     const top = WATERLINE - t.h;
     const style = t.h > 300 ? (rnd() > 0.5 ? 'spire' : 'setback') : ['flat', 'tank', 'setback', 'slant', 'flat'][Math.floor(rnd() * 5)];
 
-    // Body, with the right-hand face in shadow so each block reads as 3D.
-    g.fillStyle = pal.face;
+    // Body: concrete or glass, lit from the left and a touch lighter towards
+    // the top; the right-hand face in shadow so each block reads as 3D.
+    const face = pal.faces[Math.floor(rnd() * pal.faces.length)];
+    const body = g.createLinearGradient(0, top, 0, WATERLINE);
+    body.addColorStop(0, mix(face, '#ffffff', theme === 'day' ? 0.18 : 0.04));
+    body.addColorStop(1, face);
+    g.fillStyle = body;
     g.fillRect(t.x, top, t.w, t.h);
-    g.fillStyle = pal.side;
+    g.fillStyle = mix(face, pal.side, 0.7);
     g.fillRect(t.x + t.w * 0.64, top, t.w * 0.36, t.h);
 
     // Roofs.
-    g.fillStyle = pal.face;
+    g.fillStyle = face;
     if (style === 'setback') {
       const w2 = t.w * 0.62;
       g.fillRect(t.x + (t.w - w2) / 2, top - 26, w2, 26);
@@ -184,6 +202,21 @@ function buildCity(theme: Theme) {
       g.globalAlpha = 1;
     }
   }
+
+  // Humid haze low over the water, and the trees along the shore.
+  const haze = g.createLinearGradient(0, WATERLINE - 170, 0, WATERLINE);
+  haze.addColorStop(0, 'rgba(0,0,0,0)');
+  haze.addColorStop(1, theme === 'day' ? 'rgba(206,222,238,0.55)' : 'rgba(26,47,79,0.45)');
+  g.fillStyle = haze;
+  g.fillRect(0, WATERLINE - 170, CITY_W, 170);
+  g.fillStyle = pal.trees;
+  for (let x = -10; x < CITY_W; x += 7 + rnd() * 9) {
+    const r = 5 + rnd() * 7;
+    g.beginPath();
+    g.arc(x, WATERLINE - r * 0.55, r, Math.PI, 0);
+    g.fill();
+  }
+  g.fillRect(0, WATERLINE - 3, CITY_W, 3);
 
   // Final canvas: city, lagoon, reflection and bridge.
   const out = canvas(CITY_W * scale, CITY_H * scale);
@@ -403,14 +436,28 @@ export function createSky(el: HTMLCanvasElement) {
       ctx.arc(mx + mr * 0.42, my - mr * 0.25, mr * 0.88, 0, Math.PI * 2);
       ctx.fill();
     } else {
-      ctx.fillStyle = '#fff4d6';
+      // The sun: a warm disc in a wide, soft halo of light.
+      const sr = Math.min(34, W * 0.055);
+      const sx = W * 0.86, sy = H * 0.15 + alt * H * 0.06;
+      const halo = ctx.createRadialGradient(sx, sy, sr * 0.6, sx, sy, sr * 6);
+      halo.addColorStop(0, 'rgba(255,236,190,0.75)');
+      halo.addColorStop(0.25, 'rgba(255,226,160,0.28)');
+      halo.addColorStop(1, 'rgba(255,226,160,0)');
+      ctx.fillStyle = halo;
+      ctx.fillRect(sx - sr * 6, sy - sr * 6, sr * 12, sr * 12);
+      const disc = ctx.createRadialGradient(sx - sr * 0.25, sy - sr * 0.25, 0, sx, sy, sr);
+      disc.addColorStop(0, '#fffbea');
+      disc.addColorStop(0.7, '#ffe8a3');
+      disc.addColorStop(1, '#ffd27a');
+      ctx.fillStyle = disc;
       ctx.beginPath();
-      ctx.arc(W * 0.88, H * 0.14 + alt * H * 0.06, Math.min(30, W * 0.05), 0, Math.PI * 2);
+      ctx.arc(sx, sy, sr, 0, Math.PI * 2);
       ctx.fill();
     }
 
     // City: covers the width, anchored to the bottom, falling away as we rise.
-    const cityScale = Math.max(W / CITY_W, (H * 0.55) / CITY_H);
+    // Phones see more of the skyline at a smaller scale, not three towers up close.
+    const cityScale = W < 700 ? Math.max(W / CITY_W, Math.min(0.46, (H * 0.5) / CITY_H)) : Math.max(W / CITY_W, (H * 0.55) / CITY_H);
     const cw = CITY_W * cityScale;
     const ch = CITY_H * cityScale;
     const cityY = H - ch + ease(seg(p, 0, 0.42)) * H * 1.05;
@@ -443,7 +490,7 @@ export function createSky(el: HTMLCanvasElement) {
       const yy = y * vh;
       if (yy > H || yy + h < 0) continue;
       // Everything but the sea of cloud clears away from the name.
-      ctx.globalAlpha = c.layer >= 2 ? 1 - seg(p, 0.62, 0.72) : 1 - seg(p, 0.64, 0.78);
+      ctx.globalAlpha = c.layer >= 2 ? 1 - seg(p, 0.6, 0.68) : 1 - seg(p, 0.6, 0.7);
       if (ctx.globalAlpha <= 0) continue;
       ctx.drawImage(a.clouds[c.sprite], x * vw, yy, w, h);
     }
@@ -458,15 +505,18 @@ export function createSky(el: HTMLCanvasElement) {
       ctx.globalAlpha = 1;
     }
 
-    // Above the weather: a sea of cloud rolls in below the loop and the name.
+    // Above the weather: a sea of cloud rolls in along the bottom edge. It is a
+    // low band, flattened and capped in height, so it never reaches the name
+    // or the buttons above it.
     const seaIn = ease(seg(p, 0.55, 0.75));
     if (seaIn > 0) {
+      const band = W < 700 ? Math.min(H * 0.2, 160) : Math.min(H * 0.13, 110);
       for (const s of sea) {
         const w = s.w * vw;
-        const h = w * (300 / 640);
+        const h = Math.max(Math.min(w * (300 / 640) * 0.7, band * 2.2), band * 1.2);
         const x = ((s.x + s.drift * t) % 130 + 130) % 130 - 20;
         ctx.globalAlpha = seaIn;
-        ctx.drawImage(a.clouds[s.sprite], x * vw, H - h * 0.62 + (1 - seaIn) * H * 0.4, w, h);
+        ctx.drawImage(a.clouds[s.sprite], x * vw, H - band + (1 - seaIn) * H * 0.4, w, h);
       }
       ctx.globalAlpha = 1;
     }

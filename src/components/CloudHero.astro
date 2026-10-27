@@ -148,6 +148,9 @@ const loopPath =
     right: var(--gutter);
     top: 50%;
     transform: translateY(-50%);
+    padding: 0.5rem 0.75rem;
+    background: rgb(15 30 51 / 0.55);
+    border-left: 2px solid var(--highlight);
     font-family: var(--font-mono);
     font-size: 0.68rem;
     letter-spacing: 0.12em;
@@ -165,9 +168,11 @@ const loopPath =
   }
   @media (max-width: 640px) {
     .flight__alt {
-      top: auto;
-      bottom: 5.5rem;
+      top: 1rem;
+      left: var(--gutter);
+      right: auto;
       transform: none;
+      text-align: left;
     }
   }
 
@@ -327,7 +332,7 @@ const loopPath =
   :global(:root[data-theme='light']) .flight__loop :global(.lbl),
   :global(:root[data-theme='light']) .flight__note,
   :global(:root[data-theme='light']) .flight__role,
-  :global(:root[data-theme='light']) .flight__alt,
+
   :global(:root[data-theme='light']) .flight__cue {
     color: #e6eef8;
     fill: #e6eef8;
@@ -419,7 +424,9 @@ const loopPath =
         s.setAttribute('aria-hidden', 'true');
         s.textContent = ch === ' ' ? ' ' : ch;
         nameEl.appendChild(s);
-        return { s, dx: (rnd() - 0.5) * 600, dy: (rnd() - 0.5) * 400 - 100, r: (rnd() - 0.5) * 120 };
+        // Letters gather from nearby, scaled to the screen, so none flies in from off the page.
+        const spread = Math.min(1, window.innerWidth / 1100);
+        return { s, dx: (rnd() - 0.5) * 420 * spread, dy: ((rnd() - 0.5) * 260 - 60) * spread, r: (rnd() - 0.5) * 90 };
       });
 
       const intro = q<HTMLElement>('[data-intro]');
@@ -455,7 +462,7 @@ const loopPath =
         ink.style.strokeDashoffset = String(L * (1 - ease(seg(p, 0.54, 0.72))));
 
         letters.forEach((l, i) => {
-          const k = ease(seg(p, 0.68 + i * 0.008, 0.8 + i * 0.008));
+          const k = ease(seg(p, 0.7 + i * 0.007, 0.8 + i * 0.007));
           l.s.style.opacity = String(k);
           l.s.style.transform = `translate(${l.dx * (1 - k)}px, ${l.dy * (1 - k)}px) rotate(${l.r * (1 - k)}deg)`;
         });

@@ -1,8 +1,6 @@
 ---
-import { isWide } from '../../lib/grid';
 import Base from '../../layouts/Base.astro';
 import PageHero from '../../components/PageHero.astro';
-import ProjectCard from '../../components/ProjectCard.astro';
 import ArchStage from '../../components/ArchStage.astro';
 import FreelanceSystems from '../../components/FreelanceSystems.astro';
 import SocialIcon from '../../components/SocialIcon.astro';
@@ -37,13 +35,25 @@ const description =
     <div class="shell">
       <div class="section-head">
         <span class="eyebrow">Cloud and DevOps</span>
-        <h2>AWS projects</h2>
+        <h2>Every case study</h2>
         <span class="rule-tick"></span>
       </div>
 
-      <div class="grid grid--pair">
-        {cloudProjects.map((p, i, all) => <ProjectCard project={p} wide={isWide(i, all.length)} />)}
-      </div>
+      <!-- A plain index of the systems above, for reading straight down the list. -->
+      <ul class="index">
+        {
+          cloudProjects.map((p) => (
+            <li>
+              <a href={`/projects/${p.slug}`}>
+                <span class="index__date">{p.date}</span>
+                <span class="index__title">{p.title}</span>
+                <span class="index__stack">{p.stack.slice(0, 4).join(' · ')}</span>
+                <SocialIcon name="arrow" size={16} />
+              </a>
+            </li>
+          ))
+        }
+      </ul>
     </div>
   </section>
 
@@ -53,7 +63,7 @@ const description =
         <span class="eyebrow">Freelance software</span>
         <h2>Client systems</h2>
         <p class="lede">
-          Production software built for businesses in Lagos. Both are live, and both are named with
+          Production software built for businesses in Lagos. Both run in production, and both are named with
           the client's agreement.
         </p>
         <span class="rule-tick"></span>
@@ -70,3 +80,60 @@ const description =
     </div>
   </section>
 </Base>
+
+<style>
+  .index {
+    list-style: none;
+    margin: 0 auto;
+    padding: 0;
+    max-width: 56rem;
+    border-top: 1px solid var(--rule);
+  }
+  .index a {
+    display: grid;
+    grid-template-columns: 8rem minmax(0, 1fr) auto;
+    grid-template-areas: 'date title arrow' 'date stack arrow';
+    gap: 0.2rem 1.25rem;
+    align-items: center;
+    padding: 1.1rem 0.5rem;
+    border-bottom: 1px solid var(--rule);
+    color: var(--text);
+    text-decoration: none;
+    transition: background-color 0.2s ease;
+  }
+  .index a:hover {
+    background: var(--bg-sunken);
+  }
+  .index a:hover .index__title {
+    color: var(--accent);
+  }
+  .index__date {
+    grid-area: date;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+  .index__title {
+    grid-area: title;
+    font-family: var(--font-display);
+    font-size: 1.2rem;
+    transition: color 0.2s ease;
+  }
+  .index__stack {
+    grid-area: stack;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+  }
+  .index a :global(svg) {
+    grid-area: arrow;
+    color: var(--accent);
+  }
+  @media (max-width: 640px) {
+    .index a {
+      grid-template-columns: minmax(0, 1fr) auto;
+      grid-template-areas: 'date arrow' 'title arrow' 'stack arrow';
+    }
+  }
+</style>

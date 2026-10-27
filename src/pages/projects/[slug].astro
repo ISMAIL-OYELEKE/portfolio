@@ -110,6 +110,8 @@ const schema = {
       </div>
     </header>
 
+    <!-- The stage strip only sticks while the case study itself is on screen. -->
+    <div class="case-track">
     <nav class="stages" data-stages aria-label="On this page" hidden></nav>
     <div class="section">
       <div class="shell case-body">
@@ -242,6 +244,7 @@ const schema = {
 
         {project.note && <p class="case-note">{project.note}</p>}
       </div>
+    </div>
     </div>
 
     <section class="section section--sunken">
@@ -401,6 +404,22 @@ const schema = {
   @media (prefers-reduced-motion: reduce) {
     .stages :global(li.is-active a)::before {
       animation: none;
+    }
+  }
+  /* Phones: every stage is a dot on one line, and only the current one
+     shows its name, so the whole pipeline fits without sideways scrolling. */
+  @media (max-width: 640px) {
+    .stages :global(ol) {
+      justify-content: center;
+      padding-inline: 0.5rem;
+    }
+    .stages :global(li + li)::before {
+      width: 0.9rem;
+      margin: 0 0.3rem;
+    }
+    .stages :global(li:not(.is-active) a) {
+      font-size: 0;
+      gap: 0;
     }
   }
   .case-body > [id] {
@@ -595,7 +614,8 @@ const schema = {
 
   .related {
     list-style: none;
-    margin: 0;
+    margin: 0 auto;
+    max-width: 56rem;
     padding: 0;
     border-top: 1px solid var(--rule);
   }

@@ -45,6 +45,9 @@ const isCurrent = (href: string) => path === href || (href !== '/' && path.start
 
   <div class="masthead__panel" id="site-menu" data-menu-panel hidden>
     <ul>
+      <li>
+        <a href="/" aria-current={isCurrent('/') ? 'page' : undefined}>Home</a>
+      </li>
       {
         nav.map((item) => (
           <li>
@@ -54,7 +57,7 @@ const isCurrent = (href: string) => path === href || (href !== '/' && path.start
           </li>
         ))
       }
-      <li><a href={site.cv} download>Download CV</a></li>
+      <li><a class="masthead__panel-cv" href={site.cv} download>Download CV</a></li>
     </ul>
   </div>
 </header>
@@ -173,9 +176,8 @@ const isCurrent = (href: string) => path === href || (href !== '/' && path.start
     transform: translateY(-6px) rotate(-45deg);
   }
 
-  /* The open menu is a paper sheet over the page, with the page behind it
-     dimmed, so it reads as open on the navy sections as well as the light
-     ones. */
+  /* The open menu continues the navy header down over the page, with the
+     page behind it dimmed. */
   .masthead__panel {
     position: absolute;
     top: 100%;
@@ -184,9 +186,10 @@ const isCurrent = (href: string) => path === href || (href !== '/' && path.start
     max-height: calc(100svh - 100%);
     overflow-y: auto;
     z-index: 1;
-    background: var(--bg);
+    background: var(--brand-ink);
     border-top: 3px solid var(--highlight);
     box-shadow: 0 18px 40px rgba(10, 21, 38, 0.35);
+    text-align: center;
     animation: menu-in 0.22s var(--ease-out);
   }
   /* Dims the page while the menu is open, never the header above it. */
@@ -213,25 +216,30 @@ const isCurrent = (href: string) => path === href || (href !== '/' && path.start
   }
   .masthead__panel a {
     display: block;
-    padding: 0.9rem 0 0.9rem 0.85rem;
+    padding: 0.9rem 0;
     font-family: var(--font-mono);
     font-size: 0.8rem;
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: var(--text);
+    color: var(--paper);
     text-decoration: none;
-    border-bottom: 1px solid var(--rule);
-    border-left: 3px solid transparent;
-    transition: border-color 0.2s ease, background-color 0.2s ease;
+    border-bottom: 1px solid var(--brand-line);
+    transition: color 0.2s ease, background-color 0.2s ease;
   }
   .masthead__panel a:hover {
-    border-left-color: var(--highlight);
-    background: var(--bg-sunken);
+    color: var(--highlight);
+    background: rgb(255 255 255 / 0.04);
   }
   .masthead__panel a[aria-current='page'] {
-    color: var(--accent);
-    border-left-color: var(--highlight);
+    color: var(--highlight);
     font-weight: 600;
+  }
+  .masthead__panel a.masthead__panel-cv {
+    margin-top: 1rem;
+    padding-left: 0;
+    border: 1px solid var(--highlight);
+    background: var(--highlight);
+    color: var(--brand-ink);
   }
   @media (prefers-reduced-motion: reduce) {
     .masthead__panel {

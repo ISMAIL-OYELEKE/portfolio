@@ -10,8 +10,7 @@ const year = new Date().getFullYear();
 <footer class="footer">
   <div class="shell">
     <p class="footer__you" data-visitor>
-      This page reached you through Route 53, CloudFront and S3, deployed by GitHub Actions. I built
-      that too.
+      This site runs on Route 53, CloudFront and S3, deployed by GitHub Actions. I built that too.
     </p>
   </div>
   <div class="shell footer__grid">
@@ -24,8 +23,8 @@ const year = new Date().getFullYear();
         {
           socials.map((s) => (
             <li>
-              <a href={s.href} rel="me noopener" target="_blank" aria-label={s.label} style={brandStyle(s.icon)}>
-                <SocialIcon name={s.icon} />
+              <a href={s.href} rel="me noopener" target="_blank" aria-label={s.label} style={brandStyle(s.icon)} class:list={{ 'is-wordmark': s.icon === 'credly' }}>
+                <SocialIcon name={s.icon} size={s.icon === 'credly' ? 42 : 18} />
               </a>
             </li>
           ))
@@ -162,6 +161,10 @@ const year = new Date().getFullYear();
       color 0.2s ease,
       transform 0.2s ease;
   }
+  /* Credly's mark is a wordmark, so it gets a wider tile to stay legible. */
+  .footer__socials a.is-wordmark {
+    width: 62px;
+  }
   .footer__socials a:hover,
   .footer__socials a:focus-visible {
     background: var(--brand, var(--highlight));
@@ -208,9 +211,20 @@ const year = new Date().getFullYear();
   }
 
   @media (max-width: 620px) {
+    .footer__grid {
+      text-align: center;
+    }
+    .footer__line {
+      margin-inline: auto;
+    }
+    .footer__socials {
+      justify-content: center;
+      flex-wrap: wrap;
+    }
     .footer__base {
       flex-direction: column;
-      align-items: flex-start;
+      align-items: center;
+      text-align: center;
     }
   }
 </style>
@@ -228,9 +242,13 @@ const year = new Date().getFullYear();
       const nav = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming | undefined;
       const ms = nav && nav.responseEnd ? Math.round(nav.responseEnd) : 0;
       const b = (s: string) => `<b>${s.replace(/[<>&]/g, '')}</b>`;
+      // Only the live domain is served by CloudFront; a preview copy says so plainly.
+      const live = location.hostname === 'ismailoyeleke.com' || location.hostname.endsWith('.ismailoyeleke.com');
       line.innerHTML =
         (place ? `You are reading this in ${b(place)} at ${b(time)}. ` : '') +
-        `This page reached you through Route 53, CloudFront and S3${ms ? ` in ${b(`${ms} ms`)}` : ''}, deployed by GitHub Actions. I built that too.`;
+        (live
+          ? `This page reached you through Route 53, CloudFront and S3${ms ? ` in ${b(`${ms} ms`)}` : ''}, deployed by GitHub Actions. I built that too.`
+          : 'This is a preview copy. The live site runs on Route 53, CloudFront and S3, deployed by GitHub Actions. I built that too.');
     } catch {
       /* keep the plain sentence */
     }

@@ -88,6 +88,21 @@ const cloud = (fill: string) =>
     }
   }
 
+  /* Daytime: white cumulus over the blue. */
+  :global(:root[data-theme='light']) .page-hero__cloud :global(g) {
+    fill: #ffffff;
+  }
+  :global(:root[data-theme='light']) .c1 :global(g),
+  :global(:root[data-theme='light']) .c3 :global(g) {
+    fill: #eef4fb;
+  }
+  :global(:root[data-theme='light']) .page-hero__cloud {
+    opacity: 0.85;
+  }
+  :global(:root[data-theme='light']) .page-hero__route {
+    background: rgb(255 255 255 / 0.4);
+  }
+
   /* A short route with a packet that travels it once, under the title. */
   .page-hero__route {
     display: block;

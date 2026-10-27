@@ -5,11 +5,11 @@
    Every number comes from the case study. Replays are sped up, and say so.
    Without JavaScript each panel shows its finished result as text. */
 const tabs = [
-  { id: 'ship', label: 'Ship a change' },
-  { id: 'load', label: 'Payday load test' },
-  { id: 'break', label: 'Break it' },
-  { id: 'restore', label: 'Restore drill' },
-  { id: 'down', label: 'Tear it down' },
+  { id: 'ship', label: 'Ship a change', short: 'Ship' },
+  { id: 'load', label: 'Payday load test', short: 'Load' },
+  { id: 'break', label: 'Break it', short: 'Break' },
+  { id: 'restore', label: 'Restore drill', short: 'Restore' },
+  { id: 'down', label: 'Tear it down', short: 'Destroy' },
 ];
 const prStages = ['Lint', 'Unit and database tests', 'terraform fmt and validate', 'Checkov security scan', 'Plan posted on the PR'];
 const devStages = ['ECR scan gate and cost tags', 'Deploy to dev'];
@@ -37,7 +37,8 @@ const modules = ['network', 'database', 'api', 'messaging', 'worker', 'kms', 'ob
           data-lab-tab={t.id}
         >
           <span>{String(i + 1).padStart(2, '0')}</span>
-          {t.label}
+          <em class="lab__long">{t.label}</em>
+          <em class="lab__short" aria-hidden="true">{t.short}</em>
         </button>
       ))
     }
@@ -45,30 +46,43 @@ const modules = ['network', 'database', 'api', 'messaging', 'worker', 'kms', 'ob
 
   <!-- 1. Ship -->
   <div class="lab__panel" role="tabpanel" id="lab-ship" aria-labelledby="lab-tab-ship" data-lab-panel="ship">
-    <div class="pipe2" data-ship>
-      <p class="pipe2__lane">Pull request</p>
-      <ol>{prStages.map((s) => <li class="is-done">{s}</li>)}</ol>
-      <p class="pipe2__lane">After merge</p>
-      <ol>{devStages.map((s) => <li class="is-done">{s}</li>)}</ol>
-      <p class="pipe2__gate" data-gate>
-        <span>Waiting for a human to approve prod</span>
-        <button type="button" class="lab__btn" data-approve hidden>Approve prod deploy</button>
+    <div class="lab__ctl">
+      <p class="lab__out" data-ship-out aria-live="polite">
+        Prod gets the same tested image, only after a human approves it. GitHub signs in to AWS with OIDC, so no access keys exist.
       </p>
-      <ol>{prodStages.map((s) => <li class="is-done">{s}</li>)}</ol>
+      <button type="button" class="lab__btn" data-merge hidden>Merge a pull request</button>
+      <button type="button" class="lab__btn" data-approve hidden>Approve prod deploy</button>
     </div>
-    <p class="lab__out" data-ship-out aria-live="polite">
-      Prod gets the same tested image, only after a human approves it. GitHub signs in to AWS with OIDC, so no access keys exist.
-    </p>
-    <button type="button" class="lab__btn" data-merge hidden>Merge a pull request</button>
+    <div class="pipe2" data-ship>
+      <div class="pipe2__col">
+        <p class="pipe2__lane">Pull request</p>
+        <ol>{prStages.map((s) => <li class="is-done">{s}</li>)}</ol>
+      </div>
+      <div class="pipe2__col">
+        <p class="pipe2__lane">After merge</p>
+        <ol>{devStages.map((s) => <li class="is-done">{s}</li>)}</ol>
+        <p class="pipe2__gate" data-gate>Waiting for a human to approve prod</p>
+      </div>
+      <div class="pipe2__col">
+        <p class="pipe2__lane">Prod</p>
+        <ol>{prodStages.map((s) => <li class="is-done">{s}</li>)}</ol>
+      </div>
+    </div>
   </div>
 
   <!-- 2. Load -->
   <div class="lab__panel" role="tabpanel" id="lab-load" aria-labelledby="lab-tab-load" data-lab-panel="load" hidden>
+    <div class="lab__ctl">
+      <p class="lab__out" data-load-out aria-live="polite">
+        A payday peak of 50 requests a second, 25 times a normal day. Auto scaling went from 2 to 5 tasks and back down.
+      </p>
+      <button type="button" class="lab__btn" data-run-load hidden>Start the payday test</button>
+    </div>
     <div class="load" data-load>
       <div class="load__stats">
         <div><b data-l-req>19,602</b><span>requests</span></div>
         <div><b data-l-fail>0</b><span>failed</span></div>
-        <div><b data-l-rps>50</b><span>requests a second, peak</span></div>
+        <div><b data-l-rps>50</b><span>requests a second</span></div>
         <div><b data-l-p95>58 ms</b><span>p95, target 1 s</span></div>
       </div>
       <div class="load__tasks">
@@ -80,14 +94,16 @@ const modules = ['network', 'database', 'api', 'messaging', 'worker', 'kms', 'ob
       <div class="load__meter"><span data-l-meter /></div>
       <p class="load__clock" data-l-clock>8 minutes of k6 against prod, no alarm fired.</p>
     </div>
-    <p class="lab__out" data-load-out aria-live="polite">
-      A payday peak of 50 requests a second, 25 times a normal day. Auto scaling went from 2 to 5 tasks and back down.
-    </p>
-    <button type="button" class="lab__btn" data-run-load hidden>Start the payday test</button>
   </div>
 
   <!-- 3. Break -->
   <div class="lab__panel" role="tabpanel" id="lab-break" aria-labelledby="lab-tab-break" data-lab-panel="break" hidden>
+    <div class="lab__ctl">
+      <p class="lab__out" data-break-out aria-live="polite">
+        A deliberately broken image was deployed, and the ECS deployment circuit breaker rolled back to the working version by itself while customers kept being served.
+      </p>
+      <button type="button" class="lab__btn lab__btn--danger" data-run-break hidden>Deploy a broken image</button>
+    </div>
     <div class="brk" data-brk>
       <div class="brk__row">
         <span class="brk__label">Serving</span>
@@ -100,14 +116,16 @@ const modules = ['network', 'database', 'api', 'messaging', 'worker', 'kms', 'ob
         <span class="brk__state" data-b-state>Health checks failed. Circuit breaker rolled back to v1.</span>
       </div>
     </div>
-    <p class="lab__out" data-break-out aria-live="polite">
-      A deliberately broken image was deployed, and the ECS deployment circuit breaker rolled back to the working version by itself while customers kept being served.
-    </p>
-    <button type="button" class="lab__btn lab__btn--danger" data-run-break hidden>Deploy a broken image</button>
   </div>
 
   <!-- 4. Restore -->
   <div class="lab__panel" role="tabpanel" id="lab-restore" aria-labelledby="lab-tab-restore" data-lab-panel="restore" hidden>
+    <div class="lab__ctl">
+      <p class="lab__out" data-restore-out aria-live="polite">
+        Restore drill on prod: stable 21 minutes after the restore was requested, and the newest restorable point was under 5 minutes old.
+      </p>
+      <button type="button" class="lab__btn" data-run-restore hidden>Start the restore drill</button>
+    </div>
     <div class="rst">
       <div class="rst__row">
         <span class="rst__name">Back to stable <small>target 2 hours</small></span>
@@ -120,14 +138,16 @@ const modules = ['network', 'database', 'api', 'messaging', 'worker', 'kms', 'ob
         <b data-r-rpo-text>under 5 min</b>
       </div>
     </div>
-    <p class="lab__out" data-restore-out aria-live="polite">
-      Restore drill on prod: stable 21 minutes after the restore was requested, and the newest restorable point was under 5 minutes old.
-    </p>
-    <button type="button" class="lab__btn" data-run-restore hidden>Start the restore drill</button>
   </div>
 
   <!-- 5. Tear down -->
   <div class="lab__panel" role="tabpanel" id="lab-down" aria-labelledby="lab-tab-down" data-lab-panel="down" hidden>
+    <div class="lab__ctl">
+      <p class="lab__out" data-down-out aria-live="polite">
+        Torn down with terraform destroy on 17 October 2026. AWS Config was 76% of the bill, because it bills for every recorded change while infrastructure is created and destroyed.
+      </p>
+      <button type="button" class="lab__btn lab__btn--danger" data-run-down hidden>terraform destroy</button>
+    </div>
     <div class="down">
       <div>
         <p class="down__label">Terraform modules</p>
@@ -144,11 +164,9 @@ const modules = ['network', 'database', 'api', 'messaging', 'worker', 'kms', 'ob
         <p class="down__zero" data-d-zero>USD 0.00</p>
       </div>
     </div>
-    <p class="lab__out" data-down-out aria-live="polite">
-      Torn down with terraform destroy on 17 October 2026. AWS Config was 76% of the bill, because it bills for every recorded change while infrastructure is created and destroyed.
-    </p>
-    <button type="button" class="lab__btn lab__btn--danger" data-run-down hidden>terraform destroy</button>
   </div>
+
+  <button type="button" class="lab__next" data-lab-next hidden>Next experiment</button>
 </section>
 
 <style>
@@ -171,24 +189,14 @@ const modules = ['network', 'database', 'api', 'messaging', 'worker', 'kms', 'ob
     color: var(--text-muted);
   }
   .lab__tabs {
+    scroll-margin-top: 7.5rem;
     display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
     gap: 0.4rem;
-    overflow-x: auto;
-    scrollbar-width: none;
-    margin-bottom: 1.25rem;
-    justify-content: safe center;
-  }
-  @media (min-width: 720px) {
-    .lab__tabs {
-      flex-wrap: wrap;
-      justify-content: center;
-    }
-  }
-  .lab__tabs::-webkit-scrollbar {
-    display: none;
+    margin-bottom: 1rem;
   }
   .lab__tabs button {
-    flex: none;
     display: inline-flex;
     gap: 0.45rem;
     font-family: var(--font-mono);
@@ -201,6 +209,12 @@ const modules = ['network', 'database', 'api', 'messaging', 'worker', 'kms', 'ob
     padding: 0.55rem 0.8rem;
     cursor: pointer;
   }
+  .lab__tabs em {
+    font-style: normal;
+  }
+  .lab__short {
+    display: none;
+  }
   .lab__tabs button span {
     color: var(--accent);
   }
@@ -212,6 +226,75 @@ const modules = ['network', 'database', 'api', 'messaging', 'worker', 'kms', 'ob
   .lab__tabs button[aria-selected='true'] span {
     color: var(--brand-ink);
   }
+  /* Phones: all five experiments in one row, so switching never needs a scroll. */
+  @media (max-width: 640px) {
+    .lab__head p {
+      display: none;
+    }
+    .lab__tabs {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 0.25rem;
+    }
+    .lab__tabs button {
+      flex-direction: column;
+      align-items: center;
+      gap: 0.15rem;
+      padding: 0.45rem 0.1rem;
+      font-size: 0.6rem;
+      letter-spacing: 0.02em;
+    }
+    .lab__long {
+      display: none;
+    }
+    .lab__short {
+      display: block;
+    }
+  }
+  .lab__ctl {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+  .lab__ctl .lab__out {
+    flex: 1 1 16rem;
+    margin: 0;
+  }
+  .lab__ctl .lab__btn {
+    margin: 0;
+    flex: none;
+  }
+  @media (max-width: 640px) {
+    .lab__ctl .lab__btn {
+      width: 100%;
+    }
+  }
+  .lab__next {
+    display: block;
+    margin: 1.1rem auto 0;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text);
+    background: transparent;
+    border: 1px solid var(--highlight);
+    padding: 0.6rem 1rem;
+    cursor: pointer;
+  }
+  .lab__ctl .lab__next {
+    margin: 0;
+  }
+  @media (max-width: 640px) {
+    .lab__ctl .lab__next {
+      width: 100%;
+    }
+  }
+  .lab__next[hidden] {
+    display: none;
+  }
   .lab__panel {
     animation: lab-in 0.35s var(--ease-out);
   }
@@ -222,8 +305,8 @@ const modules = ['network', 'database', 'api', 'messaging', 'worker', 'kms', 'ob
     }
   }
   .lab__out {
-    margin: 1.1rem 0 0;
-    padding: 0.7rem 0.9rem;
+    margin: 0;
+    padding: 0.6rem 0.85rem;
     border-left: 3px solid var(--highlight);
     background: var(--bg);
     font-size: 0.93rem;
@@ -257,61 +340,96 @@ const modules = ['network', 'database', 'api', 'messaging', 'worker', 'kms', 'ob
     display: none;
   }
 
-  /* Ship */
+  /* Ship: three lanes side by side on wide screens, one compact rail on phones. */
+  .pipe2 {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+  }
+  @media (max-width: 720px) {
+    .pipe2 {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 0.35rem;
+    }
+  }
   .pipe2__lane {
     font-family: var(--font-mono);
-    font-size: 0.66rem;
+    font-size: 0.64rem;
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: var(--text-muted);
-    margin: 0.6rem 0 0.4rem;
+    color: var(--accent);
+    margin: 0 0 0.35rem;
   }
   .pipe2 ol {
     list-style: none;
     margin: 0;
-    padding: 0;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.4rem;
+    padding: 0 0 0 0.9rem;
+    border-left: 2px solid var(--rule);
+    display: grid;
+    gap: 0.15rem;
   }
-  .pipe2 li,
-  .pipe2__gate {
-    font-size: 0.82rem;
-    padding: 0.45rem 0.7rem;
-    border: 1px solid var(--rule);
-    background: var(--bg);
+  .pipe2 li {
+    position: relative;
+    font-size: 0.84rem;
+    line-height: 1.35;
+    padding: 0.18rem 0;
     color: var(--text-muted);
-    transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+    transition: color 0.3s ease;
+  }
+  .pipe2 li::before {
+    content: '';
+    position: absolute;
+    left: calc(-0.9rem - 6px);
+    top: 0.5em;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    border: 2px solid var(--rule);
+    background: var(--surface);
+    transition: background-color 0.3s ease, border-color 0.3s ease;
   }
   .pipe2 li.is-run {
-    border-color: var(--highlight);
     color: var(--text);
   }
-  .pipe2 li.is-done {
+  .pipe2 li.is-run::before {
     border-color: var(--highlight);
-    background: color-mix(in srgb, var(--highlight) 18%, var(--bg));
+    animation: pipe-pulse 0.6s ease-in-out infinite alternate;
+  }
+  @keyframes pipe-pulse {
+    to {
+      background: var(--highlight);
+    }
+  }
+  .pipe2 li.is-done {
     color: var(--text);
   }
   .pipe2 li.is-done::before {
-    content: '✓ ';
-    color: var(--accent);
-    font-weight: 700;
+    border-color: var(--highlight);
+    background: var(--highlight);
   }
   .pipe2__gate {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.6rem;
-    margin: 0.6rem 0;
-    border-style: dashed;
+    margin: 0.5rem 0 0;
+    font-size: 0.8rem;
+    padding: 0.35rem 0.6rem;
+    border: 1px dashed var(--rule);
+    color: var(--text-muted);
   }
   .pipe2__gate.is-waiting {
     border-color: var(--highlight);
     color: var(--text);
   }
-  .pipe2__gate .lab__btn {
-    margin: 0;
+  @media (max-width: 720px) {
+    .pipe2__col {
+      display: grid;
+      grid-template-columns: 6.5rem minmax(0, 1fr);
+      gap: 0 0.5rem;
+    }
+    .pipe2__lane {
+      padding-top: 0.25rem;
+    }
+    .pipe2__gate {
+      grid-column: 2;
+    }
   }
 
   /* Load */
@@ -586,16 +704,43 @@ const modules = ['network', 'database', 'api', 'messaging', 'worker', 'kms', 'ob
     /* Tabs */
     const tabs = $$<HTMLButtonElement>('[data-lab-tab]');
     const panels = $$<HTMLElement>('[data-lab-panel]');
+    const next = $<HTMLButtonElement>('[data-lab-next]');
+    let current = 0;
+    /* Keep the tabs, the control and the experiment on one screen: if the lab
+       has drifted off the top, bring its top back under the header. */
+    const strip = $('.lab__tabs');
+    const frame = () => {
+      const top = strip.getBoundingClientRect().top;
+      if (top < 100 || top > window.innerHeight * 0.3) strip.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
+    };
     const select = (i: number, focus = false) => {
+      current = i;
       tabs.forEach((t, k) => {
         t.setAttribute('aria-selected', String(k === i));
         t.tabIndex = k === i ? 0 : -1;
       });
       panels.forEach((p, k) => (p.hidden = k !== i));
+      next.hidden = true;
       if (focus) tabs[i].focus();
     };
+    /* After a run, offer the next experiment right where the eye already is. */
+    const done = () => {
+      if (current >= tabs.length - 1) return;
+      next.textContent = `Next: ${tabs[current + 1].querySelector('.lab__long')!.textContent} \u2192`;
+      // It sits beside the run button, inside the part already on screen.
+      panels[current].querySelector('.lab__ctl')!.append(next);
+      next.hidden = false;
+    };
+    next.addEventListener('click', () => {
+      select(current + 1);
+      frame();
+    });
+    lab.querySelectorAll<HTMLButtonElement>('.lab__ctl .lab__btn').forEach((b) => b.addEventListener('click', frame));
     tabs.forEach((t, i) => {
-      t.addEventListener('click', () => select(i));
+      t.addEventListener('click', () => {
+        select(i);
+        frame();
+      });
       t.addEventListener('keydown', (e) => {
         const d = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
         if (d) {
@@ -637,17 +782,22 @@ const modules = ['network', 'database', 'api', 'messaging', 'worker', 'kms', 'ob
         gate.classList.add('is-waiting');
         approve.hidden = false;
         approve.disabled = false;
+        merge.hidden = true;
         out.textContent = 'Dev is healthy. Prod waits for a person. Your call.';
         approve.focus({ preventScroll: true });
       });
       approve.addEventListener('click', async () => {
         approve.disabled = true;
+        approve.hidden = true;
+        merge.hidden = false;
+        merge.disabled = true;
         gate.classList.remove('is-waiting');
         out.textContent = 'Approved. Same image, now going to prod.';
         await run(lists[2]);
         out.textContent = 'In prod. The image you approved is the one that was tested in dev, and no access key was used anywhere: GitHub signs in to AWS with OIDC.';
         merge.disabled = false;
         merge.textContent = 'Merge another';
+        done();
       });
     }
 
@@ -704,6 +854,7 @@ const modules = ['network', 'database', 'api', 'messaging', 'worker', 'kms', 'ob
           out.textContent = '19,602 requests, 0 failed, p95 58 ms against a 1 second target. Auto scaling went from 2 to 5 tasks and back down.';
           btn.disabled = false;
           btn.textContent = 'Run it again';
+          done();
         };
         requestAnimationFrame(tick);
       });
@@ -751,6 +902,7 @@ const modules = ['network', 'database', 'api', 'messaging', 'worker', 'kms', 'ob
         window.clearInterval(timer);
         btn.disabled = false;
         btn.textContent = 'Break it again';
+        done();
       });
     }
 
@@ -778,6 +930,7 @@ const modules = ['network', 'database', 'api', 'messaging', 'worker', 'kms', 'ob
           out.textContent = 'Stable 21 minutes after the restore was requested, against a 2 hour target. The newest restorable point was under 5 minutes old, against 15.';
           btn.disabled = false;
           btn.textContent = 'Run the drill again';
+          done();
         };
         requestAnimationFrame(tick);
       });

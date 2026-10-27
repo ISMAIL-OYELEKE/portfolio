@@ -79,6 +79,17 @@
   background-color: var(--bg);
 }
 
+/* By day (Light theme) the page banners and the closing call to action
+   become the same daytime sky as the home page flight, so switching theme
+   changes what you see above the fold on every page. */
+:root[data-theme='light'] .page-hero,
+:root[data-theme='light'] .closing {
+  --text-muted: #e3ecf7;
+  --rule: rgb(255 255 255 / 0.35);
+  --accent: #ffd27a;
+  background: linear-gradient(180deg, #1f5596 0%, #3a74b6 60%, #5b93d0 100%);
+}
+
 *,
 *::before,
 *::after {
@@ -228,9 +239,17 @@ hr {
   color: var(--text-muted);
 }
 
+/* Section headings sit centred on every page, like the home page. */
 .section-head {
   max-width: 44rem;
-  margin-bottom: clamp(2rem, 4vw, 3rem);
+  margin: 0 auto clamp(2rem, 4vw, 3rem);
+  text-align: center;
+}
+.section-head .lede {
+  margin-inline: auto;
+}
+.shell > .btn-row {
+  justify-content: center;
 }
 
 /* A single hairline rule with a amber tick: the one recurring flourish. */
@@ -244,7 +263,7 @@ hr {
 .rule-tick::before {
   content: '';
   position: absolute;
-  left: 0;
+  left: calc(50% - 1.75rem);
   top: -1px;
   width: 3.5rem;
   height: 3px;
