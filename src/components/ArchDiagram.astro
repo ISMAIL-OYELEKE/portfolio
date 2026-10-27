@@ -153,8 +153,25 @@ const first = flow.steps[0];
     let raf = 0;
     let packets: { c: SVGCircleElement; p: [number, number][]; L: number; o: number }[] = [];
 
+    // The drawing is fetched once, then shown; the flow never runs over an
+    // empty box while it is still on its way.
+    let ready = false;
+    let fetching = false;
+    let wanted = false;
     const load = () => {
-      if (!img.getAttribute('href')) img.setAttribute('href', src);
+      if (ready || fetching) return;
+      fetching = true;
+      const probe = new Image();
+      probe.onload = () => {
+        img.setAttribute('href', src);
+        ready = true;
+        root.classList.add('is-ready');
+        if (wanted) play();
+      };
+      probe.onerror = () => {
+        fetching = false;
+      };
+      probe.src = src;
     };
     const show = (i: number) => {
       step = i;
@@ -204,12 +221,14 @@ const first = flow.steps[0];
     };
     const play = () => {
       load();
-      if (reduce || playing || !steps.length) return;
+      wanted = true;
+      if (!ready || reduce || playing || !steps.length) return;
       playing = true;
       t0 = performance.now();
       raf = requestAnimationFrame(frame);
     };
     const stop = () => {
+      wanted = false;
       playing = false;
       cancelAnimationFrame(raf);
     };
@@ -218,9 +237,9 @@ const first = flow.steps[0];
     root.addEventListener('adg:play', () => {
       show(0);
       root.dataset.on = '';
-      // Off screen, it waits: the drawing loads once it scrolls near, so it
-      // never competes with the home page's opening for bandwidth.
+      // Off screen, it waits; the drawing itself is fetched early (below).
       if (visible) play();
+      else if (document.readyState === 'complete') load();
     });
     root.addEventListener('adg:stop', () => {
       stop();
@@ -236,6 +255,20 @@ const first = flow.steps[0];
       },
       { rootMargin: '200px 0px' },
     ).observe(root);
+    // Fetch well before it scrolls into view.
+    new IntersectionObserver(
+      ([entry], io) => {
+        if (!entry.isIntersecting) return;
+        load();
+        io.disconnect();
+      },
+      { rootMargin: '1500px 0px' },
+    ).observe(root);
+    // The diagram on show is fetched as soon as the page itself has loaded,
+    // after the opening has what it needs.
+    const early = () => root.dataset.on !== undefined && load();
+    if (document.readyState === 'complete') setTimeout(early, 300);
+    else addEventListener('load', () => setTimeout(early, 300), { once: true });
 
     if (steps.length) show(0);
   });

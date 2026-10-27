@@ -446,6 +446,14 @@ The project instructions hold the full text. Every change must keep to them.
     take their name from their visible text. Home now scores 100 for
     accessibility, best practices and SEO, 97-98 speed on phones and 100 on
     laptops.
+29. Diagram loading fix (Ismail saw the Kestrel flow moving over an empty
+    box for seconds). Cause: the Kestrel SVG was 441KB (21 icons embedded as
+    300px PNGs shown at 30px), and since item 27 it was only fetched once in
+    view. Icons re-encoded as 72px WebP: the file is now 82KB (46KB
+    gzipped). Diagrams on show are fetched right after the page loads,
+    others 1500px before they scroll in, and the flow only starts once the
+    drawing is there. On a slow phone connection the drawing is ready as
+    the section scrolls in.
 
 ## Open questions
 
