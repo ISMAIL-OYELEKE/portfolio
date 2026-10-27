@@ -44,13 +44,6 @@ const isCurrent = (href: string) => path === href || (href !== '/' && path.start
     </button>
   </div>
 
-  {/* On phones the page names sit behind the menu button, so the page you
-      are on hangs below the bar as a small tab, circled by the same cloud. */}
-  <div class="masthead__here" data-here aria-hidden="true">
-    <span data-here-label></span>
-    <svg data-here-cloud></svg>
-  </div>
-
   <div class="masthead__panel" id="site-menu" data-menu-panel hidden>
     <ul data-cloud-track>
       <li class="masthead__cloud" aria-hidden="true"><svg data-cloud></svg></li>
@@ -317,52 +310,6 @@ const isCurrent = (href: string) => path === href || (href !== '/' && path.start
     border-color: var(--highlight);
   }
 
-  .masthead__here {
-    display: none;
-  }
-  @media (max-width: 1040px) {
-    .masthead__here {
-      display: block;
-      position: absolute;
-      top: 100%;
-      left: 50%;
-      padding: 0.45rem 1.4rem 0.6rem;
-      background: var(--brand-ink);
-      border: 1px solid var(--brand-line);
-      border-top: 0;
-      border-radius: 0 0 14px 14px;
-      font-family: var(--font-mono);
-      font-size: 0.66rem;
-      font-weight: 500;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      color: var(--highlight);
-      pointer-events: none;
-      opacity: 0;
-      transform: translate(-50%, -6px);
-      transition:
-        opacity 0.3s ease,
-        transform 0.3s var(--ease-out);
-    }
-    .masthead__here.is-on {
-      opacity: 1;
-      transform: translate(-50%, 0);
-    }
-    .masthead__here span {
-      position: relative;
-      z-index: 1;
-    }
-    .masthead__here svg {
-      position: absolute;
-      overflow: visible;
-    }
-    .masthead__here :global(path) {
-      fill: none;
-      stroke: var(--highlight);
-      stroke-width: 1.2;
-      stroke-linejoin: round;
-    }
-  }
   @media (max-width: 1040px) {
     .masthead__nav,
     .masthead__cta {
@@ -461,12 +408,12 @@ const isCurrent = (href: string) => path === href || (href !== '/' && path.start
     return { root, mark, svg, path, links: [...root.querySelectorAll<HTMLAnchorElement>('a:not(.masthead__panel-cv)')], box: null };
   });
 
-  const here_ = document.querySelector<HTMLElement>('[data-here]');
-  const hereLabel = here_?.querySelector<HTMLElement>('[data-here-label]');
-  const hereCloud = here_?.querySelector<SVGSVGElement>('[data-here-cloud]');
-
+  // Only works while something changes: a scroll, a resize, the menu opening,
+  // or the marker still gliding to its place. Idle pages cost nothing.
   let current = '';
+  let queued = false;
   const frame = () => {
+    queued = false;
     const href = activeHref();
     if (href !== current) {
       current = href;
@@ -477,36 +424,26 @@ const isCurrent = (href: string) => path === href || (href !== '/' && path.start
         }),
       );
     }
-    // The phone tab: the current page's name in its own small cloud.
-    if (here_ && hereLabel && hereCloud) {
-      const link = tracks[0]?.links.find((a) => isAt(a, current));
-      const name = link?.textContent?.trim() ?? '';
-      const open = toggle?.getAttribute('aria-expanded') === 'true';
-      here_.classList.toggle('is-on', !!name && !open);
-      if (name && name !== hereLabel.textContent) {
-        hereLabel.textContent = name;
-        const w = hereLabel.offsetWidth + 22;
-        const h = hereLabel.offsetHeight + 18;
-        hereCloud.setAttribute('viewBox', `0 0 ${w} ${h}`);
-        hereCloud.setAttribute('width', String(w));
-        hereCloud.setAttribute('height', String(h));
-        hereCloud.style.left = `${hereLabel.offsetLeft - 11}px`;
-        hereCloud.style.top = `${hereLabel.offsetTop - 12}px`;
-        hereCloud.innerHTML = `<path d="${cloudPath(w, h)}"/>`;
-      }
-    }
+    let moving = false;
     tracks.forEach((t) => {
       const link = t.links.find((a) => isAt(a, current));
       const label = link?.firstElementChild as HTMLElement | undefined;
       const shown = !!label && label.offsetParent !== null;
       t.mark.classList.toggle('is-on', shown);
-      if (!shown) return;
+      if (!shown) {
+        t.box = null;
+        return;
+      }
       const box = t.root.getBoundingClientRect();
       const r = label!.getBoundingClientRect();
       const goal = [r.left - box.left - 12, r.top - box.top - 14, r.width + 24, r.height + 21];
       // Glide from the last place, or jump there the first time.
       if (!t.box || reduce) t.box = goal;
-      else t.box = t.box.map((v, i) => v + (goal[i] - v) * 0.16);
+      else {
+        t.box = t.box.map((v, i) => v + (goal[i] - v) * 0.16);
+        if (t.box.some((v, i) => Math.abs(goal[i] - v) > 0.3)) moving = true;
+        else t.box = goal;
+      }
       const [x, y, w, h] = t.box;
       t.mark.style.transform = `translate(${x}px, ${y}px)`;
       t.mark.style.width = `${w}px`;
@@ -514,7 +451,16 @@ const isCurrent = (href: string) => path === href || (href !== '/' && path.start
       t.svg.setAttribute('viewBox', `0 0 ${w} ${h}`);
       t.path.setAttribute('d', cloudPath(w, h));
     });
+    if (moving) kick();
+  };
+  const kick = () => {
+    if (queued) return;
+    queued = true;
     requestAnimationFrame(frame);
   };
-  requestAnimationFrame(frame);
+  if (sections.length) addEventListener('scroll', kick, { passive: true });
+  addEventListener('resize', kick);
+  toggle?.addEventListener('click', () => setTimeout(kick));
+  document.fonts?.ready.then(kick);
+  kick();
 </script>

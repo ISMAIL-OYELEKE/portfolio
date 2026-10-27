@@ -7,6 +7,10 @@
 import SocialIcon from './SocialIcon.astro';
 import { freelanceProjects } from '../data/projects';
 
+/** Heading level for the two titles: 2 when the page has no section heading above. */
+const { level = 3 } = Astro.props as { level?: 2 | 3 };
+const H = `h${level}`;
+
 const dimex = freelanceProjects.find((p) => p.slug === 'cloud-dimex-website')!;
 const pos = freelanceProjects.find((p) => p.slug === 'cerbiol-gadgets-pos')!;
 
@@ -33,7 +37,7 @@ const steps = [
   <article class="fs__panel" data-review>
     <header>
       <span class="fs__ctx">{dimex.context}</span>
-      <h3>{dimex.title}</h3>
+      <H>{dimex.title}</H>
       <p>{dimex.problem}</p>
     </header>
 
@@ -86,7 +90,7 @@ const steps = [
   <article class="fs__panel" data-sale>
     <header>
       <span class="fs__ctx">{pos.context}</span>
-      <h3>{pos.title}</h3>
+      <H>{pos.title}</H>
       <p>
         Money only moves through one database function that does everything in a single transaction.
         Ring up a sale, then try cutting the power halfway through.
@@ -168,7 +172,7 @@ const steps = [
     color: var(--accent);
     margin-bottom: 0.4rem;
   }
-  .fs__panel h3 {
+  .fs__panel :is(h2, h3) {
     font-size: 1.35rem;
     margin-bottom: 0.5rem;
   }

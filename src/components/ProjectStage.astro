@@ -39,7 +39,7 @@ const month = (d: string) => d.replace(/^(\w{3})\w*/, '$1').toUpperCase();
 
   {
     list.map((p, i) => (
-      <div class="ps__panel" role="tabpanel" id={`ps-panel-${i}`} aria-labelledby={`ps-tab-${i}`} data-ps-panel={i}>
+      <div class:list={['ps__panel', { 'is-on': i === 0 }]} role="tabpanel" id={`ps-panel-${i}`} aria-labelledby={`ps-tab-${i}`} data-ps-panel={i}>
         <a class="btn btn--primary ps__case ps__case--top" href={`/projects/${p.slug}`}>
           Read the case study
           <SocialIcon name="arrow" size={15} />
@@ -156,10 +156,10 @@ const month = (d: string) => d.replace(/^(\w{3})\w*/, '$1').toUpperCase();
     align-items: start;
   }
   /* With the script, only the chosen project shows. */
-  .ps.is-live .ps__panel:not(.is-on) {
+  :global(:root:not(.no-js)) .ps .ps__panel:not(.is-on) {
     display: none;
   }
-  .ps:not(.is-live) .ps__panel + .ps__panel {
+  :global(.no-js) .ps .ps__panel + .ps__panel {
     grid-column: 2;
     padding-top: 1.5rem;
     border-top: 1px solid var(--rule);
@@ -231,10 +231,10 @@ const month = (d: string) => d.replace(/^(\w{3})\w*/, '$1').toUpperCase();
     .ps {
       grid-template-columns: minmax(0, 1fr);
     }
-    .ps.is-live .ps__list {
+    :global(:root:not(.no-js)) .ps .ps__list {
       display: none;
     }
-    .ps.is-live .ps__step {
+    :global(:root:not(.no-js)) .ps .ps__step {
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -272,7 +272,7 @@ const month = (d: string) => d.replace(/^(\w{3})\w*/, '$1').toUpperCase();
       grid-template-columns: minmax(0, 1fr);
       gap: 1rem;
     }
-    .ps:not(.is-live) .ps__panel + .ps__panel {
+    :global(.no-js) .ps .ps__panel + .ps__panel {
       grid-column: auto;
     }
     .ps__case--top {

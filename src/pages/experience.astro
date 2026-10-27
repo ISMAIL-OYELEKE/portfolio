@@ -26,7 +26,7 @@ const description =
 
   <section class="section">
     <div class="shell">
-      <div class="router" data-router hidden>
+      <div class="router" data-router>
         <p class="router__label">
           Route by tool. Pick one to see where I used it.
           <span class="router__out" data-router-out aria-live="polite"></span>
@@ -324,7 +324,8 @@ const description =
     margin: 0 auto clamp(2rem, 4vw, 3rem);
     text-align: center;
   }
-  .router[hidden] {
+  /* Without the script the filter does nothing, so it is not shown. */
+  :global(.no-js) .router {
     display: none;
   }
   .router__label {
