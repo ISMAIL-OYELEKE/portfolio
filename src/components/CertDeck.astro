@@ -225,7 +225,7 @@ const cards = [
       }
       // Room left on screen for the cards once the heading and buttons are counted.
       const gap = w < 640 ? 8 : 12;
-      const other = section ? section.offsetHeight - deck.offsetHeight : 320;
+      const other = section ? section.offsetHeight - deck.offsetHeight - parseFloat(getComputedStyle(section).paddingBottom) : 320;
       const avail = Math.max(240, window.innerHeight - mast() - other);
       // Pick the column count that gives the biggest cards that still fit.
       let best = { cols: 2, scale: 0 };
@@ -235,7 +235,8 @@ const cards = [
         if (s > best.scale) best = { cols, scale: s };
       }
       const { cols } = best;
-      const scale = Math.max(0.36, best.scale);
+      // Keep cards legible, but never wider than the deck.
+      const scale = Math.min((w - (cols - 1) * gap) / (cols * cw), Math.max(0.36, best.scale));
       const sw = cw * scale, sh = ch * scale;
       const ox = (w - (cols * sw + (cols - 1) * gap)) / 2;
       placed = cards.map((_, i) => ({ x: ox + (i % cols) * (sw + gap), y: Math.floor(i / cols) * (sh + gap), s: scale }));
