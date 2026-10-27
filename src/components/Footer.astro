@@ -230,25 +230,36 @@ const year = new Date().getFullYear();
 </style>
 
 <script>
-  // Greets the visitor by their own city and time, read from the browser's
-  // time zone, and says how long this page took to reach them. Nothing is
-  // sent anywhere; it is all worked out on their device.
+  import { tzCountry } from '../data/tzCountry';
+
+  // Tells the visitor which country they are reading from and their time,
+  // both read from the browser's time zone, and how long this page took to
+  // reach them. Nothing is sent anywhere; it is all worked out on their device.
+  // The clock keeps ticking while the page is open.
   const line = document.querySelector<HTMLElement>('[data-visitor]');
   if (line) {
     try {
       const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
-      const place = tz.includes('/') ? (tz.split('/').pop() || '').replace(/_/g, ' ') : '';
-      const time = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+      const code = tzCountry[tz];
+      const country = code ? new Intl.DisplayNames(['en'], { type: 'region' }).of(code) || '' : '';
       const nav = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming | undefined;
       const ms = nav && nav.responseEnd ? Math.round(nav.responseEnd) : 0;
       const b = (s: string) => `<b>${s.replace(/[<>&]/g, '')}</b>`;
       // Only the live domain is served by CloudFront; a preview copy says so plainly.
       const live = location.hostname === 'ismailoyeleke.com' || location.hostname.endsWith('.ismailoyeleke.com');
-      line.innerHTML =
-        (place ? `You are reading this in ${b(place)} at ${b(time)}. ` : '') +
-        (live
-          ? `This page reached you through Route 53, CloudFront and S3${ms ? ` in ${b(`${ms} ms`)}` : ''}, deployed by GitHub Actions. I built that too.`
-          : 'This is a preview copy. The live site runs on Route 53, CloudFront and S3, deployed by GitHub Actions. I built that too.');
+      const rest = live
+        ? `This page reached you through Route 53, CloudFront and S3${ms ? ` in ${b(`${ms} ms`)}` : ''}, deployed by GitHub Actions. I built that too.`
+        : 'This is a preview copy. The live site runs on Route 53, CloudFront and S3, deployed by GitHub Actions. I built that too.';
+      const render = () => {
+        const time = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+        line.innerHTML = (country ? `You are reading this in ${b(country)} at ${b(time)}. ` : `Your time is ${b(time)}. `) + rest;
+      };
+      render();
+      // Tick on the minute, then every minute after.
+      setTimeout(() => {
+        render();
+        setInterval(render, 60000);
+      }, 60000 - (Date.now() % 60000) + 50);
     } catch {
       /* keep the plain sentence */
     }
