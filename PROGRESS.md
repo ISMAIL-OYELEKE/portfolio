@@ -391,6 +391,16 @@ The project instructions hold the full text. Every change must keep to them.
     architectures.ts); case studies show the one animated diagram instead of a
     flow plus a static diagram; Contact B (a service health page with a real
     light mode and a live Lagos clock).
+24. Hero and diagram review, 27 October. The scroll hints and the altitude
+    readout lost their boxes and read through a soft text shadow instead. The
+    sea of cloud at the end of the flight is gone; the sky now fades into the
+    page below. The flight plays over the first 80% of the scroll and holds
+    the finished frame (name, role, buttons) for the rest, and progress eases
+    towards the scroll position so a mouse wheel glides. The sky canvas
+    re-checks its size every frame and on pageshow, which fixes the stretched,
+    blurry sky after coming back to the home page on phones. Architecture
+    diagrams: the gold highlight lines are gone; small amber packets glide
+    along each step's own arrows, like the old flow drawings.
 
 ## Open questions
 

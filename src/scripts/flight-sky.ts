@@ -1,7 +1,6 @@
 /*
  * The painted sky behind the home page flight: a Lagos skyline on the lagoon
- * with the Third Mainland Bridge, volumetric clouds, and a sea of cloud above
- * them. Everything is drawn once into off-screen canvases per theme (day for
+ * with the Third Mainland Bridge and volumetric clouds. Everything is drawn once into off-screen canvases per theme (day for
  * Light, night for Dark), then composited each frame, so scrolling stays
  * smooth on phones.
  */
@@ -354,8 +353,7 @@ export function createSky(el: HTMLCanvasElement) {
   const rnd = mulberry(7);
   const stars = Array.from({ length: 140 }, () => ({ x: rnd(), y: rnd() * 0.75, r: rnd() * 1.3 + 0.3, tw: rnd() * 6 }));
 
-  // Clouds in vw/vh: far, mid, the near bank the camera flies through, and
-  // the sea of cloud that sits below once we are above the weather.
+  // Clouds in vw/vh: far, mid, and the near bank the camera flies through.
   const clouds: CloudSprite[] = [];
   const add = (layer: number, n: number, speed: number, size: number, yFrom: number, ySpread: number) => {
     for (let i = 0; i < n; i++) {
@@ -376,17 +374,6 @@ export function createSky(el: HTMLCanvasElement) {
   add(1, 6, 0.9, 42, 105, 50);
   add(2, 5, 1.6, 70, 130, 40);
   add(3, 3, 2.3, 105, 150, 30);
-  const sea: CloudSprite[] = Array.from({ length: 9 }, (_, i) => ({
-    sprite: i % 6,
-    x: i * 14 - 20,
-    y: 0,
-    w: 46 + rnd() * 20,
-    speed: 0,
-    layer: 4,
-    side: 0,
-    drift: 0.15 + rnd() * 0.15,
-  }));
-
   let dpr = 1;
   const resize = () => {
     dpr = Math.min(2, window.devicePixelRatio || 1);
@@ -395,11 +382,18 @@ export function createSky(el: HTMLCanvasElement) {
   };
   resize();
   window.addEventListener('resize', resize);
+  // Coming back to the page (the back button, or a phone restoring the tab)
+  // can leave the canvas at a stale size, which stretches and blurs the sky.
+  window.addEventListener('pageshow', resize);
 
   const theme = (): Theme => (document.documentElement.dataset.theme === 'dark' ? 'night' : 'day');
 
   /** p is the flight progress 0..1, t is seconds since load. */
   function draw(p: number, t: number) {
+    // Match the canvas to its box on every frame, so it is never drawn stretched.
+    const d = Math.min(2, window.devicePixelRatio || 1);
+    if (d !== dpr || el.width !== Math.round(el.clientWidth * d) || el.height !== Math.round(el.clientHeight * d)) resize();
+    if (!el.width || !el.height) return;
     const W = el.width / dpr;
     const H = el.height / dpr;
     const th = theme();
@@ -491,7 +485,7 @@ export function createSky(el: HTMLCanvasElement) {
       const h = w * (300 / 640);
       const yy = y * vh;
       if (yy > H || yy + h < 0) continue;
-      // Everything but the sea of cloud clears away from the name.
+      // Every cloud clears away from the name.
       // The near banks are thin, so the camera passes through wisps, not a wall.
       const thin = c.layer === 3 ? 0.55 : c.layer === 2 ? 0.8 : 1;
       ctx.globalAlpha = thin * (c.layer >= 2 ? 1 - seg(p, 0.6, 0.68) : 1 - seg(p, 0.6, 0.7));
@@ -506,22 +500,6 @@ export function createSky(el: HTMLCanvasElement) {
       ctx.globalAlpha = fog * 0.3;
       ctx.fillStyle = pal.fog;
       ctx.fillRect(0, 0, W, H);
-      ctx.globalAlpha = 1;
-    }
-
-    // Above the weather: a sea of cloud rolls in along the bottom edge. It is a
-    // low band, flattened and capped in height, so it never reaches the name
-    // or the buttons above it.
-    const seaIn = ease(seg(p, 0.55, 0.75));
-    if (seaIn > 0) {
-      const band = W < 700 ? Math.min(H * 0.2, 160) : Math.min(H * 0.13, 110);
-      for (const s of sea) {
-        const w = s.w * vw;
-        const h = Math.max(Math.min(w * (300 / 640) * 0.7, band * 2.2), band * 1.2);
-        const x = ((s.x + s.drift * t) % 130 + 130) % 130 - 20;
-        ctx.globalAlpha = seaIn;
-        ctx.drawImage(a.clouds[s.sprite], x * vw, H - band + (1 - seaIn) * H * 0.4, w, h);
-      }
       ctx.globalAlpha = 1;
     }
   }

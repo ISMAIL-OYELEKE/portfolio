@@ -1,7 +1,7 @@
 ---
 /* The home page opening: the Lagos skyline on the lagoon, a commit rising
    off a rooftop, a climb through the clouds, then the DevOps loop and the
-   name above a sea of cloud. Day in Light theme, night in Dark. The scroll
+   name in clear sky, which fades into the page below. Day in Light theme, night in Dark. The scroll
    drives it. With reduced motion the section shows its final frame. */
 import { site } from '../data/site';
 import SocialIcon from './SocialIcon.astro';
@@ -56,6 +56,7 @@ const loopPath =
     </div>
 
     <div class="flight__cue" data-cue aria-hidden="true">Scroll to lift off<i></i></div>
+    <div class="flight__fade" data-fade aria-hidden="true"></div>
   </div>
 </section>
 
@@ -72,8 +73,10 @@ const loopPath =
     overflow: hidden;
   }
   /* The scroll-driven version, switched on by the script. */
+  /* The last part of the scroll holds the finished frame (name, role and
+     buttons) still, so it can be read before the page moves on. */
   .flight.is-flying {
-    height: 340vh;
+    height: 400vh;
   }
   .flight.is-flying .flight__scene {
     position: sticky;
@@ -81,7 +84,7 @@ const loopPath =
   }
   @media (max-width: 640px) {
     .flight.is-flying {
-      height: 300vh;
+      height: 350vh;
     }
   }
 
@@ -137,17 +140,21 @@ const loopPath =
     font-style: normal;
     color: var(--highlight);
   }
-  /* The two hints sit on a navy backing so they read over the skyline and the
-     sky in both themes. */
+  /* The hints have no box: a soft, close shadow keeps them readable over
+     the skyline and the sky in both themes. */
+  .flight__note,
+  .flight__alt,
+  .flight__cue {
+    text-shadow:
+      0 1px 2px rgb(15 30 51 / 0.85),
+      0 0 12px rgb(15 30 51 / 0.55);
+  }
   .flight__note {
-    display: inline-block;
     color: var(--paper);
     font-size: clamp(1rem, 1.6vw, 1.2rem);
+    font-weight: 500;
     margin: 1.3rem auto 0;
     max-width: 34rem;
-    padding: 0.55rem 1rem;
-    background: rgb(15 30 51 / 0.72);
-    border-left: 2px solid var(--highlight);
   }
 
   .flight__commit {
@@ -166,14 +173,11 @@ const loopPath =
     right: var(--gutter);
     top: 50%;
     transform: translateY(-50%);
-    padding: 0.5rem 0.75rem;
-    background: rgb(15 30 51 / 0.55);
-    border-left: 2px solid var(--highlight);
     font-family: var(--font-mono);
     font-size: 0.68rem;
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: #a9b6c8;
+    color: #dfe7f1;
     text-align: right;
   }
   .flight__alt b {
@@ -207,15 +211,13 @@ const loopPath =
     color: var(--paper);
     text-align: center;
     white-space: nowrap;
-    padding: 0.55rem 1rem 0.7rem;
-    background: rgb(15 30 51 / 0.72);
   }
   .flight__cue i {
     display: block;
     width: 2px;
     height: 34px;
     margin: 0.6rem auto 0;
-    background: rgb(255 255 255 / 0.25);
+    background: rgb(255 255 255 / 0.4);
     position: relative;
     overflow: hidden;
   }
@@ -235,6 +237,22 @@ const loopPath =
     to {
       top: 34px;
     }
+  }
+
+  /* At the end of the flight the sky fades into the page below, so the hero
+     flows into the next section without a hard edge. */
+  .flight__fade {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 14%;
+    background: linear-gradient(to bottom, rgb(244 245 242 / 0), var(--paper));
+    opacity: var(--end, 0);
+    pointer-events: none;
+  }
+  :global(:root[data-theme='dark']) .flight__fade {
+    background: linear-gradient(to bottom, rgb(10 21 38 / 0), var(--brand-ink));
   }
 
   .flight__stage {
@@ -426,6 +444,7 @@ const loopPath =
     /* Still version: the final frame, redrawn when the theme changes. */
     if (reduce) {
       spin(0, true);
+      section.style.setProperty('--end', '1');
       const still = () => sky.draw(1, 0);
       still();
       document.addEventListener('themechange', still);
@@ -490,19 +509,30 @@ const loopPath =
           el.style.opacity = String(k);
           el.style.transform = `translateY(${(1 - k) * 16}px)`;
         });
+        section.style.setProperty('--end', String(seg(p, 0.78, 0.92)));
         return p > 0.7;
       };
 
       const sceneEl = section.querySelector<HTMLElement>('.flight__scene')!;
+      // The flight plays over the first 80% of the scroll; the rest holds the
+      // finished frame. Progress eases towards the scroll position, so a
+      // mouse wheel's steps turn into one smooth glide.
+      const PLAY = 0.8;
+      let shown = -1;
+      let last = 0;
       const tick = (now: number) => {
         const r = section.getBoundingClientRect();
+        const dt = Math.min(100, now - (last || now));
+        last = now;
         // Skip the work while the hero is scrolled out of sight.
         if (r.bottom > 0) {
           const top = parseFloat(getComputedStyle(sceneEl).top) || 0;
-          const p = clamp((top - r.top) / (section.offsetHeight - sceneEl.clientHeight));
+          const target = clamp((top - r.top) / (section.offsetHeight - sceneEl.clientHeight) / PLAY);
+          shown = shown < 0 ? target : shown + (target - shown) * (1 - Math.exp(-dt / 140));
+          if (Math.abs(target - shown) < 0.0005) shown = target;
           const t = now / 1000;
-          spin(t, render(p, t));
-        }
+          spin(t, render(shown, t));
+        } else shown = -1;
         requestAnimationFrame(tick);
       };
       requestAnimationFrame(tick);
