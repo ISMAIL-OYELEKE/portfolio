@@ -440,9 +440,12 @@ The project instructions hold the full text. Every change must keep to them.
     phone and laptop in light and dark found no console errors, failed
     files, broken internal links or sideways scroll. The contact form was
     run end to end with the Web3Forms reply simulated (success goes to
-    /thank-you, failure shows the email fallback). Known and kept: the
-    release timeline dims entries until you scroll to them, which Lighthouse
-    reads as low contrast (home accessibility 97).
+    /thank-you, failure shows the email fallback). Then, at Ismail's ask
+    for 100: the release timeline's unreached entries fade only to 0.86
+    (readable, above 4.5:1 in both themes) instead of 0.35, and cert cards
+    take their name from their visible text. Home now scores 100 for
+    accessibility, best practices and SEO, 97-98 speed on phones and 100 on
+    laptops.
 
 ## Open questions
 

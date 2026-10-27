@@ -142,8 +142,10 @@ const version = (i: number) => `v0.${i + 1}.0`;
     margin-bottom: 2.75rem;
     transition: opacity 0.6s ease, transform 0.6s var(--ease-out);
   }
+  /* Entries not reached yet sit slightly back and lower, but stay readable:
+     0.86 keeps every line above 4.5:1 contrast in both themes. */
   .history.is-live .rel {
-    opacity: 0.35;
+    opacity: 0.86;
     transform: translateY(14px);
   }
   .history.is-live .rel.is-on {
