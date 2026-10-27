@@ -7,6 +7,47 @@ import { site } from '../data/site';
 import { story, values, remember, education, community } from '../data/experience';
 import { skillGroups } from '../data/skills';
 import { skillIcon } from '../lib/skillIcons';
+import RequestTrace from '../components/RequestTrace.astro';
+import { projects } from '../data/projects';
+import { roles } from '../data/experience';
+
+// Where each skill shows up: the case studies whose stack names it, and the
+// roles whose tools do. Matched on whole words, ignoring Amazon and AWS prefixes.
+const aliases: Record<string, string> = {
+  ALB: 'Application Load Balancer',
+  ACM: 'Certificate Manager',
+  'Aviatrix (certified)': 'Aviatrix',
+};
+const words = (s: string) =>
+  s
+    .toLowerCase()
+    .replace(/\b(amazon|aws)\b/g, ' ')
+    .replace(/\(.*?\)/g, ' ')
+    .split(/[^a-z0-9.#+]+/)
+    .filter((w) => w && !/^\d+(\.\d+)?$/.test(w));
+const contains = (hay: string, needle: string) => {
+  const h = words(hay), n = words(needle);
+  if (!n.length) return false;
+  return h.some((_, i) => n.every((w, k) => h[i + k] === w));
+};
+const usedIn = (skill: string) => {
+  const key = aliases[skill] ?? skill;
+  return [
+    ...projects
+      .filter((p) => p.stack.some((s) => contains(s, key)))
+      .map((p) => ({ t: p.title, href: `/projects/${p.slug}` })),
+    ...roles.filter((r) => r.tools.some((t) => contains(t, key))).map((r) => ({ t: `${r.title}, ${r.company}`, href: '/experience' })),
+  ];
+};
+
+// What fails when each principle is switched off.
+const breaks: Record<string, string> = {
+  'Secure by default': 'A secret lands in the repo and a public bucket goes unnoticed until someone else notices it.',
+  'Automate everything': 'Environments drift apart, and the next rebuild happens from memory at 2am.',
+  'Cost aware': 'Idle servers bill all month for traffic that never came.',
+  Observable: 'The first alert is a customer complaint.',
+  'Document and share': 'Six months later, nobody remembers why it was built that way, including me.',
+};
 
 const description =
   'Ismail Oyeleke: how an IT support role at Nigeria’s airports led to AWS architecture, what he values in a build, and the community he founded in Lagos.';
@@ -93,12 +134,24 @@ const description =
         <span class="rule-tick"></span>
       </div>
 
-      <dl class="values">
+      <p class="health" data-health hidden>
+        <span class="health__dot" aria-hidden="true"></span>
+        <span data-health-text>All four policies on. System healthy.</span>
+        <span class="health__hint">Switch one off and see what breaks.</span>
+      </p>
+
+      <dl class="values" data-values>
         {
           values.map((v) => (
             <div class="values__item lift reveal">
-              <dt>{v.title}</dt>
+              <dt>
+                {v.title}
+                <button type="button" role="switch" aria-checked="true" class="switch" data-switch hidden>
+                  <span class="visually-hidden">{v.title}</span>
+                </button>
+              </dt>
               <dd>{v.body}</dd>
+              <dd class="values__break" data-break={breaks[v.title] ?? ''} aria-live="polite"></dd>
             </div>
           ))
         }
@@ -126,7 +179,7 @@ const description =
                 {g.items.map((item) => {
                   const icon = skillIcon(item);
                   return (
-                    <li class:list={['tag', icon && 'skill']}>
+                    <li class:list={['tag', icon && 'skill']} data-skill={item} data-used={JSON.stringify(usedIn(item))}>
                       {icon?.kind === 'aws' && <span class="skill__tile" aria-hidden="true" set:html={icon.svg} />}
                       {icon?.kind === 'mark' && (
                         <svg class="skill__mark" viewBox="0 0 24 24" aria-hidden="true" style={`color:${icon.color}`}>
@@ -143,13 +196,106 @@ const description =
         }
       </div>
 
+      <div class="used" data-used-panel hidden aria-live="polite">
+        <p class="used__hint">Tap any skill to see where I have used it.</p>
+      </div>
+
       <p class="note">
         Outside work: chess and running clubs. Based in {site.locality}, {site.country}, and open to{' '}
         {site.openTo}.
       </p>
     </div>
   </section>
+
+  <section class="section section--sunken">
+    <div class="shell">
+      <RequestTrace />
+    </div>
+  </section>
 </Base>
+
+<script>
+  /* Principles as switches: turn one off and the system reports what breaks. */
+  const health = document.querySelector<HTMLElement>('[data-health]');
+  const switches = [...document.querySelectorAll<HTMLButtonElement>('[data-switch]')];
+  if (health && switches.length) {
+    const text = health.querySelector<HTMLElement>('[data-health-text]')!;
+    health.hidden = false;
+    const update = () => {
+      const off = switches.filter((s) => s.getAttribute('aria-checked') === 'false').length;
+      const on = switches.length - off;
+      health.dataset.level = off === 0 ? 'ok' : off < 3 ? 'warn' : 'down';
+      text.textContent =
+        off === 0
+          ? `All ${switches.length} policies on. System healthy.`
+          : off === switches.length
+            ? 'Every policy off. This is how outages are made.'
+            : `${on} of ${switches.length} policies on. Incidents incoming.`;
+    };
+    switches.forEach((s) => {
+      s.hidden = false;
+      s.addEventListener('click', () => {
+        const nowOn = s.getAttribute('aria-checked') !== 'true';
+        s.setAttribute('aria-checked', String(nowOn));
+        const item = s.closest('.values__item')!;
+        item.classList.toggle('is-off', !nowOn);
+        const br = item.querySelector<HTMLElement>('[data-break]')!;
+        br.textContent = nowOn ? '' : br.dataset.break!;
+        update();
+      });
+    });
+    update();
+  }
+
+  /* Skills: tap one to see the case studies and roles that use it. */
+  const panel = document.querySelector<HTMLElement>('[data-used-panel]');
+  const skills = [...document.querySelectorAll<HTMLElement>('[data-skill]')];
+  if (panel && skills.length) {
+    panel.hidden = false;
+    let current: HTMLElement | null = null;
+    const show = (el: HTMLElement) => {
+      current?.classList.remove('is-picked');
+      if (current === el) {
+        current = null;
+        panel.innerHTML = '<p class="used__hint">Tap any skill to see where I have used it.</p>';
+        return;
+      }
+      current = el;
+      el.classList.add('is-picked');
+      const list = JSON.parse(el.dataset.used || '[]') as { t: string; href: string }[];
+      const name = el.dataset.skill!;
+      panel.replaceChildren();
+      const h = document.createElement('p');
+      h.className = 'used__title';
+      h.textContent = list.length ? `${name}, where it shows up` : `${name}: part of my toolkit, not yet in a case study here.`;
+      panel.append(h);
+      if (list.length) {
+        const ul = document.createElement('ul');
+        list.forEach((x) => {
+          const li = document.createElement('li');
+          const a = document.createElement('a');
+          a.href = import.meta.env.BASE_URL.replace(/\/$/, '') + x.href;
+          a.textContent = x.t;
+          li.append(a);
+          ul.append(li);
+        });
+        panel.append(ul);
+      }
+      if (panel.getBoundingClientRect().top > window.innerHeight) panel.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    };
+    skills.forEach((el) => {
+      el.tabIndex = 0;
+      el.setAttribute('role', 'button');
+      el.addEventListener('click', () => show(el));
+      el.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          show(el);
+        }
+      });
+    });
+  }
+</script>
 
 <style>
   .about__grid {
@@ -242,6 +388,10 @@ const description =
     background: var(--surface);
   }
   .values dt {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
     font-family: var(--font-display);
     font-size: 1.15rem;
     font-weight: 600;
@@ -253,6 +403,147 @@ const description =
     font-size: 0.94rem;
   }
 
+  .values__item {
+    transition: border-color 0.3s ease, background-color 0.3s ease;
+  }
+  .values__item.is-off {
+    border-color: #c4553f;
+  }
+  .values__item.is-off > dd:not(.values__break) {
+    text-decoration: line-through;
+    text-decoration-color: #c4553f;
+    opacity: 0.6;
+  }
+  .values__break:empty {
+    display: none;
+  }
+  .values__break {
+    margin-top: 0.75rem !important;
+    padding-left: 0.75rem;
+    border-left: 3px solid #c4553f;
+    color: var(--text) !important;
+    animation: break-in 0.35s var(--ease-out);
+  }
+  @keyframes break-in {
+    from {
+      opacity: 0;
+      transform: translateY(-4px);
+    }
+  }
+  .switch {
+    position: relative;
+    flex: none;
+    width: 46px;
+    height: 26px;
+    border-radius: 13px;
+    border: 1px solid var(--rule);
+    background: var(--highlight);
+    cursor: pointer;
+    transition: background-color 0.25s ease;
+  }
+  .switch::after {
+    content: '';
+    position: absolute;
+    top: 3px;
+    left: 23px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--brand-ink);
+    transition: left 0.25s var(--ease-out);
+  }
+  .switch[aria-checked='false'] {
+    background: var(--bg-sunken);
+  }
+  .switch[aria-checked='false']::after {
+    left: 3px;
+    background: var(--text-muted);
+  }
+  .switch[hidden] {
+    display: none;
+  }
+  .health {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem 0.9rem;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    margin: 0 0 1.5rem;
+  }
+  .health[hidden] {
+    display: none;
+  }
+  .health__dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #3fa36b;
+    box-shadow: 0 0 0 0 rgba(63, 163, 107, 0.5);
+    animation: pulse 1.8s ease-out infinite;
+  }
+  .health[data-level='warn'] .health__dot {
+    background: var(--highlight);
+  }
+  .health[data-level='down'] .health__dot {
+    background: #c4553f;
+  }
+  .health__hint {
+    flex-basis: 100%;
+    text-align: center;
+    color: var(--text-muted);
+  }
+  @keyframes pulse {
+    to {
+      box-shadow: 0 0 0 10px rgba(63, 163, 107, 0);
+    }
+  }
+  .tag[data-skill] {
+    cursor: pointer;
+  }
+  .tag.is-picked {
+    background: var(--highlight);
+    border-color: var(--highlight);
+    color: var(--brand-ink);
+  }
+  .used {
+    margin-top: 1.75rem;
+    padding: 1.1rem 1.3rem;
+    border: 1px solid var(--rule);
+    border-left: 3px solid var(--highlight);
+    background: var(--surface);
+    min-height: 3.5rem;
+  }
+  .used[hidden] {
+    display: none;
+  }
+  .used :global(.used__hint),
+  .used :global(.used__title) {
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--text-muted);
+  }
+  .used :global(.used__title) {
+    color: var(--text);
+  }
+  .used :global(ul) {
+    list-style: none;
+    margin: 0.6rem 0 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 1.2rem;
+  }
+  .used :global(a) {
+    color: var(--accent);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .health__dot {
+      animation: none;
+    }
+  }
   .skills {
     display: grid;
     gap: 1.75rem;
