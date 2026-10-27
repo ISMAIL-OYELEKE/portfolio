@@ -411,6 +411,11 @@ The project instructions hold the full text. Every change must keep to them.
     with amber packets riding it, one to three per arrow by length.
     Regenerate the posters (scratchpad poster.mjs: 1536x864 at 1.25x and
     390x844 at 2x, at scroll 0) whenever the sky drawing changes.
+26. Menu marker (Ismail picked option A): a thin amber cloud outline is drawn
+    around the current item in the top bar and the phone menu, and glides
+    between items. On the home page it follows the section you are reading
+    (sections carry data-nav-section with the page they preview); elsewhere
+    it marks the page you are on. Without JavaScript the amber underline stays.
 
 ## Open questions
 
