@@ -2,7 +2,7 @@
 import Base from '../layouts/Base.astro';
 import Portrait from '../components/Portrait.astro';
 import CloudHero from '../components/CloudHero.astro';
-import ArchStage from '../components/ArchStage.astro';
+import ProjectStage from '../components/ProjectStage.astro';
 import ReleaseHistory from '../components/ReleaseHistory.astro';
 import CertDeck from '../components/CertDeck.astro';
 import FreelanceSystems from '../components/FreelanceSystems.astro';
@@ -62,24 +62,20 @@ const description =
     </div>
   </section>
 
-  <!-- Cloud work: the service sky -->
-  <section class="on-dark section">
+  <!-- Cloud work: each project's real architecture, live -->
+  <section class="on-dark section section--projects">
     <div class="shell">
-      <div class="section-head section-head--center">
-        <span class="eyebrow">Projects · Deployed to production</span>
-        <h2>Pick a project. Watch its architecture light up.</h2>
-        <p class="lede">
-          Choose a system and watch it provision, then follow live traffic through every service it
-          runs on. Open any one for the full case study.
-        </p>
-      </div>
-      <ArchStage projects={cloudProjects} />
-      <div class="btn-row btn-row--center">
+      <div class="proj-head">
+        <div>
+          <span class="eyebrow">Projects · Deployed to production</span>
+          <h2>Pick a project. Watch its architecture light up.</h2>
+        </div>
         <a class="btn btn--ghost" href="/projects">
           All projects
           <SocialIcon name="arrow" size={15} />
         </a>
       </div>
+      <ProjectStage projects={cloudProjects} />
     </div>
   </section>
 
@@ -306,6 +302,31 @@ const description =
     letter-spacing: -0.04em;
     color: var(--accent);
     margin: 0.2rem auto 0.3rem;
+  }
+  /* Heading and All projects share a row, so the whole section fits a laptop screen. */
+  .section--projects {
+    padding-block: clamp(2.25rem, 4.5vw, 3rem);
+  }
+  .proj-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: end;
+    justify-content: space-between;
+    gap: 1rem 2rem;
+    margin-bottom: 1.5rem;
+  }
+  .proj-head h2 {
+    margin: 0.35rem 0 0;
+    font-size: clamp(1.5rem, 3vw, 2.2rem);
+  }
+  @media (max-width: 760px) {
+    .proj-head {
+      justify-content: center;
+      text-align: center;
+    }
+    .proj-head .btn {
+      display: none;
+    }
   }
   /* Compact, so the count, every dealt card and the buttons share one screen. */
   .section--deck {
