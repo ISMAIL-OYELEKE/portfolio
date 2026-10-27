@@ -1,0 +1,86 @@
+---
+/* Light, Dark or System. The inline script in Base.astro applies the saved
+   choice before first paint; this only changes it. */
+---
+
+<div class="theme" role="radiogroup" aria-label="Colour theme" data-theme-switch>
+  <button type="button" role="radio" data-set="light" aria-label="Light theme" title="Light">
+    <svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true">
+      <circle cx="10" cy="10" r="3.6" fill="none" stroke="currentColor" stroke-width="1.6"></circle>
+      <path d="M10 1.5v2.4M10 16.1v2.4M1.5 10h2.4M16.1 10h2.4M4 4l1.7 1.7M14.3 14.3 16 16M4 16l1.7-1.7M14.3 5.7 16 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"></path>
+    </svg>
+  </button>
+  <button type="button" role="radio" data-set="dark" aria-label="Dark theme" title="Dark">
+    <svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true">
+      <path d="M15.8 12.6A6.6 6.6 0 0 1 7.4 4.2a6.6 6.6 0 1 0 8.4 8.4Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"></path>
+    </svg>
+  </button>
+  <button type="button" role="radio" data-set="system" aria-label="Match my device" title="System">
+    <svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true">
+      <rect x="2.5" y="3.5" width="15" height="10" fill="none" stroke="currentColor" stroke-width="1.6"></rect>
+      <path d="M7 17h6M10 13.5V17" stroke="currentColor" stroke-width="1.6"></path>
+    </svg>
+  </button>
+</div>
+
+<style>
+  .theme {
+    display: inline-flex;
+    border: 1px solid var(--brand-line);
+    border-radius: var(--r-pill);
+    padding: 2px;
+    flex: 0 0 auto;
+  }
+  .theme button {
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    border: 0;
+    border-radius: var(--r-pill);
+    background: transparent;
+    color: #a9b6c8;
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease;
+  }
+  .theme button:hover {
+    color: var(--paper);
+  }
+  .theme button[aria-checked='true'] {
+    background: var(--highlight);
+    color: var(--brand-deep);
+  }
+</style>
+
+<script>
+  const root = document.documentElement;
+  const media = window.matchMedia('(prefers-color-scheme: dark)');
+
+  const apply = (pref: string) => {
+    const dark = pref === 'dark' || (pref === 'system' && media.matches);
+    root.dataset.themePref = pref;
+    root.dataset.theme = dark ? 'dark' : 'light';
+    document.querySelectorAll<HTMLButtonElement>('[data-theme-switch] button').forEach((b) => {
+      b.setAttribute('aria-checked', String(b.dataset.set === pref));
+    });
+    document.dispatchEvent(new CustomEvent('themechange'));
+  };
+
+  apply(root.dataset.themePref || 'system');
+
+  document.querySelectorAll<HTMLButtonElement>('[data-theme-switch] button').forEach((b) => {
+    b.addEventListener('click', () => {
+      const pref = b.dataset.set || 'system';
+      try {
+        localStorage.setItem('theme', pref);
+      } catch {
+        /* private mode: the choice lasts for this page only */
+      }
+      apply(pref);
+    });
+  });
+
+  media.addEventListener('change', () => {
+    if ((root.dataset.themePref || 'system') === 'system') apply('system');
+  });
+</script>

@@ -11,7 +11,7 @@ name: Preview
 
 on:
   push:
-    branches: ['claude/**']
+    branches: ['preview/**']
   workflow_dispatch:
 
 permissions:

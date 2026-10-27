@@ -202,7 +202,7 @@ A policy that fits what the site actually loads:
 
 ```
 default-src 'self';
-script-src 'self' 'sha256-bRrXOZfzkSHqxbwz5Za8TNTsnrMa7Kvk+eW1MqoTxsQ=' https://www.googletagmanager.com;
+script-src 'self' 'sha256-MGQfFiVtmMxbAZMfUvlMQNu8zMiPvyw54OTJ2axKIPk=' https://www.googletagmanager.com;
 style-src 'self' 'unsafe-inline';
 img-src 'self' data: https://i.ytimg.com https://www.googletagmanager.com;
 font-src 'self';
@@ -214,8 +214,9 @@ object-src 'none';
 frame-ancestors 'none'
 ```
 
-Every script ships as its own file except the one-line `no-js` snippet in the
-page head, which the hash in `script-src` allows. `node scripts/qa.mjs` fails
+Every script ships as its own file except the small snippet in the page head
+that removes `no-js` and applies the saved Light, Dark or System theme before
+first paint, which the hash in `script-src` allows. `node scripts/qa.mjs` fails
 the build if any other inline script appears, so the policy cannot silently
 break the site. If that snippet ever changes, the check prints the new hash to
 put here and in `scripts/qa.mjs`.

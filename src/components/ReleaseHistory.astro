@@ -1,0 +1,205 @@
+---
+/* Career as a release history: a rail that fills as the page scrolls, with
+   each release lighting up as the rail reaches it. Oldest first. */
+import { roles, education, community } from '../data/experience';
+import { site } from '../data/site';
+
+const releases = [
+  ...roles.map((r) => ({
+    iso: r.startISO,
+    year: r.startISO.slice(0, 4),
+    when: r.period,
+    tag: r.company,
+    title: r.title,
+    body: r.did[0],
+  })),
+  {
+    iso: '2024-09',
+    year: '2024',
+    when: `Graduated ${education.graduated}`,
+    tag: `Education · ${education.school.split(' (')[0]}`,
+    title: education.degree + ', First Class',
+    body: `${education.result}. Final year research: ${education.research.charAt(0).toLowerCase()}${education.research.slice(1)}`,
+  },
+  {
+    iso: '2025-10',
+    year: '2025',
+    when: community.founded.period,
+    tag: `Community · ${community.founded.role}`,
+    title: `Started ${community.founded.name}`,
+    body: community.founded.detail,
+  },
+].sort((a, b) => a.iso.localeCompare(b.iso));
+---
+
+<div class="history" data-history>
+  <span class="history__rail" aria-hidden="true"></span>
+  <span class="history__fill" data-history-fill aria-hidden="true"></span>
+  <ol>
+    {
+      releases.map((r) => (
+        <li class="rel">
+          <span class="rel__dot" aria-hidden="true" />
+          <p class="rel__when">
+            <b>{r.year}</b>
+            {r.when}
+          </p>
+          <div class="rel__what">
+            <span class="rel__tag">{r.tag}</span>
+            <h3>{r.title}</h3>
+            <p>{r.body}</p>
+          </div>
+        </li>
+      ))
+    }
+    <li class="rel rel--next">
+      <span class="rel__dot" aria-hidden="true"></span>
+      <p class="rel__when"><b>Next</b>Open to work</p>
+      <div class="rel__what">
+        <span class="rel__tag">Next release</span>
+        <h3>Your team</h3>
+        <p>I am open to {site.openTo}.</p>
+      </div>
+    </li>
+  </ol>
+</div>
+
+<style>
+  .history {
+    position: relative;
+    max-width: 52rem;
+    margin: 0 auto;
+  }
+  .history ol {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .history__rail,
+  .history__fill {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    width: 2px;
+    margin-left: -1px;
+  }
+  .history__rail {
+    bottom: 0;
+    background: var(--rule);
+  }
+  .history__fill {
+    height: 0;
+    background: var(--highlight);
+  }
+  .rel {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3.5rem;
+    margin-bottom: 2.75rem;
+    transition: opacity 0.6s ease, transform 0.6s var(--ease-out);
+  }
+  .history.is-live .rel {
+    opacity: 0.35;
+    transform: translateY(14px);
+  }
+  .history.is-live .rel.is-on {
+    opacity: 1;
+    transform: none;
+  }
+  .rel__dot {
+    position: absolute;
+    left: 50%;
+    top: 0.4rem;
+    width: 16px;
+    height: 16px;
+    margin-left: -8px;
+    border-radius: 50%;
+    background: var(--bg);
+    border: 2px solid var(--rule);
+    transition: background-color 0.4s ease, border-color 0.4s ease;
+  }
+  .rel.is-on .rel__dot,
+  .history:not(.is-live) .rel__dot {
+    background: var(--highlight);
+    border-color: var(--highlight);
+  }
+  .rel__when {
+    text-align: right;
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    margin: 0;
+  }
+  .rel__when b {
+    display: block;
+    font-family: var(--font-display);
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.1;
+  }
+  .rel__tag {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 0.66rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 0.35rem;
+  }
+  .rel__what h3 {
+    font-size: 1.2rem;
+    margin-bottom: 0.35rem;
+  }
+  .rel__what p {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 0.95rem;
+  }
+  /* Alternate sides, like a release train. */
+  .rel:nth-child(even) .rel__when {
+    order: 2;
+    text-align: left;
+  }
+  .rel:nth-child(even) .rel__what {
+    text-align: right;
+  }
+  @media (max-width: 720px) {
+    .history__rail,
+    .history__fill,
+    .rel__dot {
+      left: 8px;
+    }
+    .rel {
+      grid-template-columns: 1fr;
+      gap: 0.4rem;
+      padding-left: 2.25rem;
+    }
+    .rel__when,
+    .rel:nth-child(even) .rel__when,
+    .rel:nth-child(even) .rel__what {
+      order: 0;
+      text-align: left;
+    }
+  }
+</style>
+
+<script>
+  const history = document.querySelector<HTMLElement>('[data-history]');
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (history && !reduce) {
+    const fill = history.querySelector<HTMLElement>('[data-history-fill]')!;
+    const rels = [...history.querySelectorAll<HTMLElement>('.rel')];
+    history.classList.add('is-live');
+    const update = () => {
+      const r = history.getBoundingClientRect();
+      const line = window.innerHeight * 0.62;
+      fill.style.height = `${Math.min(Math.max(line - r.top, 0), r.height)}px`;
+      rels.forEach((el) => el.classList.toggle('is-on', el.getBoundingClientRect().top < line));
+    };
+    update();
+    window.addEventListener('scroll', update, { passive: true });
+    window.addEventListener('resize', update);
+  }
+</script>

@@ -1,6 +1,7 @@
 ---
 import { nav, site } from '../data/site';
 import logo from '../assets/logo/lockup-horizontal-reversed.svg';
+import ThemeSwitch from './ThemeSwitch.astro';
 
 const path = Astro.url.pathname.replace(/\/$/, '') || '/';
 const isCurrent = (href: string) => path === href || (href !== '/' && path.startsWith(href + '/'));
@@ -25,6 +26,8 @@ const isCurrent = (href: string) => path === href || (href !== '/' && path.start
         }
       </ul>
     </nav>
+
+    <ThemeSwitch />
 
     <a class="btn btn--primary masthead__cta" href={site.cv} download>Download CV</a>
 
@@ -181,7 +184,7 @@ const isCurrent = (href: string) => path === href || (href !== '/' && path.start
     max-height: calc(100svh - 100%);
     overflow-y: auto;
     z-index: 1;
-    background: var(--paper);
+    background: var(--bg);
     border-top: 3px solid var(--highlight);
     box-shadow: 0 18px 40px rgba(10, 21, 38, 0.35);
     animation: menu-in 0.22s var(--ease-out);
@@ -215,18 +218,18 @@ const isCurrent = (href: string) => path === href || (href !== '/' && path.start
     font-size: 0.8rem;
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: var(--brand-deep);
+    color: var(--text);
     text-decoration: none;
-    border-bottom: 1px solid var(--paper-dim);
+    border-bottom: 1px solid var(--rule);
     border-left: 3px solid transparent;
     transition: border-color 0.2s ease, background-color 0.2s ease;
   }
   .masthead__panel a:hover {
     border-left-color: var(--highlight);
-    background: var(--paper-dim);
+    background: var(--bg-sunken);
   }
   .masthead__panel a[aria-current='page'] {
-    color: var(--accent-text);
+    color: var(--accent);
     border-left-color: var(--highlight);
     font-weight: 600;
   }

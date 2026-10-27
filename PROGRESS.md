@@ -309,6 +309,19 @@ The project instructions hold the full text. Every change must keep to them.
 20. 2026-10-27: CV replaced with Ismail's latest (from the career coach
     thread, adds Kestrel), same file name so existing links keep working.
 
+21. 2026-10-27: creative redesign in progress on the `preview/redesign`
+    branch, for Ismail's review on GitHub Pages before anything reaches main.
+    Home opens with a scroll-driven flight (Lagos skyline, a commit rising
+    through flat clouds, the DevOps loop drawing itself, the name assembling
+    letter by letter); then a service sky for projects (drag the services,
+    point at a project to light its architecture), experience as a release
+    history, all certifications as a deck that deals out and flips, and a
+    footer line that greets visitors by their own time zone. Inner pages get
+    drifting clouds in their header. Light, Dark and System theme switch in
+    the header (System is the default); the head snippet that applies it is
+    the one inline script, with its new hash in the CSP, qa.mjs and
+    docs/deployment.md. Reduced motion shows the final frame with no flight.
+
 ## Open questions
 
 
@@ -326,7 +339,7 @@ npm run check          # type and Astro diagnostics
 
 Optional `.env` (copy `.env.example`): `PUBLIC_WEB3FORMS_KEY`, `PUBLIC_GA_ID`.
 
-Preview: every push to a `claude/**` branch (not `main`, which goes live) runs
+Preview: every push to a `preview/**` branch (not `main`, which goes live) runs
 `.github/workflows/preview.yml`, which builds with `BASE_PATH=/portfolio` and
 `PUBLIC_NOINDEX=true`, prefixes links with `scripts/apply-base.mjs`, and
 publishes to https://ismail-oyeleke.github.io/portfolio/. The preview is never

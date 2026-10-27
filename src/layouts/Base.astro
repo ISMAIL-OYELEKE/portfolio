@@ -63,7 +63,7 @@ const schemas = [personSchema, ...(schema ? (Array.isArray(schema) ? schema : [s
          managed header policies. frame-ancestors cannot be set from a meta
          tag; the managed policy's X-Frame-Options covers framing instead.
          form-action includes 'self' for the redirect back to /thank-you. -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-bRrXOZfzkSHqxbwz5Za8TNTsnrMa7Kvk+eW1MqoTxsQ=' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://i.ytimg.com https://www.googletagmanager.com; font-src 'self'; connect-src 'self' https://api.web3forms.com https://www.googletagmanager.com https://www.google-analytics.com https://region1.google-analytics.com https://region1.analytics.google.com; frame-src https://www.youtube-nocookie.com; form-action 'self' https://api.web3forms.com; base-uri 'self'; object-src 'none'" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-MGQfFiVtmMxbAZMfUvlMQNu8zMiPvyw54OTJ2axKIPk=' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://i.ytimg.com https://www.googletagmanager.com; font-src 'self'; connect-src 'self' https://api.web3forms.com https://www.googletagmanager.com https://www.google-analytics.com https://region1.google-analytics.com https://region1.analytics.google.com; frame-src https://www.youtube-nocookie.com; form-action 'self' https://api.web3forms.com; base-uri 'self'; object-src 'none'" />
     <meta name="generator" content={Astro.generator} />
     <meta name="author" content={site.name} />
     <meta name="theme-color" content="#0F1E33" />
@@ -76,8 +76,17 @@ const schemas = [personSchema, ...(schema ? (Array.isArray(schema) ? schema : [s
 
     <Seo title={title} description={description} image={image} noindex={noindex} type={type} />
 
+    <!-- Runs before first paint so the page never flashes the wrong theme.
+         The choice is Light, Dark or System; System follows the device. -->
     <script is:inline>
-      document.documentElement.classList.remove('no-js');
+      (function (d) {
+        d.classList.remove('no-js');
+        var pref = 'system';
+        try { pref = localStorage.getItem('theme') || 'system'; } catch (e) {}
+        var dark = pref === 'dark' || (pref === 'system' && matchMedia('(prefers-color-scheme: dark)').matches);
+        d.dataset.themePref = pref;
+        d.dataset.theme = dark ? 'dark' : 'light';
+      })(document.documentElement);
     </script>
 
     {schemas.map((s) => <script type="application/ld+json" set:html={JSON.stringify(s)} />)}
