@@ -39,7 +39,8 @@
   --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
 
   --measure: 68ch;
-  --shell: 1180px;
+  /* In rem, so the page widens along with the type on large screens. */
+  --shell: 73.75rem;
   --gutter: clamp(1rem, 4vw, 2.75rem);
   --section-y: clamp(3.5rem, 8vw, 7rem);
 
@@ -99,6 +100,28 @@
 html {
   scroll-behavior: smooth;
   -webkit-text-size-adjust: 100%;
+}
+
+/* Wide screens: everything set in rem (type, spacing, the page width) steps
+   up together, so a 1920px screen shows the site at the same proportions as
+   a 1366px laptop instead of a small column with wide empty margins. */
+@media (min-width: 1500px) {
+  html {
+    font-size: 106.25%;
+  }
+}
+@media (min-width: 1760px) {
+  html {
+    font-size: 112.5%;
+  }
+  :root {
+    --shell: 80rem;
+  }
+}
+@media (min-width: 2300px) {
+  html {
+    font-size: 125%;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
