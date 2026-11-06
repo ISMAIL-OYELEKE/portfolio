@@ -399,6 +399,19 @@ const description =
   .values__item:last-child:nth-child(odd) {
     grid-column: 1 / -1;
   }
+  /* Wide screens fit three across: three on top, the last two share the
+     row below, so no card sits alone. */
+  @media (min-width: 1280px) {
+    .values {
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+    }
+    .values .values__item {
+      grid-column: span 2;
+    }
+    .values .values__item:nth-child(n + 4) {
+      grid-column: span 3;
+    }
+  }
   .values__item {
     border: 1px solid var(--rule);
     border-radius: var(--r-card);
