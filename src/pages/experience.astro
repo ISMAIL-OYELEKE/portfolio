@@ -443,7 +443,10 @@ const description =
     position: relative;
     padding-left: 1.35rem;
     color: var(--text-muted);
-    max-width: 70ch;
+    max-width: var(--measure-wide);
+  }
+  .timeline__body p {
+    max-width: var(--measure-wide);
   }
   /* An amber hairline rather than a checkmark bullet. */
   .timeline__list li::before {

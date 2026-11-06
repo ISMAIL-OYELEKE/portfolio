@@ -39,8 +39,14 @@
   --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
 
   --measure: 68ch;
-  --shell: 1180px;
-  --gutter: clamp(1rem, 4vw, 2.75rem);
+  /* Text that sits beside a photo or runs across a wide block: long lines,
+     so a paragraph stays a few lines tall on a laptop or monitor. */
+  --measure-wide: 115ch;
+  /* The page fills the screen with a margin that scales with the window,
+     so every laptop and monitor shows the same proportions. The cap only
+     stops ultra wide monitors from stretching it too far. */
+  --shell: 150rem;
+  --gutter: clamp(1rem, 4vw, 6rem);
   --section-y: clamp(3.5rem, 8vw, 7rem);
 
   /* deliberate, varied radii: sharp cards, cut corners, round only on pills */
@@ -99,6 +105,25 @@
 html {
   scroll-behavior: smooth;
   -webkit-text-size-adjust: 100%;
+}
+
+/* Wide screens: everything set in rem (type, spacing, text widths) steps
+   up together, so a 1920px screen shows the site at the same proportions as
+   a 1366px laptop instead of a small column with wide empty margins. */
+@media (min-width: 1500px) {
+  html {
+    font-size: 106.25%;
+  }
+}
+@media (min-width: 1760px) {
+  html {
+    font-size: 112.5%;
+  }
+}
+@media (min-width: 2300px) {
+  html {
+    font-size: 125%;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

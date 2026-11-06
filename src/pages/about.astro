@@ -59,7 +59,7 @@ const description =
   <section class="section">
     <div class="shell about__grid">
       <div class="about__portrait">
-        <Portrait alt={`${site.name} in Lagos`} width={320} />
+        <Portrait alt={`${site.name} in Lagos`} width={380} />
       </div>
 
       <div class="about__story">
@@ -310,10 +310,8 @@ const description =
   .about__grid {
     display: grid;
     gap: clamp(2rem, 5vw, 3.5rem) clamp(2rem, 5vw, 4rem);
-    grid-template-columns: minmax(0, 0.75fr) minmax(0, 1.25fr);
+    grid-template-columns: minmax(0, 0.5fr) minmax(0, 1.5fr);
     align-items: center;
-    max-width: 66rem;
-    margin-inline: auto;
   }
   .about__portrait {
     display: flex;
@@ -329,6 +327,7 @@ const description =
 
   .about__story p {
     font-size: 1.04rem;
+    max-width: var(--measure-wide);
   }
 
 
@@ -398,6 +397,19 @@ const description =
   /* An odd last item spans the row rather than sitting alone in it. */
   .values__item:last-child:nth-child(odd) {
     grid-column: 1 / -1;
+  }
+  /* Wide screens fit three across: three on top, the last two share the
+     row below, so no card sits alone. */
+  @media (min-width: 1280px) {
+    .values {
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+    }
+    .values .values__item {
+      grid-column: span 2;
+    }
+    .values .values__item:nth-child(n + 4) {
+      grid-column: span 3;
+    }
   }
   .values__item {
     border: 1px solid var(--rule);

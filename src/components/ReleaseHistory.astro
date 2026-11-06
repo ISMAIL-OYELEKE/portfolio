@@ -106,8 +106,10 @@ const version = (i: number) => `v0.${i + 1}.0`;
 <style>
   .history {
     position: relative;
-    max-width: 52rem;
     margin: 0 auto;
+  }
+  .history p {
+    max-width: var(--measure-wide);
   }
   .history ol {
     list-style: none;

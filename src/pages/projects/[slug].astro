@@ -156,7 +156,7 @@ const schema = {
               </figure>
             ) : shotFor(m.src) ? (
               <figure class="shot">
-                <Image src={shotFor(m.src)!} alt={m.alt} widths={[640, 960, 1280]} sizes="(max-width: 860px) 92vw, 760px" format="webp" quality={80} />
+                <Image src={shotFor(m.src)!} alt={m.alt} widths={[640, 960, 1280, 1920]} sizes="(max-width: 860px) 92vw, 90vw" format="webp" quality={80} />
                 {m.caption && <figcaption>{m.caption}</figcaption>}
               </figure>
             ) : null
@@ -501,8 +501,8 @@ const schema = {
     }
   }
 
-  .case-body {
-    max-width: 50rem;
+  .case-body p {
+    max-width: var(--measure-wide);
   }
   .case-body > section + section,
   .case-body > section + .shot {
@@ -523,7 +523,7 @@ const schema = {
   .bullets li {
     position: relative;
     padding-left: 1.5rem;
-    max-width: 68ch;
+    max-width: var(--measure-wide);
   }
   .bullets li::before {
     content: '';
@@ -587,7 +587,6 @@ const schema = {
   .related {
     list-style: none;
     margin: 0 auto;
-    max-width: 56rem;
     padding: 0;
     border-top: 1px solid var(--rule);
   }
