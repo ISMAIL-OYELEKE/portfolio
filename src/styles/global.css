@@ -39,6 +39,9 @@
   --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
 
   --measure: 68ch;
+  /* Text that sits beside a photo or runs across a wide block: long lines,
+     so a paragraph stays a few lines tall on a laptop or monitor. */
+  --measure-wide: 115ch;
   /* The page fills the screen with a margin that scales with the window,
      so every laptop and monitor shows the same proportions. The cap only
      stops ultra wide monitors from stretching it too far. */

@@ -12,7 +12,7 @@ interface Props {
 const { alt, width = 440, smallWidth = 240, priority = false } = Astro.props;
 ---
 
-<figure class="portrait" style={`--w:${width}px;--w-sm:${smallWidth}px`}>
+<figure class="portrait" style={`--w:${width / 16}rem;--w-sm:${smallWidth}px`}>
   <Image
     src={portrait}
     alt={alt}

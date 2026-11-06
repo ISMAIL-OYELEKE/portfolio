@@ -59,7 +59,7 @@ const description =
   <section class="section">
     <div class="shell about__grid">
       <div class="about__portrait">
-        <Portrait alt={`${site.name} in Lagos`} width={320} />
+        <Portrait alt={`${site.name} in Lagos`} width={380} />
       </div>
 
       <div class="about__story">
@@ -310,10 +310,8 @@ const description =
   .about__grid {
     display: grid;
     gap: clamp(2rem, 5vw, 3.5rem) clamp(2rem, 5vw, 4rem);
-    grid-template-columns: minmax(0, 0.75fr) minmax(0, 1.25fr);
+    grid-template-columns: minmax(0, 0.5fr) minmax(0, 1.5fr);
     align-items: center;
-    max-width: 66rem;
-    margin-inline: auto;
   }
   .about__portrait {
     display: flex;
@@ -329,6 +327,7 @@ const description =
 
   .about__story p {
     font-size: 1.04rem;
+    max-width: var(--measure-wide);
   }
 
 
