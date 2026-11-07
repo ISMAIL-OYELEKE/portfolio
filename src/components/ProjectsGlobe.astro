@@ -1,0 +1,300 @@
+---
+/* "Where my builds run": a globe with a pin on the AWS region each project ran
+   in, arcs from Lagos, and "Your request, traced": the path the visitor's own
+   page load took (their time zone city, the CloudFront edge named in the
+   x-amz-cf-pop header, the S3 origin). Drawn on a canvas with d3-geo, loaded
+   only when the section scrolls into view. Nothing is sent anywhere. */
+import { builds, origin } from '../data/globe';
+import { cloudProjects } from '../data/projects';
+
+const pins = builds
+  .map((b) => {
+    const p = cloudProjects.find((c) => c.slug === b.slug);
+    return p ? { ...b, title: p.title } : null;
+  })
+  .filter((p): p is NonNullable<typeof p> => p !== null);
+const short = (t: string) => t.replace(/:.*$/, '').replace(' on AWS', '');
+---
+
+<div
+  class="globe"
+  data-globe
+  data-land="/geo/land-110m.json"
+  data-pins={JSON.stringify(pins.map(({ slug, region, city, lat, lon }) => ({ slug, region, city, lat, lon })))}
+>
+  <div class="globe__stage">
+    <canvas data-globe-canvas role="img" aria-label="Globe with a pin on each AWS region my projects run in"></canvas>
+    <p class="globe__hint" aria-hidden="true">Drag to spin</p>
+  </div>
+
+  <div class="globe__panel">
+    <div class="globe__tabs" role="tablist" aria-label="Globe view">
+      <button type="button" role="tab" id="gtab-builds" aria-controls="gpanel-builds" aria-selected="true" data-gtab="builds">My builds</button>
+      <button type="button" role="tab" id="gtab-trace" aria-controls="gpanel-trace" aria-selected="false" data-gtab="trace" hidden>Your request</button>
+    </div>
+
+    <div class="globe__view" role="tabpanel" id="gpanel-builds" aria-labelledby="gtab-builds" data-gview="builds">
+      <p class="globe__lede">Each pin is the AWS region a project was deployed to, from Lagos. Spin the globe or pick a project to fly there.</p>
+      <div class="globe__card" data-gcard hidden aria-live="polite">
+        {
+          pins.map((p, i) => (
+            <div data-gcard-item={i} hidden>
+              <b>{p.title}</b>
+              <span class="globe__mono">{p.region} · {p.city}</span>
+              <a href={`/projects/${p.slug}`}>Read the case study</a>
+            </div>
+          ))
+        }
+      </div>
+      <ul class="globe__list">
+        {
+          pins.map((p, i) => (
+            <li>
+              <button type="button" data-gpin={i} aria-pressed="false">
+                <span>{short(p.title)}</span>
+                <small>{p.region}</small>
+              </button>
+            </li>
+          ))
+        }
+      </ul>
+      <div class="globe__toggle" role="group" aria-label="Regions shown">
+        <button type="button" data-gregions="mine" aria-pressed="true">My regions</button>
+        <button type="button" data-gregions="all" aria-pressed="false">All AWS regions</button>
+      </div>
+    </div>
+
+    <div class="globe__view" role="tabpanel" id="gpanel-trace" aria-labelledby="gtab-trace" data-gview="trace" hidden>
+      <p class="globe__lede">The path this page took to reach you, drawn as it happened.</p>
+      <ol class="globe__steps">
+        <li data-gstep="0"><span class="globe__mono">01 you</span><span data-gstep-text="0"></span></li>
+        <li data-gstep="1"><span class="globe__mono">02 edge</span><span data-gstep-text="1"></span></li>
+        <li data-gstep="2"><span class="globe__mono">03 origin</span><span>On a cache miss, the edge fetches the page from the {origin.name} in {origin.region}.</span></li>
+      </ol>
+      <button type="button" class="globe__again" data-gagain>Trace it again</button>
+      <p class="globe__note" data-gnote>Your city is estimated from your device's time zone. Nothing is sent anywhere.</p>
+    </div>
+  </div>
+</div>
+
+
+<style>
+  .globe {
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+    gap: clamp(1.5rem, 4vw, 4rem);
+    align-items: center;
+  }
+  .globe__stage {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    touch-action: pan-y;
+  }
+  .globe__stage canvas {
+    display: block;
+    width: min(100%, 36rem, 62vh);
+    aspect-ratio: 1;
+    cursor: grab;
+  }
+  .globe__stage canvas:active {
+    cursor: grabbing;
+  }
+  .globe__hint {
+    margin: 0.6rem 0 0;
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    opacity: 0.6;
+  }
+  .globe__panel {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  .globe__tabs,
+  .globe__toggle {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .globe__tabs button,
+  .globe__toggle button,
+  .globe__again {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 0.6rem 0.9rem;
+    border: 1px solid rgba(244, 245, 242, 0.22);
+    border-radius: var(--r-sharp);
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+  }
+  .globe__tabs button[aria-selected='true'],
+  .globe__toggle button[aria-pressed='true'] {
+    border-color: var(--highlight);
+    color: var(--highlight);
+  }
+  .globe__tabs button[hidden] {
+    display: none;
+  }
+  .globe__view[hidden] {
+    display: none;
+  }
+  .globe__view {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  .globe__lede {
+    margin: 0;
+    opacity: 0.85;
+  }
+  .globe__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 0.5rem;
+  }
+  .globe__list button {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 1rem;
+    text-align: left;
+    font: inherit;
+    font-size: 0.95rem;
+    padding: 0.75rem 0.9rem;
+    border: 1px solid rgba(244, 245, 242, 0.16);
+    border-radius: var(--r-card);
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+    transition: border-color 0.2s ease, background 0.2s ease;
+  }
+  .globe__list button:hover {
+    border-color: rgba(244, 245, 242, 0.4);
+  }
+  .globe__list button[aria-pressed='true'] {
+    border-color: var(--highlight);
+    background: rgba(224, 163, 58, 0.1);
+  }
+  .globe__list small,
+  .globe__mono {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.04em;
+    opacity: 0.8;
+    white-space: nowrap;
+  }
+  .globe__card {
+    border-left: 2px solid var(--highlight);
+    padding: 0.8rem 1rem;
+    background: rgba(244, 245, 242, 0.05);
+  }
+  .globe__card[hidden],
+  .globe__card [hidden] {
+    display: none;
+  }
+  .globe__card div {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+  .globe__card b {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 1.05rem;
+  }
+  .globe__card a {
+    color: var(--highlight);
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-top: 0.3rem;
+  }
+  .globe__steps {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 0.7rem;
+  }
+  .globe__steps li {
+    display: grid;
+    grid-template-columns: 6rem minmax(0, 1fr);
+    gap: 0.8rem;
+    align-items: baseline;
+    opacity: 0.4;
+    transition: opacity 0.35s ease;
+  }
+  .globe__steps li.is-on {
+    opacity: 1;
+  }
+  .globe__steps .globe__mono {
+    color: var(--highlight);
+    opacity: 1;
+  }
+  .globe__again {
+    align-self: flex-start;
+  }
+  .globe__note {
+    margin: 0;
+    font-size: 0.82rem;
+    opacity: 0.65;
+  }
+
+  @media (max-width: 860px) {
+    .globe {
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+    .globe__stage canvas {
+      width: min(100%, 40vh);
+    }
+    .globe__hint {
+      display: none;
+    }
+    .globe__lede {
+      display: none;
+    }
+    .globe__list {
+      grid-template-columns: 1fr 1fr;
+    }
+    .globe__list button {
+      flex-direction: column;
+      gap: 0.15rem;
+      font-size: 0.85rem;
+      padding: 0.6rem 0.7rem;
+    }
+    .globe__steps li {
+      grid-template-columns: 4.6rem minmax(0, 1fr);
+      font-size: 0.9rem;
+    }
+  }
+</style>
+
+<script>
+  import { initGlobe } from '../lib/globe';
+
+  const root = document.querySelector<HTMLElement>('[data-globe]');
+  if (root) {
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) {
+          io.disconnect();
+          initGlobe(root);
+        }
+      },
+      { rootMargin: '300px 0px' },
+    );
+    io.observe(root);
+  }
+</script>

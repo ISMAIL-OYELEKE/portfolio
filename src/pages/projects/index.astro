@@ -2,6 +2,7 @@
 import Base from '../../layouts/Base.astro';
 import PageHero from '../../components/PageHero.astro';
 import ProjectStage from '../../components/ProjectStage.astro';
+import ProjectsGlobe from '../../components/ProjectsGlobe.astro';
 import FreelanceSystems from '../../components/FreelanceSystems.astro';
 import SocialIcon from '../../components/SocialIcon.astro';
 import { cloudProjects } from '../../data/projects';
@@ -16,6 +17,16 @@ const description =
     title="What I built, and why it was built that way"
     lede="Each case study covers the problem, the architecture, the decisions I would defend in a review, and what the result actually is."
   />
+
+  <section class="on-dark section globe-sec">
+    <div class="shell">
+      <div class="section-head section-head--center">
+        <span class="eyebrow">Where my builds run</span>
+        <h2>Built in Lagos, running on AWS.</h2>
+      </div>
+      <ProjectsGlobe />
+    </div>
+  </section>
 
   <section class="on-dark section live-arch">
     <div class="shell">
@@ -78,8 +89,16 @@ const description =
 </Base>
 
 <style>
+  .globe-sec {
+    padding-block: clamp(2.25rem, 4.5vw, 3.5rem) clamp(1.5rem, 3vw, 2rem);
+  }
+  .globe-sec .section-head {
+    margin-bottom: 1.25rem;
+  }
+  /* The globe and the live diagrams share one navy band, split by a hairline. */
   .live-arch {
     padding-block: clamp(2.25rem, 4.5vw, 3rem);
+    border-top: 1px solid rgba(244, 245, 242, 0.1);
   }
   .live-arch .section-head {
     margin-bottom: 1.5rem;
