@@ -40,7 +40,7 @@ const files = await walk(dist);
 for (const file of files) {
   const before = await readFile(file, 'utf8');
   const after = before
-    .replace(/(href|src|poster|action)="(\/[^"]*)"/g, (_, attr, url) => `${attr}="${prefix(url)}"`)
+    .replace(/(href|src|poster|action|data-land)="(\/[^"]*)"/g, (_, attr, url) => `${attr}="${prefix(url)}"`)
     .replace(/url\((\/[^)"']*)\)/g, (_, url) => `url(${prefix(url)})`)
     .replace(/"src":\s*"(\/[^"]*)"/g, (_, url) => `"src": "${prefix(url)}"`)
     .replace(/location\.href\s*=\s*'(\/[^']*)'/g, (_, url) => `location.href = '${prefix(url)}'`);
