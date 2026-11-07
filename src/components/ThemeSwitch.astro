@@ -50,6 +50,18 @@
     background: var(--highlight);
     color: var(--brand-deep);
   }
+  :global(:root[data-theme='light']) .theme {
+    border-color: var(--rule);
+  }
+  :global(:root[data-theme='light']) .theme button {
+    color: var(--text-muted);
+  }
+  :global(:root[data-theme='light']) .theme button:hover {
+    color: var(--text);
+  }
+  :global(:root[data-theme='light']) .theme button[aria-checked='true'] {
+    color: var(--brand-deep);
+  }
 </style>
 
 <script>

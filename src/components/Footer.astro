@@ -3,6 +3,7 @@ import { nav, site, socials } from '../data/site';
 import SocialIcon from './SocialIcon.astro';
 import { brandStyle } from '../lib/brands';
 import logo from '../assets/logo/lockup-stacked-reversed.svg';
+import logoLight from '../assets/logo/lockup-stacked.svg';
 
 const year = new Date().getFullYear();
 ---
@@ -15,7 +16,8 @@ const year = new Date().getFullYear();
   </div>
   <div class="shell footer__grid">
     <div>
-      <img src={logo.src} alt={site.name} width="150" height="120" class="footer__logo" />
+      <img src={logoLight.src} alt={site.name} width="150" height="120" class="footer__logo footer__logo--day" />
+      <img src={logo.src} alt={site.name} width="150" height="120" class="footer__logo footer__logo--night" />
       <p class="footer__line">
         {site.role} in {site.locality}, {site.country}.
       </p>
@@ -65,24 +67,32 @@ const year = new Date().getFullYear();
 </footer>
 
 <style>
+  /* Navy in Dark theme; a soft paper band in Light theme. Colours come from
+     these few tokens so both themes share one set of rules. */
   .footer {
-    background: var(--brand-ink);
-    color: var(--paper);
+    --f-bg: var(--brand-ink);
+    --f-text: var(--paper);
+    --f-soft: #c3cede;
+    --f-muted: #a9b6c8;
+    --f-line: var(--brand-line);
+    --f-hl: var(--highlight);
+    background: var(--f-bg);
+    color: var(--f-text);
     padding-top: clamp(3rem, 6vw, 4.5rem);
-    border-top: 1px solid var(--brand-line);
+    border-top: 1px solid var(--f-line);
   }
 
   .footer__you {
     max-width: 46rem;
     margin: 0 auto 2.75rem;
     padding-bottom: 2.5rem;
-    border-bottom: 1px solid var(--brand-line);
+    border-bottom: 1px solid var(--f-line);
     text-align: center;
     font-size: clamp(1rem, 1.8vw, 1.15rem);
-    color: #c3cede;
+    color: var(--f-soft);
   }
   .footer__you :global(b) {
-    color: var(--highlight);
+    color: var(--f-hl);
     font-weight: 500;
   }
 
@@ -93,6 +103,27 @@ const year = new Date().getFullYear();
     padding-bottom: 2.75rem;
   }
 
+  .footer__logo--day {
+    display: none;
+  }
+  :global(:root[data-theme='light']) .footer {
+    --f-bg: var(--paper-dim);
+    --f-text: var(--text);
+    --f-soft: #2c3a4d;
+    --f-muted: var(--text-muted);
+    --f-line: var(--stone);
+    --f-hl: var(--accent-text);
+  }
+  :global(:root[data-theme='light']) .footer__socials a {
+    color: var(--brand, var(--f-soft));
+  }
+  :global(:root[data-theme='light']) .footer__logo--day {
+    display: block;
+  }
+  :global(:root[data-theme='light']) .footer__logo--night {
+    display: none;
+  }
+
   .footer__logo {
     height: 84px;
     width: auto;
@@ -100,7 +131,7 @@ const year = new Date().getFullYear();
   }
 
   .footer__line {
-    color: #a9b6c8;
+    color: var(--f-muted);
     font-size: 0.92rem;
     max-width: 24rem;
   }
@@ -111,7 +142,7 @@ const year = new Date().getFullYear();
     font-weight: 500;
     letter-spacing: 0.2em;
     text-transform: uppercase;
-    color: var(--highlight);
+    color: var(--f-hl);
     margin-bottom: 1rem;
   }
 
@@ -124,18 +155,18 @@ const year = new Date().getFullYear();
   }
   .footer__list a {
     overflow-wrap: anywhere;
-    color: #c3cede;
+    color: var(--f-soft);
     font-size: 0.92rem;
     text-decoration: none;
   }
   .footer__list a:hover {
-    color: var(--paper);
+    color: var(--f-text);
     text-decoration: underline;
   }
 
   .footer__address {
     font-style: normal;
-    color: #a9b6c8;
+    color: var(--f-muted);
     font-size: 0.92rem;
     margin-top: 1.1rem;
   }
@@ -152,9 +183,9 @@ const year = new Date().getFullYear();
     place-items: center;
     width: 40px;
     height: 40px;
-    border: 1px solid var(--brand-line);
+    border: 1px solid var(--f-line);
     border-radius: var(--r-sharp);
-    color: var(--brand-on-dark, #c3cede);
+    color: var(--brand-on-dark, var(--f-soft));
     transition:
       background-color 0.2s ease,
       border-color 0.2s ease,
@@ -179,10 +210,10 @@ const year = new Date().getFullYear();
     gap: 1rem 1.5rem;
     justify-content: space-between;
     align-items: center;
-    border-top: 1px solid var(--brand-line);
+    border-top: 1px solid var(--f-line);
     padding-block: 1.3rem 1.6rem;
     font-size: 0.82rem;
-    color: #a9b6c8;
+    color: var(--f-muted);
   }
   .footer__base p {
     margin: 0;
@@ -196,7 +227,7 @@ const year = new Date().getFullYear();
   }
   .footer__legal a,
   .footer__legal button {
-    color: #a9b6c8;
+    color: var(--f-muted);
     font-size: 0.82rem;
     font-family: inherit;
     background: none;
@@ -207,7 +238,7 @@ const year = new Date().getFullYear();
   }
   .footer__legal a:hover,
   .footer__legal button:hover {
-    color: var(--highlight);
+    color: var(--f-hl);
   }
 
   @media (max-width: 620px) {

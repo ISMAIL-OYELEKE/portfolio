@@ -4,7 +4,8 @@ import { airports, awsRegions, home, origin, zones } from '../data/globe';
 type Pt = { name: string; lat: number; lon: number };
 type Pin = { slug: string; region: string; city: string; lat: number; lon: number };
 
-const C = {
+/* Night globe for Dark theme, a paper globe for Light theme. */
+const NIGHT = {
   ocean: '#16304f',
   land: '#2c5585',
   coast: '#3d6aa0',
@@ -16,12 +17,30 @@ const C = {
   region: 'rgba(244,245,242,0.45)',
   label: '#F4F5F2',
 };
+const DAY: typeof NIGHT = {
+  ocean: '#f7f8f6',
+  land: '#cdd6e1',
+  coast: '#9aabbf',
+  grid: 'rgba(21,33,50,0.07)',
+  rim: 'rgba(21,33,50,0.28)',
+  pin: '#E0A33A',
+  home: '#0F1E33',
+  arc: 'rgba(29,91,166,0.85)',
+  region: 'rgba(21,33,50,0.4)',
+  label: '#152132',
+};
+let C = NIGHT;
+const pickPalette = () => {
+  C = document.documentElement.dataset.theme === 'light' ? DAY : NIGHT;
+};
 
 export async function initGlobe(root: HTMLElement) {
   const canvas = root.querySelector<HTMLCanvasElement>('[data-globe-canvas]');
   const pinsJson = root.dataset.pins;
   if (!canvas || !pinsJson) return;
   const pins: Pin[] = JSON.parse(pinsJson);
+  pickPalette();
+  document.addEventListener('themechange', pickPalette);
 
   const [geo, land] = await Promise.all([
     import('d3-geo'),

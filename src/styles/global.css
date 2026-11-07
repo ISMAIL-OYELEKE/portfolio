@@ -33,6 +33,8 @@
   --rule: #d5d9de;
   --accent: var(--accent-text);
   --accent-line: var(--highlight);
+  /* the text colour as channels, for hairlines and tints: rgb(var(--ink-rgb) / 0.2) */
+  --ink-rgb: 21 33 50;
 
   --font-display: 'Fraunces Variable', 'Iowan Old Style', Georgia, 'Times New Roman', serif;
   --font-body: 'Sora', 'Segoe UI', system-ui, sans-serif;
@@ -68,11 +70,24 @@
   --rule: var(--brand-line);
   --accent: var(--highlight);
   --accent-line: var(--highlight);
+  --ink-rgb: 244 245 242;
 }
 
-/* Dark navy surface, applied per-section rather than globally,
-   so the page alternates the way the reference does. */
+/* Feature bands. In Light theme they are a soft paper band, so a light page
+   stays light from top to bottom. In Dark theme they are navy, a step up from
+   the ink page, so the alternation between bands still reads. The page
+   banners, the closing call to action and the home flight sit on a sky in
+   both themes, so they always keep light text. */
 .on-dark {
+  --bg: var(--paper-dim);
+  --bg-sunken: var(--paper);
+  --surface: #fafbf9;
+  color: var(--text);
+  background-color: var(--bg);
+}
+:root[data-theme='dark'] .on-dark,
+:is(.page-hero, .closing, .flight).on-dark {
+  --ink-rgb: 244 245 242;
   --bg: var(--brand-deep);
   --bg-sunken: var(--brand-ink);
   --surface: #13253f;
@@ -81,8 +96,6 @@
   --rule: var(--brand-line);
   --accent: var(--highlight);
   --accent-line: var(--highlight);
-  color: var(--text);
-  background-color: var(--bg);
 }
 
 /* By day (Light theme) the page banners and the closing call to action
