@@ -1,6 +1,7 @@
 ---
 import { nav, site } from '../data/site';
 import logo from '../assets/logo/lockup-horizontal-reversed.svg';
+import logoLight from '../assets/logo/lockup-horizontal.svg';
 import ThemeSwitch from './ThemeSwitch.astro';
 
 const path = Astro.url.pathname.replace(/\/$/, '') || '/';
@@ -10,7 +11,8 @@ const isCurrent = (href: string) => path === href || (href !== '/' && path.start
 <header class="masthead" data-masthead>
   <div class="shell masthead__inner">
     <a href="/" class="masthead__brand" aria-label={`${site.name}, home`}>
-      <img src={logo.src} alt="" width="190" height="48" />
+      <img class="masthead__logo masthead__logo--day" src={logoLight.src} alt="" width="190" height="48" />
+      <img class="masthead__logo masthead__logo--night" src={logo.src} alt="" width="190" height="48" />
     </a>
 
     <nav class="masthead__nav" aria-label="Main">
@@ -171,7 +173,7 @@ const isCurrent = (href: string) => path === href || (href !== '/' && path.start
     stroke-width: 1.4;
     stroke-linejoin: round;
   }
-  :global(:root[data-theme='dark']) .masthead__panel .masthead__cloud :global(path) {
+  .masthead__panel .masthead__cloud :global(path) {
     stroke: #b97a12;
   }
 
@@ -287,25 +289,25 @@ const isCurrent = (href: string) => path === href || (href !== '/' && path.start
       animation: none;
     }
   }
-  /* In Dark theme the page is navy too, so the open menu turns light to stand
-     apart from it. In Light theme it stays navy over the light page. */
-  :global(:root[data-theme='dark']) .masthead__panel {
+  /* The open menu is a light sheet in both themes: over the navy page in Dark
+     theme it stands apart, and in Light theme it matches the light header. */
+  .masthead__panel {
     background: var(--paper);
   }
-  :global(:root[data-theme='dark']) .masthead__panel a {
+  .masthead__panel a {
     color: var(--brand-ink);
     border-bottom-color: #d5dae1;
   }
-  :global(:root[data-theme='dark']) .masthead__panel a:hover {
+  .masthead__panel a:hover {
     color: #1d5ba6;
     background: rgb(15 30 51 / 0.05);
   }
   /* The current item matches its darker amber cloud on the light menu. */
-  :global(:root[data-theme='dark']) .masthead__panel a[aria-current='page'],
-  :global(:root[data-theme='dark']) .masthead__panel a.is-here {
+  .masthead__panel a[aria-current='page'],
+  .masthead__panel a.is-here {
     color: #8a5a0c;
   }
-  :global(:root[data-theme='dark']) .masthead__panel a.masthead__panel-cv {
+  .masthead__panel a.masthead__panel-cv {
     color: var(--brand-ink);
     border-color: var(--highlight);
   }
@@ -318,6 +320,48 @@ const isCurrent = (href: string) => path === href || (href !== '/' && path.start
     .masthead__toggle {
       display: block;
     }
+  }
+  /* Light theme: the header is paper with navy type, like the rest of the page. */
+  .masthead__logo--day {
+    display: none;
+  }
+  :global(:root[data-theme='light']) .masthead__logo--day {
+    display: block;
+  }
+  :global(:root[data-theme='light']) .masthead__logo--night {
+    display: none;
+  }
+  :global(:root[data-theme='light']) .masthead {
+    background: #fafbf9;
+    border-bottom-color: var(--rule);
+  }
+  :global(:root[data-theme='light']) .masthead.is-scrolled {
+    box-shadow: 0 12px 28px -22px rgb(15 30 51 / 0.45);
+  }
+  :global(:root[data-theme='light']) .masthead__nav a {
+    color: var(--text-muted);
+  }
+  :global(:root[data-theme='light']) .masthead__nav a:hover {
+    color: var(--text);
+  }
+  :global(:root[data-theme='light']) .masthead__nav a[aria-current='page'],
+  :global(:root[data-theme='light']) .masthead__nav a.is-here {
+    color: var(--accent-text);
+  }
+  :global(:root[data-theme='light']) .masthead__toggle {
+    border-color: var(--rule);
+  }
+  :global(:root[data-theme='light']) .masthead__bars,
+  :global(:root[data-theme='light']) .masthead__bars::before,
+  :global(:root[data-theme='light']) .masthead__bars::after {
+    background: var(--brand-deep);
+  }
+  :global(:root[data-theme='light']) [aria-expanded='true'] .masthead__bars {
+    background: transparent;
+  }
+  :global(:root[data-theme='light']) .masthead__panel {
+    border-top-color: var(--accent-text);
+    border-bottom: 1px solid var(--rule);
   }
 </style>
 
