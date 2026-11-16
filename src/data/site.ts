@@ -29,7 +29,7 @@ export const socials = [
   { label: 'LinkedIn', href: 'https://www.linkedin.com/in/ismail-oyeleke-6930b6317/', icon: 'linkedin' },
   { label: 'GitHub', href: 'https://github.com/ISMAIL-OYELEKE', icon: 'github' },
   { label: 'Credly', href: 'https://www.credly.com/users/ismail-oyeleke', icon: 'credly' },
-  { label: 'YouTube', href: 'https://youtube.com/@learn_with_ismail_oyeleke', icon: 'youtube' },
+  { label: 'YouTube', href: 'https://youtube.com/@Ismail_Oyeleke', icon: 'youtube' },
   { label: 'Medium', href: 'https://medium.com/@ismailoyeleke2003', icon: 'medium' },
   { label: 'X', href: 'https://x.com/ismail_oyeleke_', icon: 'x' },
 ];
